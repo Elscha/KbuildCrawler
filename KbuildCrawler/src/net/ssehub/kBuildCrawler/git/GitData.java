@@ -1,5 +1,10 @@
 package net.ssehub.kBuildCrawler.git;
 
+/**
+ * Parsed info of how to reproduce an error reported by the Kbuild test robot.
+ * @author El-Sharkawy
+ *
+ */
 public class GitData {
     private String url;
     private String base;
@@ -23,7 +28,47 @@ public class GitData {
         this.commit = commit;
     }
     
-    
+    /**
+     * Returns the url from where to download the project. 
+     * @return The url from where to download the project, maybe <tt>null</tt>.
+     */
+    public String getUrl() {
+        return url;
+    }
+
+    /**
+     * Returns the url of the whole git repository.
+     * @return the url of the whole git repository., maybe <tt>null</tt>.
+     */
+    public String getBase() {
+        return base;
+    }
+
+    /**
+     * Returns the specified branch.
+     * @return The specified branch or <tt>null</tt>. If not <tt>null</tt>, than also {@link #getBase()} must not
+     *     be <tt>null</tt>.
+     */
+    public String getBranch() {
+        return branch;
+    }
+
+    /**
+     * Optional head commit for a problematic commit. Maybe used for creating a diff.
+     * @return Head commit for a problematic commit, maybe <tt>null</tt>.
+     */
+    public String getHead() {
+        return head;
+    }
+
+    /**
+     * Problematic commit.
+     * @return Problematic commit, maybe <tt>null</tt>.
+     */
+    public String getCommit() {
+        return commit;
+    }
+
     @Override
     public String toString() {
         StringBuffer result = new StringBuffer();

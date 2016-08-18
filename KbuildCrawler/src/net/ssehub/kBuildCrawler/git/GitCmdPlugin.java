@@ -12,6 +12,11 @@ import net.ssehub.kBuildCrawler.io.ConsoleOutputHandler;
 import net.ssehub.kBuildCrawler.io.IProcessOutputHandler;
 import net.ssehub.kBuildCrawler.io.InputReader;
 
+/**
+ * {@link IGitPlugin} which uses a localy installed git binary for the specified operations.
+ * @author El-Sharkawy
+ *
+ */
 public class GitCmdPlugin implements IGitPlugin {
     
     private final static String GIT_CMD = "git";
@@ -19,6 +24,11 @@ public class GitCmdPlugin implements IGitPlugin {
     private File basePath;
     private File gitPath;
     
+    /**
+     * Single constructor for this class.
+     * @param path Optional: Folder where to find the <tt>git</tt> binary. Maybe <tt>null</tt> if the folder is part
+     * of the <tt>PATH</tt> variable.
+     */
     public GitCmdPlugin(File path) {
         this.gitPath = path;
         basePath = null;
@@ -40,6 +50,13 @@ public class GitCmdPlugin implements IGitPlugin {
         return this.basePath;
     }
 
+    /**
+     * Executes a git command at the command line.
+     * @param folder The folder where to perform the operation (e.g. where to download a repository).
+     * @param commands The commands to execute ad the command line.
+     * @param handler An output handle for the output streams of a {@link Process}.
+     * @return <tt>true</tt> if update (fetch) was successful, <tt>false</tt> if not.
+     */
     private boolean executeGitCommand(File folder, List<String> commands, IProcessOutputHandler handler) {
         boolean success = false;
         ProcessBuilder pb = new ProcessBuilder(commands);
@@ -64,6 +81,11 @@ public class GitCmdPlugin implements IGitPlugin {
         return success;
     }
     
+    /**
+     * Creates <tt>git</tt> command and considers the specified location of the git executable.
+     * @param gitCommand The name of the git executable.
+     * @return <tt>gitCommand</tt> or <tt>basePath/gitCommand</tt>.
+     */
     private String createGitCommand(String gitCommand) {
         String cmd = gitCommand;
         if (null != gitPath) {
@@ -73,6 +95,10 @@ public class GitCmdPlugin implements IGitPlugin {
         return cmd;
     }
     
+    /**
+     * Creates <tt>git</tt> command and considers the specified location of the git executable.
+     * @return <tt>{@value GitCmdPlugin#GIT_CMD}</tt> or <tt>basePath/{@value GitCmdPlugin#GIT_CMD}</tt>.
+     */
     private String createGitCommand() {
         return createGitCommand(GIT_CMD);
     }
@@ -204,6 +230,4 @@ public class GitCmdPlugin implements IGitPlugin {
         
         return success;
     }
-
-
 }

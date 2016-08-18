@@ -2,18 +2,32 @@ package net.ssehub.kBuildCrawler.git;
 
 import java.io.File;
 
+/**
+ * Implements a git plugin, which stores the state to avoid multiple checkouts of the same repository.
+ * @author El-Sharkawy
+ *
+ */
 public class StateFullGitPlugin implements IGitPlugin {
 
     private IGitPlugin delegate;
     private File basePath;
     private String remoteURL;
     
+    /**
+     * Single constructor for this class.
+     * @param plugin Another git plugin which is used by this plugin (decorator pattern).
+     * @param basePath The base path, where to checkout a newly downloaded repository (parent folder).
+     */
     public StateFullGitPlugin(IGitPlugin plugin, File basePath) {
         delegate = plugin;
         delegate.setBasePath(basePath);
         this.basePath = basePath;
     }
     
+    /**
+     * Returns the URL of the repository handled by this plugin.
+     * @return The clone url fo the
+     */
     public String getRepositoryURL() {
         return remoteURL;
     }
@@ -74,5 +88,13 @@ public class StateFullGitPlugin implements IGitPlugin {
     @Override
     public boolean swithToBranch(String branch) {
         return delegate.swithToBranch(branch);
+    }
+    
+    /**
+     * Returns the path of the handles repository.
+     * @return The path of the repository or <tt>basePath</tt> if no repository was checked out so far.
+     */
+    public File getRepoPath() {
+        return basePath;
     }
 }

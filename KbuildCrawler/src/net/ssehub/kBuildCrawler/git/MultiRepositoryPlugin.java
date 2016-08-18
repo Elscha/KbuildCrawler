@@ -27,7 +27,8 @@ public class MultiRepositoryPlugin implements IGitPlugin {
     @Override
     public File setBasePath(File basePath) {
         // switching base path is not supported by this plugin
-        return basePath;
+        File currentFolder = null != currentRepoPlugin? currentRepoPlugin.getRepoPath() : basePath;
+        return currentFolder;
     }
 
     @Override
@@ -55,5 +56,4 @@ public class MultiRepositoryPlugin implements IGitPlugin {
     public boolean swithToBranch(String branch) {
         return currentRepoPlugin.swithToBranch(branch);
     }
-
 }
