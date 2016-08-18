@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="net.ssehub.kBuildCrawler" default="all" basedir="." xmlns:jacoco="antlib:org.jacoco.ant">
+	
+	  <!-- Settings for this project -->
+  	<!-- Souce folders -->
+  	<property name="src.dir" value="src"/>
+	  <property name="test.dir" value="test"/>
+  	<!-- Generated folders -->
+  	<property name="build.base.dir" value="build"/>
+	  <property name="build.classes.dir" value="${build.base.dir}/classes"/>
+  	<property name="build.test.dir" value="${build.base.dir}/test"/>
+  	<property name="build.jar.dir" value="${build.base.dir}/jar"/>
+  	<property name="build.results.dir" value="${build.base.dir}/test_results"/>
+	  <!-- Libraries -->
+	  <property name="libs.all.dir" value="lib"/>
+  	<property name="libs.compile.dir" value="${libs.all.dir}/compile"/>
+  	<property name="libs.test.dir" value="${libs.all.dir}/junit"/>
+  	<!-- Compiler settings -->
+	  <property name="javacSource" value="1.8"/>
+	  <property name="javacTarget" value="1.8"/>
+	  <!-- Path to Jacoco Lib -->
+	  <property name="jacoco.path" value="/var/lib/jenkins/addtionalLibs/jacoco-0.7.7"/>
+	
+	  <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+	  	  <classpath path="${jacoco.path}/jacocoant.jar"/>
+	  </taskdef>
+	
+	  <!-- Class path: Production code -->
+	  <path id ="cp.compile">
+        <fileset dir="${libs.compile.dir}">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+	
+  	<!-- Class path: Test code (e.g. Junit) -->
+	  <path id ="cp.test">
+        <fileset dir="${libs.test.dir}">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+	
+	  <!-- Targets  -->
+	  <target name="init">
+	  	  <!-- Delete generated folders -->
+	  	  <delete dir="${build.base.dir}"/>
+		
+	  	  <!-- Create folders -->
+        <mkdir dir="${build.base.dir}"/>
+	  	  <mkdir dir="${build.classes.dir}"/>
+	  	  <mkdir dir="${build.test.dir}"/>
+  		  <mkdir dir="${build.jar.dir}"/>
+  	</target>
+	
+  	<target name="compile" depends="init">
+		    <!-- Delivered Code -->
+		    <javac srcdir="${src.dir}" debug="off" destdir="${build.classes.dir}" includeAntRuntime="no" failonerror="true" source="${javacSource}" target="${javacTarget}" encoding="${javac.encoding}">
+		  	    <classpath refid="cp.compile" />	
+		    </javac>
+		    <!-- For running Junit tests -->
+		    <javac srcdir="${src.dir}" debug="on" destdir="${build.test.dir}" includeAntRuntime="no" failonerror="true" source="${javacSource}" target="${javacTarget}" encoding="${javac.encoding}">
+		    	  <src path="${test.dir}"/>
+		    	  <classpath refid="cp.compile" />	
+		  	    <classpath refid="cp.test" />	
+		    </javac>
+    </target>
+	
+	  <target name="test">
+	    	<jacoco:coverage destfile="${build.results.dir}/jacoco.exec" includes="net.ssehub.kBuildCrawler.*">
+	  	      <junit fork="true" forkmode="once" printsummary="off" haltonfailure="off">
+	  	          <classpath refid="cp.compile"/>
+	  	          <classpath refid="cp.test"/>
+	  	          <classpath>
+	  	              <pathelement location="${build.test.dir}"/>
+	              </classpath>
+	  	          <formatter type="xml"/>
+	  	          <test name="net.ssehub.kBuildCrawler.AllTests" todir="${build.results.dir}"/>
+	          </junit>
+	      </jacoco:coverage>
+	  	  <jacoco:report>
+	  	      <executiondata>
+	  	          <file file="${build.results.dir}/jacoco.exec"/>
+	          </executiondata>
+	  	      <structure name="${ant.project.name}">
+	  	          <classfiles>
+	  	              <fileset dir="${build.test.dir}"/>
+	              </classfiles>
+	  	          <sourcefiles encoding="UTF-8">
+	  	              <fileset dir="${src.dir}"/>
+	  	              <fileset dir="${test.dir}"/>
+	              </sourcefiles>
+	          </structure>
+	  	      <html destdir="${build.results.dir}/report"/>
+	      </jacoco:report>
+		</target>
+	
+  	<!-- Creates a jar file -->
+	  <target name="jar" depends="compile">
+	  	  <manifest file="${build.base.dir}/MANIFEST.MF">
+	  	      <attribute name="Main-Class" value="net.ssehub.kBuildCrawler.KbuildCrawler" />
+	  	  </manifest>
+	  	  <jar destfile="${build.jar.dir}/${ant.project.name}.jar" basedir="${build.classes.dir}" manifest="${build.base.dir}/MANIFEST.MF"/>
+    </target>
+	
+	  <target name="all" depends="init, compile, test, jar"/>
+</project>

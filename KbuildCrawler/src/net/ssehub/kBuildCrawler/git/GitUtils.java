@@ -1,0 +1,122 @@
+package net.ssehub.kBuildCrawler.git;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import net.ssehub.kBuildCrawler.io.IOUtils;
+import net.ssehub.kBuildCrawler.mail.Mail;
+import net.ssehub.kBuildCrawler.mail.MailUtils;
+
+public class GitUtils {
+    
+    static final String CONFIG_REGEX = "^URL: <(.*obj)>$";
+    static final String DEFECT_REGEX = "^>> (.*/)+([^/]*\\.c):(\\p{Digit}+)(:(\\p{Digit}+))?: (.*)$";
+    
+    private static final String URL_PREFIX = "url: ";
+    private static final String BASE_PREFIX = "base: ";
+    private static final String TREE_PREFIX = "tree: ";
+    private static final String HEAD_PREFIX = "head: ";
+    private static final String COMMIT_PREFIX = "commit: ";
+    
+    static GitData extractGitSettings(String[] lines) {
+        String url = null;
+        String base = null;
+        String branch = null;
+        String head = null;
+        String commit = null;
+        
+        for (int i = 0; i < lines.length; i++) {
+            if (lines[i].startsWith(URL_PREFIX)) {
+                url = lines[i].substring(URL_PREFIX.length()).trim();
+            }
+            if (lines[i].startsWith(BASE_PREFIX)) {
+                String line = lines[i].substring(BASE_PREFIX.length()).trim();
+                String[] elements = line.split(" ");
+                base = elements[0];
+                branch = elements[1];
+            }
+            if (lines[i].startsWith(TREE_PREFIX)) {
+                String line = lines[i].substring(TREE_PREFIX.length()).trim();
+                String[] elements = line.split(" ");
+                base = elements[0];
+                branch = elements[1];
+            }
+            if (lines[i].startsWith(HEAD_PREFIX)) {
+                String line = lines[i].substring(HEAD_PREFIX.length()).trim();
+                String[] elements = line.split(" ");
+                head = elements[0];
+            }
+            if (lines[i].startsWith(COMMIT_PREFIX)) {
+                String line = lines[i].substring(COMMIT_PREFIX.length()).trim();
+                String[] elements = line.split(" ");
+                commit = elements[0];
+            }
+        }
+        
+        
+        GitData data = new GitData(url, base, branch, head, commit);
+        return data;
+    }
+    
+    static ConfigProvider extractConfigURL(String[] lines) {
+        ConfigProvider config = null;
+        
+        // Attachment stays usually at the end -> performance optimization
+        Pattern pattern = Pattern.compile(CONFIG_REGEX);
+        for (int i = lines.length - 1; i >= 0 && null == config; i--) {
+            Matcher matcher = pattern.matcher(lines[i]);
+            if (matcher.find()) {
+                config = new ConfigProvider(matcher.group(1));
+            }
+        }
+        
+        return config;
+    }
+    
+    static List<FileDefect> extractAffectedFiles(String[] lines) {
+        List<FileDefect> defects = new ArrayList<>();
+        
+        Pattern pattern = Pattern.compile(DEFECT_REGEX);
+        for (int i = 0; i < lines.length; i++) {
+            if (lines[i].startsWith(MailUtils.NEW_ERROR_PREFIX)) {
+                Matcher matcher = pattern.matcher(lines[i]);
+                if (matcher.find()) {
+                    String path = matcher.group(1);
+                    String file = matcher.group(2);
+                    String lineNo = matcher.group(3);
+                    int line = null != lineNo ? Integer.valueOf(lineNo) : 0;
+                    int charPos = 0;
+                    if (matcher.groupCount() == 6) {
+                        String charNo = matcher.group(5);
+                        if (null != charNo) {
+                            charPos = Integer.valueOf(charNo);
+                        }
+                    }
+                    String description = matcher.group(matcher.groupCount());
+                    defects.add(new FileDefect(path, file, line, charPos, description));
+                } else {
+                    System.err.println("Could not parse: " + lines[i]);
+                }
+            }
+        }
+        
+        return defects;
+    }
+    
+    public static List<FailureTrace> convertToTraces(List<Mail> kbuildMails) {
+        List<FailureTrace> traces = new ArrayList<>();
+        
+        for (Mail mail: kbuildMails) {
+            String[] lines = mail.getContent().split(IOUtils.MAIL_LINEFEED_REGEX);
+            GitData gitInfo = extractGitSettings(lines);
+            ConfigProvider config = extractConfigURL(lines);
+            List<FileDefect> defects = extractAffectedFiles(lines);
+            traces.add(new FailureTrace(mail, gitInfo, config, defects));
+        }
+        
+        return traces;
+    }
+
+}
