@@ -83,7 +83,9 @@
             </executiondata>
             <structure name="${ant.project.name}">
                 <classfiles>
-                    <fileset dir="${build.test.dir}"/>
+                    <fileset dir="${build.test.dir}">
+                	      <exclude name="**/*Test*.class" />
+                    </fileset>
                 </classfiles>
                 <sourcefiles encoding="UTF-8">
                     <fileset dir="${src.dir}"/>
