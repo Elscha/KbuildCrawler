@@ -68,7 +68,7 @@
     <target name="test">
         <jacoco:coverage destfile="${build.results.dir}/jacoco.exec" includes="net.ssehub.kBuildCrawler.*">
             <junit fork="true" forkmode="once" printsummary="off" haltonfailure="off">
-                <classpath refid="cp.compile"/>
+                <!-- classpath refid="cp.compile"/ -->
                 <classpath refid="cp.test"/>
                 <classpath>
                     <pathelement location="${build.test.dir}"/>
