@@ -1,13 +1,20 @@
 package net.ssehub.kBuildCrawler.git.diff;
 
-import net.ssehub.kBuildCrawler.io.IOUtils;
-
 public class FileDiff {
     
     private ChangeType fileChange;
     private String file;
 
-    FileDiff(String diff) {
-        String[] lines = diff.split(IOUtils.MAIL_LINEFEED_REGEX);
+    FileDiff(String file, ChangeType fileChange) {
+        this.file = file;
+        this.fileChange = fileChange;
+    }
+
+    public String getFile() {
+        return file;
+    }
+
+    public ChangeType getFileChange() {
+        return fileChange;
     }
 }

@@ -65,7 +65,7 @@
         </javac>
     </target>
   
-    <target name="test">
+    <target name="test" depends="compile">
         <jacoco:coverage destfile="${build.results.dir}/jacoco.exec" includes="net.ssehub.kBuildCrawler.*">
             <junit fork="true" forkmode="once" printsummary="off" haltonfailure="off">
                 <!-- classpath refid="cp.compile"/ -->
