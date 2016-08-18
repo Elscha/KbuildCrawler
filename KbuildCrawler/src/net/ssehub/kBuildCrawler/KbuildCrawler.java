@@ -38,8 +38,10 @@ public class KbuildCrawler {
         tmpFolder = new File(tmpFolder, "gitTest");
         MultiRepositoryPlugin multiRepos = new MultiRepositoryPlugin(tmpFolder);
         multiRepos.clone("https://github.com/Elscha/KbuildCrawler.git", null);
-        String diff = multiRepos.diff("d9c0fc70ad50f17a7c41ac1ce31deec195ab368b",
-            "29cd71d2d360c5cc214fd7bfdf084168645cde9f");
+//        String diff = multiRepos.diff("d9c0fc70ad50f17a7c41ac1ce31deec195ab368b",
+//            "29cd71d2d360c5cc214fd7bfdf084168645cde9f");
+        String diff = multiRepos.diff("29cd71d2d360c5cc214fd7bfdf084168645cde9f",
+                "4726ee9ca0e27a0cfe666e2eac7e0b77d2d1119a");
         System.out.println(diff);
     }
     

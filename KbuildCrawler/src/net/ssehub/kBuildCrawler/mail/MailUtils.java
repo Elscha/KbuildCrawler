@@ -48,7 +48,7 @@ public class MailUtils {
     static boolean hasCompilerProblem(Mail mail) {
         boolean hasProblem = false;
         
-        String[] lines = mail.getContent().split(IOUtils.MAIL_LINEFEED_REGEX);
+        String[] lines = mail.getContent().split(IOUtils.LINEFEED_REGEX);
         for (int i = 0; i < lines.length && !hasProblem; i++) {
             if (lines[i].startsWith(">>")) {
                 hasProblem = lines[i].matches(COMPILATION_WARNINGS_REGEX);

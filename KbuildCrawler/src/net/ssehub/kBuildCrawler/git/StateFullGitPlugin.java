@@ -42,6 +42,7 @@ public class StateFullGitPlugin implements IGitPlugin {
                 } else {
                     delegate.swithToBranch("master");
                 }
+                delegate.fetch();
             } else {
                 basePath = delegate.clone(url, branch);                
             }

@@ -109,7 +109,7 @@ public class GitUtils {
         List<FailureTrace> traces = new ArrayList<>();
         
         for (Mail mail: kbuildMails) {
-            String[] lines = mail.getContent().split(IOUtils.MAIL_LINEFEED_REGEX);
+            String[] lines = mail.getContent().split(IOUtils.LINEFEED_REGEX);
             GitData gitInfo = extractGitSettings(lines);
             ConfigProvider config = extractConfigURL(lines);
             List<FileDefect> defects = extractAffectedFiles(lines);
