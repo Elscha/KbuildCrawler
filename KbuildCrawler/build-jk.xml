@@ -18,6 +18,7 @@
     <!-- Compiler settings -->
     <property name="javacSource" value="1.8"/>
     <property name="javacTarget" value="1.8"/>
+    <property name="javac.encoding" value="iso-8859-1"/>
     <!-- Path to Jacoco Lib -->
     <property name="jacoco.path" value="/var/lib/jenkins/addtionalLibs/jacoco-0.7.7"/>
   
