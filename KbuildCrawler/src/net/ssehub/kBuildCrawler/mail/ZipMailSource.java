@@ -11,7 +11,10 @@ import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 /**
- * Uses one already downloaded GZ archive as mail source to minimize traffic.
+ * Uses one already downloaded GZ archive as mail source to minimize traffic.<br/>
+ * This mail source takes a single GZ archive from
+ * <a href="https://lists.01.org/pipermail/kbuild-all/">https://lists.01.org/pipermail/kbuild-all/</a>
+ * as input.
  * @author El-Sharkawy
  *
  */
