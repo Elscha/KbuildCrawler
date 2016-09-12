@@ -28,7 +28,7 @@ public class Mail {
 
     /**
      * Returns the sender.
-     * @return E-Mail adress (name).
+     * @return E-Mail address (name).
      */
     public String getFrom() {
         return from;

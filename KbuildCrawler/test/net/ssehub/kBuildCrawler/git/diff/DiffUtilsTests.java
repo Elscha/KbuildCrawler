@@ -1,8 +1,13 @@
 package net.ssehub.kBuildCrawler.git.diff;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+
 import org.junit.Assert;
 import org.junit.Test;
 
+import net.ssehub.kBuildCrawler.AllTests;
 import net.ssehub.kBuildCrawler.io.IOUtils;
 
 /**
@@ -13,7 +18,25 @@ import net.ssehub.kBuildCrawler.io.IOUtils;
 public class DiffUtilsTests {
     
     /**
-     * Tests {@link DiffUtils#parseDiff(String)} if only one file was added.
+     * Helper method to read a diff from a text file.
+     * @param fileName A text file within the {@link AllTests#TESTDATA} folder containing a diff file.
+     * @return The content of the specified file.
+     */
+    private static String loadDiff(String fileName) {
+        File file = new File(AllTests.TESTDATA, fileName);
+        String content = null;
+        try {
+            content = org.apache.commons.io.FileUtils.readFileToString(file, (Charset) null);
+            Assert.assertNotNull(content);
+        } catch (IOException e) {
+            Assert.fail("Could not read file \"" + file.getAbsolutePath() + "\": " + e.getMessage());
+        }
+        
+        return content;
+    }
+    
+    /**
+     * Tests {@link DiffUtils#parseDiff(String)} if only one file was added, with one hunk.
      */
     @Test
     public void testParseFileDiff_FileAdded() {
@@ -40,7 +63,7 @@ public class DiffUtilsTests {
     }
     
     /**
-     * Tests {@link DiffUtils#parseDiff(String)} if only one file was added.
+     * Tests {@link DiffUtils#parseDiff(String)} if only one file was added, with two hunks.
      */
     @Test
     public void testParseFileDiff_TwoHunksChanged() {
@@ -80,6 +103,12 @@ public class DiffUtilsTests {
         Assert.assertEquals(1, hunk.getNumberOfChangesLinesBefore());
         Assert.assertEquals(16, hunk.getStartLineAfter());
         Assert.assertEquals(1, hunk.getNumberOfChangesLinesAfter());
+    }
+    
+    @Test
+    public void testParseDiff_MultipleFiles() {
+        String diffString = loadDiff("diffMultipleFiles.diff");
+        CommitDiff diff = DiffUtils.parseDiff(diffString);
     }
 
 }

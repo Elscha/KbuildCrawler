@@ -57,8 +57,20 @@ public class DiffUtils {
      * @return A data object for the given file in the diff.
      */
     static FileDiff parseFileDiff(String[] diffLines, int startLine, int endLine) {
-        String fileBefore = diffLines[startLine + 3].split(" ")[1];
-        String fileAfter = diffLines[startLine + 4].split(" ")[1];
+        int offset = diffLines[startLine + 2].startsWith("index") == true ? 3 : 2;
+        boolean binaryFile = false;
+        String fileBefore;
+        String fileAfter;
+        
+        if (diffLines[startLine + offset].startsWith("Binary files ")) {
+            binaryFile = true;
+            fileBefore = diffLines[startLine + offset].split(" ")[1];
+            fileAfter = diffLines[startLine + offset].split(" ")[2];  
+        } else {
+            fileBefore = diffLines[startLine + offset].split(" ")[1];
+            fileAfter = diffLines[startLine + offset + 1].split(" ")[1];   
+        }
+        
         ChangeType filechange = ChangeType.CHANGED;
         String fileName = null;
         if (NO_FILE.equals(fileBefore) && !NO_FILE.equals(fileAfter)) {
@@ -72,27 +84,28 @@ public class DiffUtils {
         }
         
         List<InFileDiff> lineChanges = new ArrayList<>();
-        int startIndex = startLine + 5;
-        int endIndex = 0;
-        for (int i = startLine + 5; i < endLine; i++) {
-            String line = diffLines[i];
-            if (line.startsWith("@@ -")) {
-                endIndex = i - 1;
-                if (endIndex > startIndex) {
-                    InFileDiff hunk = parseInffileDiff(diffLines, startIndex, endIndex);
-                    if (null != hunk) {
-                        lineChanges.add(hunk);
+        if (!binaryFile) {
+            int startIndex = startLine + offset + 2;
+            int endIndex = 0;
+            for (int i = startLine + offset + 2; i < endLine; i++) {
+                String line = diffLines[i];
+                if (line.startsWith("@@ -")) {
+                    endIndex = i - 1;
+                    if (endIndex > startIndex) {
+                        InFileDiff hunk = parseInffileDiff(diffLines, startIndex, endIndex);
+                        if (null != hunk) {
+                            lineChanges.add(hunk);
+                        }
                     }
+                    startIndex = i;
                 }
-                startIndex = i;
+            }
+            // last hunk
+            InFileDiff hunk = parseInffileDiff(diffLines, endIndex + 1, endLine);
+            if (null != hunk) {
+                lineChanges.add(hunk);
             }
         }
-        // last hunk
-        InFileDiff hunk = parseInffileDiff(diffLines, endIndex + 1, endLine);
-        if (null != hunk) {
-            lineChanges.add(hunk);
-        }
-        
         return new FileDiff(fileName, filechange, lineChanges);
     }
     

@@ -1,0 +1,96 @@
+diff --git a/KbuildCrawler/test/net/ssehub/kBuildCrawler/mail/AllMailTests.java b/KbuildCrawler/test/net/ssehub/kBuildCrawler/mail/AllMailTests.java
+index 76347f0..72d3555 100644
+--- a/KbuildCrawler/test/net/ssehub/kBuildCrawler/mail/AllMailTests.java
++++ b/KbuildCrawler/test/net/ssehub/kBuildCrawler/mail/AllMailTests.java
+@@ -8,6 +8,7 @@ import org.junit.runners.Suite.SuiteClasses;
+ @SuiteClasses({
+     ZipMailSourceTests.class,
+     // Should come after ZipMailSourceTests
++    GZFolderMailSourceTest.class,
+     MailUtilsTest.class})
+ public class AllMailTests {
+ 
+diff --git a/KbuildCrawler/test/net/ssehub/kBuildCrawler/mail/GZFolderMailSourceTest.java b/KbuildCrawler/test/net/ssehub/kBuildCrawler/mail/GZFolderMailSourceTest.java
+new file mode 100644
+index 0000000..81d94dc
+--- /dev/null
++++ b/KbuildCrawler/test/net/ssehub/kBuildCrawler/mail/GZFolderMailSourceTest.java
+@@ -0,0 +1,34 @@
++package net.ssehub.kBuildCrawler.mail;
++
++import java.util.List;
++
++import org.junit.Assert;
++import org.junit.Test;
++
++import net.ssehub.kBuildCrawler.AllTests;
++
++/**
++ * Tests the {@link GZFolderMailSource}, depends on {@link ZipMailSourceTests} and should come afterwards.
++ * @author El-Sharkawy
++ *
++ */
++public class GZFolderMailSourceTest {
++    
++    /**
++     * Tests parsing of Mails out of a multiple GZ files.
++     * @throws Exception Must not happen!
++     */
++    @Test
++    public void testLoadMails() throws Exception {
++        // For comparison
++        List<Mail> mails = ZipMailSourceTests.loadAugMails();
++        
++        // Test: GZFolderMailSource
++        IMailSource augMailsByFolder = new GZFolderMailSource(AllTests.TESTDATA);
++        List<Mail> doubledMails = augMailsByFolder.loadMails();
++        
++        Assert.assertNotNull(doubledMails);
++        Assert.assertEquals(2 * mails.size(), doubledMails.size());
++    }
++
++}
+diff --git a/KbuildCrawler/test/net/ssehub/kBuildCrawler/mail/ZipMailSourceTests.java b/KbuildCrawler/test/net/ssehub/kBuildCrawler/mail/ZipMailSourceTests.java
+index a056fad..85a01bd 100644
+--- a/KbuildCrawler/test/net/ssehub/kBuildCrawler/mail/ZipMailSourceTests.java
++++ b/KbuildCrawler/test/net/ssehub/kBuildCrawler/mail/ZipMailSourceTests.java
+@@ -17,6 +17,24 @@ import net.ssehub.kBuildCrawler.mail.ZipMailSource;
+  */
+ public class ZipMailSourceTests {
+     static final int EXPECTED_MAILS_SIZE = 135;
++    
++    /**
++     * Loads the sample file via the {@link ZipMailSource}.
++     * @return Mails of the sample file, will not be <tt>null</tt>.
++     */
++    static List<Mail> loadAugMails() {
++        File zipFile = new File(AllTests.TESTDATA, "2016-August.txt.gz");
++        IMailSource augMails = new ZipMailSource(zipFile);
++        List<Mail> mails = null;
++        try {
++            mails = augMails.loadMails();
++            Assert.assertNotNull(mails);
++        } catch (Exception e) {
++            Assert.fail("File \"" + zipFile.getAbsolutePath() + "\"could not be loaded: " + e.getMessage());
++        }
++        
++        return mails;
++    }
+ 
+     /**
+      * Tests parsing of Mails out of a GZ file.
+@@ -25,9 +43,7 @@ public class ZipMailSourceTests {
+     @Test
+     public void testLoadMails() throws Exception {
+         // Parse test case
+-        File zipFile = new File(AllTests.TESTDATA, "2016-August.txt.gz");
+-        IMailSource augMails = new ZipMailSource(zipFile);
+-        List<Mail> mails = augMails.loadMails();
++        List<Mail> mails = loadAugMails();
+         
+         Assert.assertNotNull(mails);
+         Assert.assertEquals(EXPECTED_MAILS_SIZE, mails.size());
+diff --git a/KbuildCrawler/testdata/2016-August-copy.txt.gz b/KbuildCrawler/testdata/2016-August-copy.txt.gz
+new file mode 100644
+index 0000000..a5e7d72
+Binary files /dev/null and b/KbuildCrawler/testdata/2016-August-copy.txt.gz differ
