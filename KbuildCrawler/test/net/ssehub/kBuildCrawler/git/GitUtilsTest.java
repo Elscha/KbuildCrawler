@@ -26,5 +26,10 @@ public class GitUtilsTest {
             + "different size";
         Assert.assertTrue(defect.matches(GitUtils.DEFECT_REGEX));
     }
+    
+    @Test
+    public void testConvertToTraces() {
+        // TODO
+    }
 
 }

@@ -105,10 +105,42 @@ public class DiffUtilsTests {
         Assert.assertEquals(1, hunk.getNumberOfChangesLinesAfter());
     }
     
+    /**
+     * Tests the {@link DiffUtils#parseDiff(String)} method.
+     */
     @Test
     public void testParseDiff_MultipleFiles() {
         String diffString = loadDiff("diffMultipleFiles.diff");
         CommitDiff diff = DiffUtils.parseDiff(diffString);
+        
+        // Whole diff
+        Assert.assertNotNull(diff);
+        Assert.assertEquals(4, diff.getChangedFiles().size());
+        
+        // Files
+        assertFileDiff(diff.getChangedFiles().get(0),
+            "KbuildCrawler/test/net/ssehub/kBuildCrawler/mail/AllMailTests.java", ChangeType.CHANGED, 1);
+        assertFileDiff(diff.getChangedFiles().get(1),
+            "KbuildCrawler/test/net/ssehub/kBuildCrawler/mail/GZFolderMailSourceTest.java", ChangeType.ADDED, 1);
+        assertFileDiff(diff.getChangedFiles().get(2),
+            "KbuildCrawler/test/net/ssehub/kBuildCrawler/mail/ZipMailSourceTests.java", ChangeType.CHANGED, 2);
+        assertFileDiff(diff.getChangedFiles().get(3),
+            "KbuildCrawler/testdata/2016-August-copy.txt.gz", ChangeType.ADDED, 0);
+        
+    }
+
+    /**
+     * Helper method to test a {@link CommitDiff}.
+     * @param fDiff The {@link CommitDiff} to test.
+     * @param expectedFile The expected relative path of the associated file.
+     * @param expectedChange The expected kind of change for the given file.
+     * @param expectedHunks The expected number of changed code blocks.
+     */
+    private void assertFileDiff(FileDiff fDiff, String expectedFile, ChangeType expectedChange, int expectedHunks) {
+        Assert.assertNotNull(fDiff);
+        Assert.assertEquals(expectedFile, fDiff.getFile());
+        Assert.assertEquals(expectedChange, fDiff.getFileChange());
+        Assert.assertEquals(expectedHunks, fDiff.getHunks().size());
     }
 
 }

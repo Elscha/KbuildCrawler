@@ -20,6 +20,11 @@ public class DiffUtils {
      */
     private DiffUtils() {}
     
+    /**
+     * Parses a complete diff log for multiple files into a {@link CommitDiff} data object.
+     * @param diff The output of a <tt>diff &lt;commit&gt; &lt;commit&gt;</tt> command
+     * @return The parsed diff.
+     */
     public static CommitDiff parseDiff(String diff) {
         String lines[] = diff.split(IOUtils.LINEFEED_REGEX);
         List<FileDiff> files = new ArrayList<>();
@@ -64,8 +69,9 @@ public class DiffUtils {
         
         if (diffLines[startLine + offset].startsWith("Binary files ")) {
             binaryFile = true;
-            fileBefore = diffLines[startLine + offset].split(" ")[1];
-            fileAfter = diffLines[startLine + offset].split(" ")[2];  
+            String line = diffLines[startLine + offset];
+            fileBefore = line.split(" ")[2];
+            fileAfter = line.split(" ")[4];  
         } else {
             fileBefore = diffLines[startLine + offset].split(" ")[1];
             fileAfter = diffLines[startLine + offset + 1].split(" ")[1];   
