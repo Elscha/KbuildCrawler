@@ -8,6 +8,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
     ZipMailSourceTests.class,
     // Should come after ZipMailSourceTests
+    GZFolderMailSourceTest.class,
     MailUtilsTest.class})
 public class AllMailTests {
 

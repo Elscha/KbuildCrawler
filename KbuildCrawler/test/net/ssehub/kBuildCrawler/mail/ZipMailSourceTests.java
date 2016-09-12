@@ -17,6 +17,24 @@ import net.ssehub.kBuildCrawler.mail.ZipMailSource;
  */
 public class ZipMailSourceTests {
     static final int EXPECTED_MAILS_SIZE = 135;
+    
+    /**
+     * Loads the sample file via the {@link ZipMailSource}.
+     * @return Mails of the sample file, will not be <tt>null</tt>.
+     */
+    static List<Mail> loadAugMails() {
+        File zipFile = new File(AllTests.TESTDATA, "2016-August.txt.gz");
+        IMailSource augMails = new ZipMailSource(zipFile);
+        List<Mail> mails = null;
+        try {
+            mails = augMails.loadMails();
+            Assert.assertNotNull(mails);
+        } catch (Exception e) {
+            Assert.fail("File \"" + zipFile.getAbsolutePath() + "\"could not be loaded: " + e.getMessage());
+        }
+        
+        return mails;
+    }
 
     /**
      * Tests parsing of Mails out of a GZ file.
@@ -25,9 +43,7 @@ public class ZipMailSourceTests {
     @Test
     public void testLoadMails() throws Exception {
         // Parse test case
-        File zipFile = new File(AllTests.TESTDATA, "2016-August.txt.gz");
-        IMailSource augMails = new ZipMailSource(zipFile);
-        List<Mail> mails = augMails.loadMails();
+        List<Mail> mails = loadAugMails();
         
         Assert.assertNotNull(mails);
         Assert.assertEquals(EXPECTED_MAILS_SIZE, mails.size());
