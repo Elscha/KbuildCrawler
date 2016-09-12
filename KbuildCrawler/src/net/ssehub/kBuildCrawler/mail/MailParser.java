@@ -28,7 +28,6 @@ public class MailParser {
             }
         }
         
-        
         return mails;
     }
 

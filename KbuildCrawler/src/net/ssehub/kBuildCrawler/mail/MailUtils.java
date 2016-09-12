@@ -13,13 +13,28 @@ import net.ssehub.kBuildCrawler.io.IOUtils;
  */
 public class MailUtils {
     
+    /**
+     * Prefix for a line showing a new introduced error/warning.
+     */
     public static final String NEW_ERROR_PREFIX = ">> ";
-    
+
+    /**
+     * Regex showing an error inside a C file. <br/>
+     * <tt>.c:&lt;Line start number&gt;:&lt;Line end number&gt;</tt>
+     */
     static final String COMPILATION_WARNINGS_REGEX = "^.*\\.c\\:\\p{Digit}+:\\p{Digit}+.*$";
+    
+    // Valid addresses for the Kbuild test robot.
     private static final String KBUILD_TEST_ROBOT_ADDRESS1 = "lkp at intel.com (kbuild test robot)";
     private static final String KBUILD_TEST_ROBOT_ADDRESS2 = "fengguang.wu at intel.com (kbuild test robot)";
+    
     private static final String COMPILATION_ERRORS_CONTENT = "compilation terminated.";
 
+    /**
+     * Returns whether a given mail was send by the Kbuild test robot.
+     * @param from {@link Mail#getFrom()}
+     * @return <tt>true</tt> if the mail was send by the robot, <tt>false</tt> otherwise.
+     */
     static boolean isFromKbuildRobot(String from) {
         boolean isFromRobot = from.equals(KBUILD_TEST_ROBOT_ADDRESS1);
         
@@ -45,6 +60,12 @@ public class MailUtils {
         return mailStream.collect(Collectors.toList());
     }
     
+    /**
+     * Returns whether a mail contains a compiler error or warning.
+     * @param mail A single mail to check.
+     * @return <tt>true</tt> The mail contains a C error or warning, <tt>false</tt> something else, e.g., a header or
+     * linker error.
+     */
     static boolean hasCompilerProblem(Mail mail) {
         boolean hasProblem = false;
         
