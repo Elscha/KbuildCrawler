@@ -31,6 +31,11 @@ public class MailUtils {
     private static final String COMPILATION_ERRORS_CONTENT = "compilation terminated.";
 
     /**
+     * Avoid instantiation of utility class.
+     */
+    private MailUtils() {}
+    
+    /**
      * Returns whether a given mail was send by the Kbuild test robot.
      * @param from {@link Mail#getFrom()}
      * @return <tt>true</tt> if the mail was send by the robot, <tt>false</tt> otherwise.
