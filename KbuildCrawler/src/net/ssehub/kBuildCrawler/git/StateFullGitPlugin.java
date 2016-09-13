@@ -50,6 +50,7 @@ public class StateFullGitPlugin implements IGitPlugin {
                 repoName = url.substring(start, end);
             }
             if (null != repoName && (basePath = new File(basePath, repoName)).exists()) {
+                // Repository already downloaded -> switch to desired branch, update the repository and use it
                 delegate.setBasePath(basePath);
                 if (null != branch) {
                     delegate.swithToBranch(branch);
@@ -58,6 +59,7 @@ public class StateFullGitPlugin implements IGitPlugin {
                 }
                 delegate.fetch();
             } else {
+                // Repository does not exist -> clone it
                 basePath = delegate.clone(url, branch);                
             }
             

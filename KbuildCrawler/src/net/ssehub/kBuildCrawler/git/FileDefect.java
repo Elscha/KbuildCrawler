@@ -1,5 +1,10 @@
 package net.ssehub.kBuildCrawler.git;
 
+/**
+ * Points to a single failure within a file.
+ * @author El-Sharkawy
+ *
+ */
 public class FileDefect {
     private String path;
     private String file;

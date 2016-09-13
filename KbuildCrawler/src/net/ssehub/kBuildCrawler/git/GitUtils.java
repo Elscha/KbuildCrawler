@@ -9,10 +9,18 @@ import net.ssehub.kBuildCrawler.io.IOUtils;
 import net.ssehub.kBuildCrawler.mail.Mail;
 import net.ssehub.kBuildCrawler.mail.MailUtils;
 
+/**
+ * Utility methods to extract relevant git information from {@link Mail}s.
+ * @author El-Sharkawy
+ */
 public class GitUtils {
     
     static final String CONFIG_REGEX = "^URL: <(.*obj)>$";
-    static final String DEFECT_REGEX = "^>> (.*/)+([^/]*\\.c):(\\p{Digit}+)(:(\\p{Digit}+))?: (.*)$";
+    
+    private static final String C_FILE_PATH = "(.*/)+([^/]*\\.c)";
+    private static final String NUMBER = "(\\p{Digit}+)";
+    private static final String RANGE = NUMBER + "(\\-" + NUMBER + ")?";
+    static final String DEFECT_REGEX = "^>> " + C_FILE_PATH + ":" + NUMBER + "(:" + RANGE + ")?: (.*)$";
     
     private static final String URL_PREFIX = "url: ";
     private static final String BASE_PREFIX = "base: ";
@@ -105,6 +113,12 @@ public class GitUtils {
         return defects;
     }
     
+    /**
+     * Converts a list of mails from the Kbuild test robot to Git {@link FailureTrace}s, which contain all
+     * necessary information to reproduce the reported error in a structured way.
+     * @param kbuildMails Compilation error/warnings reported by the Kbuild test robot.
+     * @return The given information in a parsed and structured way to make the report reproduceable.
+     */
     public static List<FailureTrace> convertToTraces(List<Mail> kbuildMails) {
         List<FailureTrace> traces = new ArrayList<>();
         

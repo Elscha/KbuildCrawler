@@ -4,12 +4,22 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Stores multiple repositories in one location and tries to reuse them to reduce traffic as much as possible.
+ * This plugin can also handle previous cloned repositories, as it make usage of the {@link StateFullGitPlugin}.
+ * @author El-Sharkawy
+ *
+ */
 public class MultiRepositoryPlugin implements IGitPlugin {
     
     private File basePath;
     private Map<String, StateFullGitPlugin> repositories;
     private StateFullGitPlugin currentRepoPlugin;
     
+    /**
+     * Sole constructor for ths class.
+     * @param basePath The base path, where to store all downloaded repositories.
+     */
     public MultiRepositoryPlugin(File basePath) {
         this.basePath = basePath;
         repositories = new HashMap<>();

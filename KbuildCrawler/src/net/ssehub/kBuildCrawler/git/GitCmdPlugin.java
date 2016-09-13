@@ -13,7 +13,7 @@ import net.ssehub.kBuildCrawler.io.IProcessOutputHandler;
 import net.ssehub.kBuildCrawler.io.InputReader;
 
 /**
- * {@link IGitPlugin} which uses a localy installed git binary for the specified operations.
+ * {@link IGitPlugin} which uses a locally installed git binary for the specified operations.
  * @author El-Sharkawy
  *
  */

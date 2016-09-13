@@ -37,7 +37,7 @@ public interface IGitPlugin {
     public String diff(String headSHA1, String commitSHA1);
     
     /**
-     * Checksout the specified commit.
+     * Checks out the specified commit.
      * @param hash The SHA1 hash of the specified commit.
      * @return <tt>true</tt> if checkout was successful, <tt>false</tt> if not.
      */

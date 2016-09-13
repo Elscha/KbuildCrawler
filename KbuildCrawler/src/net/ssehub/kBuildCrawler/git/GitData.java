@@ -1,7 +1,12 @@
 package net.ssehub.kBuildCrawler.git;
 
 /**
- * Parsed info of how to reproduce an error reported by the Kbuild test robot.
+ * Parsed information of how to reproduce an error reported by the Kbuild test robot.
+ * There exist two ways to reproduce the data (depends on the information available):
+ * <ul>
+ *   <li>Cloning the repository via {@link #getBase()} and {@link #getCommit()}</li>
+ *   <li>Download from {@link #getUrl()}</li>
+ * </ul>
  * @author El-Sharkawy
  *
  */
@@ -68,6 +73,15 @@ public class GitData {
     public String getCommit() {
         return commit;
     }
+    
+    /**
+     * Returns whether the data can be used for cloning (preferred way) or downloading a repository.
+     * @return <tt>true</tt>Repository can be cloned via {@link #getBase()} and {@link #getCommit()},
+     * <tt>false</tt> repository must be downloaded from {@link #getUrl()}.
+     */
+    public boolean cloningPossible() {
+        return getBase() != null && getCommit() != null;
+    }
 
     @Override
     public String toString() {
@@ -107,5 +121,4 @@ public class GitData {
         
         return result.toString();
     }
-
 }

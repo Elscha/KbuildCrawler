@@ -13,5 +13,5 @@ import net.ssehub.kBuildCrawler.mail.AllMailTests;
     AllMailTests.class,
     AllGitTests.class})
 public class AllTests {
-    public final static File TESTDATA = new File("testdata");
+    public static final File TESTDATA = new File("testdata");
 }
