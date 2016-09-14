@@ -27,6 +27,10 @@ public class KbuildCrawler {
         
         File tmpFolder = new File(System.getProperty("java.io.tmpdir"));
         tmpFolder = new File(tmpFolder, "gitTest");
+//        GitCmdPlugin cmdPlugin = new GitCmdPlugin(null);
+//        cmdPlugin.setBasePath(new File(tmpFolder, "Linux"));
+//        String remote = cmdPlugin.getRemoteURL();
+//        System.out.println(remote);
         MultiRepositoryPlugin multiRepos = new MultiRepositoryPlugin(tmpFolder);
         multiRepos.clone("https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git", "master");
         

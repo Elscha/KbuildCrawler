@@ -230,4 +230,34 @@ public class GitCmdPlugin extends AbstractGitPlugin {
         
         return success;
     }
+    
+    /**
+     * Returns the URL of the cloned repository.
+     * @return The URL of the cloned repository or <tt>null</tt> if if could not be determined.
+     */
+    public String getRemoteURL() {
+        List<String> commands = new ArrayList<>();
+        
+        // Git show remote command
+        commands.add(createGitCommand());
+        commands.add("remote");
+        commands.add("show");
+        commands.add("origin");
+        
+        InputReader reader = new InputReader();
+        boolean success = executeGitCommand(basePath, commands, reader);
+        
+        String result = null;
+        if (success) {
+            String output = reader.getOutput();
+            int startPos = output.indexOf("Fetch URL: ");
+            int endPos = output.indexOf("\n", startPos);
+            
+            if (-1 != startPos && -1 != endPos) {
+                result = output.substring(startPos + "Fetch URL: ".length(), endPos);
+            }
+        }
+        
+        return result;
+    }
 }

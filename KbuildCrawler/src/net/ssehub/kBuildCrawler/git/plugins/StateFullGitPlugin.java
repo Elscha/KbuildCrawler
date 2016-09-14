@@ -9,7 +9,7 @@ import java.io.File;
  */
 public class StateFullGitPlugin extends AbstractGitPlugin {
 
-    private IGitPlugin delegate;
+    private GitCmdPlugin delegate;
     private File basePath;
     private String remoteURL;
     
@@ -18,7 +18,7 @@ public class StateFullGitPlugin extends AbstractGitPlugin {
      * @param plugin Another git plugin which is used by this plugin (decorator pattern).
      * @param basePath The base path, where to checkout a newly downloaded repository (parent folder).
      */
-    public StateFullGitPlugin(IGitPlugin plugin, File basePath) {
+    public StateFullGitPlugin(GitCmdPlugin plugin, File basePath) {
         delegate = plugin;
         delegate.setBasePath(basePath);
         this.basePath = basePath;
@@ -50,16 +50,32 @@ public class StateFullGitPlugin extends AbstractGitPlugin {
                 repoName = url.substring(start, end);
             }
             if (null != repoName && (basePath = new File(basePath, repoName)).exists()) {
-                /* Repository already downloaded -> switch to desired branch,
-                 * update (fetch) the repository and use it.
-                 */
                 delegate.setBasePath(basePath);
-                if (null != branch) {
-                    delegate.swithToBranch(branch);
+                // Maybe multiple repositories with same name exist, verify that the correct repository is reused.
+                boolean correctRepository = delegate.getRemoteURL().equals(url);
+                if (!correctRepository) {
+                    int n = 0;
+                    File alternativeFolder = new File(basePath, repoName + "_" + n);
+                    while (!correctRepository && alternativeFolder.exists()) {
+                        delegate.setBasePath(alternativeFolder);
+                        correctRepository = delegate.getRemoteURL().equals(url);
+                        if (!correctRepository) {
+                            n++;
+                            alternativeFolder = new File(basePath, repoName + "_" + n);
+                        }
+                    }
+                    
+                    if (correctRepository && alternativeFolder.exists()) {
+                        reuseClonedRepository(alternativeFolder, branch);
+                    } else {
+                        System.err.println("Error");
+                    }
                 } else {
-                    delegate.swithToBranch(AbstractGitPlugin.DEFAULT_BRANCH);
+                    /* Repository already downloaded -> switch to desired branch,
+                     * update (fetch) the repository and use it.
+                     */
+                    reuseClonedRepository(basePath, branch);
                 }
-                delegate.fetch();
             } else {
                 // Repository does not exist -> clone it
                 basePath = delegate.clone(url, branch);                
@@ -72,6 +88,16 @@ public class StateFullGitPlugin extends AbstractGitPlugin {
         }
         
         return basePath;
+    }
+
+    private void reuseClonedRepository(File basePath, String branch) {
+        delegate.setBasePath(basePath);
+        if (null != branch) {
+            delegate.swithToBranch(branch);
+        } else {
+            delegate.swithToBranch(AbstractGitPlugin.DEFAULT_BRANCH);
+        }
+        delegate.fetch();
     }
 
     @Override
@@ -95,7 +121,7 @@ public class StateFullGitPlugin extends AbstractGitPlugin {
     }
     
     /**
-     * Returns the path of the handles repository.
+     * Returns the path of the handled repository.
      * @return The path of the repository or <tt>basePath</tt> if no repository was checked out so far.
      */
     public File getRepoPath() {
