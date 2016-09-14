@@ -1,4 +1,4 @@
-package net.ssehub.kBuildCrawler.git;
+package net.ssehub.kBuildCrawler.git.plugins;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +17,7 @@ import net.ssehub.kBuildCrawler.io.InputReader;
  * @author El-Sharkawy
  *
  */
-public class GitCmdPlugin implements IGitPlugin {
+public class GitCmdPlugin extends AbstractGitPlugin {
     
     private final static String GIT_CMD = "git";
     

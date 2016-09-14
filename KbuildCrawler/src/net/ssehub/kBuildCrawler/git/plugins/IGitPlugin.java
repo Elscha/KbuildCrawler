@@ -1,6 +1,8 @@
-package net.ssehub.kBuildCrawler.git;
+package net.ssehub.kBuildCrawler.git.plugins;
 
 import java.io.File;
+
+import net.ssehub.kBuildCrawler.git.GitData;
 
 /**
  * Interface for a (stateless) git repository including a plugin for handling this repository.
@@ -55,4 +57,11 @@ public interface IGitPlugin {
      * @return <tt>true</tt> if update (fetch) was successful, <tt>false</tt> if not.
      */
     public boolean swithToBranch(String branch);
+    
+    /**
+     * Highlevel operation: Uses a parsed {@link GitData} object to restore a repository, branch and commit in one step.
+     * @param commitInfo A parsed commit info to restore a specific commit as it was part of a report.
+     * @return <tt>true</tt> if this operation was successful, <tt>false</tt> if not.
+     */
+    public boolean restoreCommit(GitData commitInfo);
 }

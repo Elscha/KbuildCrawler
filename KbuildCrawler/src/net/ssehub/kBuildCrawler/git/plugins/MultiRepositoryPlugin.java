@@ -1,4 +1,4 @@
-package net.ssehub.kBuildCrawler.git;
+package net.ssehub.kBuildCrawler.git.plugins;
 
 import java.io.File;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.Map;
  * @author El-Sharkawy
  *
  */
-public class MultiRepositoryPlugin implements IGitPlugin {
+public class MultiRepositoryPlugin extends AbstractGitPlugin {
     
     private File basePath;
     private Map<String, StateFullGitPlugin> repositories;
@@ -37,7 +37,7 @@ public class MultiRepositoryPlugin implements IGitPlugin {
     @Override
     public File setBasePath(File basePath) {
         // switching base path is not supported by this plugin
-        File currentFolder = null != currentRepoPlugin? currentRepoPlugin.getRepoPath() : basePath;
+        File currentFolder = null != currentRepoPlugin ? currentRepoPlugin.getRepoPath() : this.basePath;
         return currentFolder;
     }
 

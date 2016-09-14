@@ -1,4 +1,4 @@
-package net.ssehub.kBuildCrawler.git;
+package net.ssehub.kBuildCrawler.git.plugins;
 
 import java.io.File;
 
@@ -7,7 +7,7 @@ import java.io.File;
  * @author El-Sharkawy
  *
  */
-public class StateFullGitPlugin implements IGitPlugin {
+public class StateFullGitPlugin extends AbstractGitPlugin {
 
     private IGitPlugin delegate;
     private File basePath;
@@ -50,12 +50,14 @@ public class StateFullGitPlugin implements IGitPlugin {
                 repoName = url.substring(start, end);
             }
             if (null != repoName && (basePath = new File(basePath, repoName)).exists()) {
-                // Repository already downloaded -> switch to desired branch, update the repository and use it
+                /* Repository already downloaded -> switch to desired branch,
+                 * update (fetch) the repository and use it.
+                 */
                 delegate.setBasePath(basePath);
                 if (null != branch) {
                     delegate.swithToBranch(branch);
                 } else {
-                    delegate.swithToBranch("master");
+                    delegate.swithToBranch(AbstractGitPlugin.DEFAULT_BRANCH);
                 }
                 delegate.fetch();
             } else {

@@ -5,9 +5,9 @@ import java.io.File;
 import java.util.List;
 
 import net.ssehub.kBuildCrawler.git.FailureTrace;
-import net.ssehub.kBuildCrawler.git.GitCmdPlugin;
 import net.ssehub.kBuildCrawler.git.GitUtils;
-import net.ssehub.kBuildCrawler.git.MultiRepositoryPlugin;
+import net.ssehub.kBuildCrawler.git.plugins.GitCmdPlugin;
+import net.ssehub.kBuildCrawler.git.plugins.MultiRepositoryPlugin;
 import net.ssehub.kBuildCrawler.mail.IMailSource;
 import net.ssehub.kBuildCrawler.mail.Mail;
 import net.ssehub.kBuildCrawler.mail.MailParser;
@@ -22,15 +22,43 @@ public class KbuildCrawler {
         //readMails();
         //gitCheckoutAndDiff();
         //gitCheckoutAndFetch();
-        downloadOwnRepositoryAndDiff();
-//        File tmpFolder = new File(System.getProperty("java.io.tmpdir"));
-//        tmpFolder = new File(tmpFolder, "gitTest");
-//        MultiRepositoryPlugin multiRepos = new MultiRepositoryPlugin(tmpFolder);
+        //downloadOwnRepositoryAndDiff();
+        //downloadAllAugReports();
+        
+        File tmpFolder = new File(System.getProperty("java.io.tmpdir"));
+        tmpFolder = new File(tmpFolder, "gitTest");
+        MultiRepositoryPlugin multiRepos = new MultiRepositoryPlugin(tmpFolder);
+        multiRepos.clone("https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git", "master");
+        
 //        multiRepos.clone("https://github.com/QualiMaster/QM-IConf.git", "permissibleParameters");
 //        multiRepos.clone("https://github.com/QualiMaster/Infrastructure.git", null);
 //        String diff = multiRepos.diff("30e8ad93ee22eba033c8200cc0df8060ec3d06f8",
 //            "e899d50c52c07078efca7cec30ce78aa09860e22");
 //        System.out.println(diff);
+    }
+
+    private static void downloadAllAugReports() throws Exception {
+        File tmpFolder = new File(System.getProperty("java.io.tmpdir"));
+        tmpFolder = new File(tmpFolder, "gitTest");
+        MultiRepositoryPlugin multiRepos = new MultiRepositoryPlugin(tmpFolder);
+        
+        File zipFile = new File(TESTDATA, "2016-August.txt.gz");
+        IMailSource augMails = new ZipMailSource(zipFile);
+        MailParser parser = new MailParser();
+        
+        // Aug 2016 mails
+        List<Mail> mails = parser.loadMails(augMails);
+        
+        // Only mails from Kbuild test robot, containing compilation problems
+        mails = MailUtils.filterForKbuildTestRobot(mails, true);
+        mails = MailUtils.filterForCompilationProblems(mails, false);
+        
+        // Extract needed infos:
+        List<FailureTrace> failures = GitUtils.convertToTraces(mails);
+        
+        for (FailureTrace failureTrace : failures) {
+            multiRepos.restoreCommit(failureTrace.getGitInfo());
+        }
     }
 
     private static void downloadOwnRepositoryAndDiff() {
