@@ -5,16 +5,30 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+/**
+ * Passes the output (either std <b>or</b> err) of a {@link Process} to a String.
+ * The other one will be passed to the console.
+ * @author El-Sharkawy
+ *
+ */
 public class InputReader extends Thread implements IProcessOutputHandler {
 
     private StringBuffer sb;
     private InputStream is;
     private boolean readStd;
     
+    /**
+     * Constructor to gobble in <tt>std</tt> output.
+     */
     public InputReader() {
         this(true);
     }
     
+    /**
+     * Constructor to specify whether std <b>or</b> err should be passed to a String.
+     * @param readStd <tt>true</tt> the output of <tt>std</tt> will be returned in {@link #getOutput()},
+     *     <tt>false</tt> <tt>err</tt> will be returned.
+     */
     public InputReader(boolean readStd) {
         this.readStd = readStd;
     }
@@ -55,6 +69,11 @@ public class InputReader extends Thread implements IProcessOutputHandler {
         }
     }
     
+    
+    /**
+     * Returns the output of the {@link Process}.
+     * @return std <b>or</b> err, depending on the settings passed to the constructor.
+     */
     public String getOutput() {
         return sb.toString();
     }

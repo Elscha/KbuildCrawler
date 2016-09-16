@@ -26,6 +26,11 @@ public class MultiRepositoryPlugin extends AbstractGitPlugin {
         currentRepoPlugin = null;
     }
     
+    /**
+     * Retrieves (and sets) the correct {@link StateFullGitPlugin} for the specified git repository URL.
+     * Will reuse an already created plugin if possible.
+     * @param repoURL The clone URL of a repository to handle.
+     */
     private void setRepositoryPlugin(String repoURL) {
         currentRepoPlugin = repositories.get(repoURL);
         if (null == currentRepoPlugin) {

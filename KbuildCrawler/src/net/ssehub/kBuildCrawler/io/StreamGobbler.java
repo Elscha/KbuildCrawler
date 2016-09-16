@@ -26,6 +26,10 @@ public class StreamGobbler extends Thread {
      * Creates a stream gobbler.
      * 
      * @param is the input stream to be gobbled and emitted
+     * @param out the target output stream where to pass the input to
+     * @param isLineStream specification whether the given input can be read line by line (<tt>true</tt>)
+     *     or must be handled char by char (<tt>false</tt>). Default is: <tt>true</tt>.
+     * @param name The name of the stream, is only needed for debugging purpose.
      */
     public StreamGobbler(InputStream is, OutputStream out, boolean isLineStream, String name) {
         this.is = is;
@@ -55,6 +59,9 @@ public class StreamGobbler extends Thread {
         }
     }
     
+    /**
+     * Reads the specified stream line by line.
+     */
     private void handleLineStream() {
         try {
             InputStreamReader isr = new InputStreamReader(is);
@@ -73,6 +80,9 @@ public class StreamGobbler extends Thread {
         }        
     }
     
+    /**
+     * Reads the specified stream char by char.
+     */
     private void handleTokenStream() {
         try {
             int charNo = -1;

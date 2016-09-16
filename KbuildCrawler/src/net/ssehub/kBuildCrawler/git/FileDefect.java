@@ -1,7 +1,7 @@
 package net.ssehub.kBuildCrawler.git;
 
 /**
- * Points to a single failure within a file.
+ * Points to a single failure reported in a {@link net.ssehub.kBuildCrawler.mail.Mail}.
  * @author El-Sharkawy
  *
  */
@@ -12,6 +12,14 @@ public class FileDefect {
     private int posStart;
     private String description;
     
+    /**
+     * Sole constructor for a file based diff.
+     * @param path The relative path to the file inside the repository, without the file itself
+     * @param file The file (last segment of the path).
+     * @param line The reported starting line of the defect.
+     * @param posStart The reported starting positing within the line
+     * @param description Optional: A description of the reported failure.
+     */
     FileDefect(String path, String file, int line, int posStart, String description) {
         this.path = path;
         this.file = file;

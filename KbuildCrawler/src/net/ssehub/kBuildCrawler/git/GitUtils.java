@@ -28,6 +28,12 @@ public class GitUtils {
     private static final String HEAD_PREFIX = "head: ";
     private static final String COMMIT_PREFIX = "commit: ";
     
+    /**
+     * Extracts the {@link GitData} (information how to download and restore a a tested Linux version)
+     * from one {@link Mail} from Kbuild test robot.
+     * @param lines {@link Mail#getContent()} separated into single lines.
+     * @return The {@link GitData} (information how to download and restore a a tested Linux version)
+     */
     static GitData extractGitSettings(String[] lines) {
         String url = null;
         String base = null;
@@ -68,6 +74,12 @@ public class GitUtils {
         return data;
     }
     
+    /**
+     * Extracts the {@link ConfigProvider} (location of a <tt>.config</tt> Kconfig file, which was used for a report)
+     * from one {@link Mail} from Kbuild test robot.
+     * @param lines {@link Mail#getContent()} separated into single lines.
+     * @return The {@link ConfigProvider} (location of a <tt>.config</tt> Kconfig file, which was used for a report)
+     */
     static ConfigProvider extractConfigURL(String[] lines) {
         ConfigProvider config = null;
         
@@ -83,6 +95,11 @@ public class GitUtils {
         return config;
     }
     
+    /**
+     * Extracts the reported failures from one {@link Mail} from Kbuild test robot.
+     * @param lines lines {@link Mail#getContent()} separated into single lines.
+     * @return The reported failures
+     */
     static List<FileDefect> extractAffectedFiles(String[] lines) {
         List<FileDefect> defects = new ArrayList<>();
         

@@ -26,7 +26,7 @@ public class DiffUtils {
      * @return The parsed diff.
      */
     public static CommitDiff parseDiff(String diff) {
-        String lines[] = diff.split(IOUtils.LINEFEED_REGEX);
+        String[] lines = diff.split(IOUtils.LINEFEED_REGEX);
         List<FileDiff> files = new ArrayList<>();
         
         int startIndex = 0;
@@ -62,7 +62,7 @@ public class DiffUtils {
      * @return A data object for the given file in the diff.
      */
     static FileDiff parseFileDiff(String[] diffLines, int startLine, int endLine) {
-        int offset = diffLines[startLine + 2].startsWith("index") == true ? 3 : 2;
+        int offset = diffLines[startLine + 2].startsWith("index") ? 3 : 2;
         boolean binaryFile = false;
         String fileBefore;
         String fileAfter;

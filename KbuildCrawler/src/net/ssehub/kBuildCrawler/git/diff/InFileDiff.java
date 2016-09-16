@@ -1,7 +1,7 @@
 package net.ssehub.kBuildCrawler.git.diff;
 
 /**
- * Represents one block (hunk) of added and/or removed lines
+ * Represents one block (hunk) of added and/or removed lines.
  * @author El-Sharkawy
  *
  */

@@ -96,7 +96,7 @@ public class ZipMailSource implements IMailSource {
         
         for (int i = startIndex; i <= endIndex; i++) {
             String line = allLines.get(i);
-            if(!contentStarted) {
+            if (!contentStarted) {
                 if (line.startsWith(FROM_START)) {
                     from = line.substring(FROM_START.length(), line.length());
                 } else if (line.startsWith(DATE_START)) {

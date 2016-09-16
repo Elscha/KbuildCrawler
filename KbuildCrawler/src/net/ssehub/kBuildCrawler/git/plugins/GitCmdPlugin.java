@@ -19,7 +19,7 @@ import net.ssehub.kBuildCrawler.io.InputReader;
  */
 public class GitCmdPlugin extends AbstractGitPlugin {
     
-    private final static String GIT_CMD = "git";
+    private static final String GIT_CMD = "git";
     
     private File basePath;
     private File gitPath;
@@ -139,6 +139,53 @@ public class GitCmdPlugin extends AbstractGitPlugin {
                     }
                 }
             }
+        }
+        
+        return newRepoPath;
+    }
+    
+    /**
+     * Clones a repository to a predefined location.
+     * @param url The url of the repository.
+     * @param branch Optional: the branch to be checked out, or <tt>null</tt>.
+     * @param newRepoPath The target folder were to clone the repository to (it will be created if it does not exist).
+     * @return The folder of the checked out repository or <tt>null</tt> in case of errors.
+     * @see #clone(String, String)
+     */
+    public File clone(String url, String branch, File newRepoPath) {
+        boolean success = true;
+        
+        // Validate (and create) target directory
+        if (!newRepoPath.exists()) {
+            success = newRepoPath.mkdirs();
+        } else {
+            success = newRepoPath.isDirectory();
+        }
+        
+        if (success) {
+            List<String> commands = new ArrayList<>();
+            
+            // Git clone command
+            commands.add(createGitCommand());
+            commands.add("clone");
+            
+            // Optional branch
+            if (null != branch) {
+                commands.add("--branch");
+                commands.add(branch);
+            };
+            
+            // Clone url
+            commands.add(url);
+
+            // At last: Add target directory
+            commands.add(newRepoPath.getAbsolutePath());
+            
+            success = executeGitCommand(basePath, commands, new ConsoleOutputHandler());
+        }
+        
+        if (!success) {
+            newRepoPath = null;
         }
         
         return newRepoPath;

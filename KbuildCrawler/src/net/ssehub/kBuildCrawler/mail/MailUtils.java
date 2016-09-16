@@ -85,7 +85,7 @@ public class MailUtils {
     }
     
     /**
-     * Filters a list of parsed mails for mails containing compilation errors/problems
+     * Filters a list of parsed mails for mails containing compilation errors/problems.
      * @param allMails The mails to split.
      * @param onlyErrors <tt>true</tt> returns only mails containing compilation errors, <tt>false</tt> mails may also
      *   contain warnings.

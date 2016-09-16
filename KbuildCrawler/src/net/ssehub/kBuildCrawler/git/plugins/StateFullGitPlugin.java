@@ -3,7 +3,8 @@ package net.ssehub.kBuildCrawler.git.plugins;
 import java.io.File;
 
 /**
- * Implements a git plugin, which stores the state to avoid multiple checkouts of the same repository.
+ * Implements a git plugin, which stores the state to avoid multiple checkouts of the same repository.<br/>
+ * Can also re-use already cloned repositories (cloned in a previous run or done by an external tool).
  * @author El-Sharkawy
  *
  */
@@ -55,20 +56,24 @@ public class StateFullGitPlugin extends AbstractGitPlugin {
                 boolean correctRepository = delegate.getRemoteURL().equals(url);
                 if (!correctRepository) {
                     int n = 0;
-                    File alternativeFolder = new File(basePath, repoName + "_" + n);
+                    File alternativeFolder = new File(oldPath, repoName + "_" + n);
                     while (!correctRepository && alternativeFolder.exists()) {
                         delegate.setBasePath(alternativeFolder);
                         correctRepository = delegate.getRemoteURL().equals(url);
                         if (!correctRepository) {
                             n++;
-                            alternativeFolder = new File(basePath, repoName + "_" + n);
+                            alternativeFolder = new File(oldPath, repoName + "_" + n);
                         }
                     }
                     
                     if (correctRepository && alternativeFolder.exists()) {
                         reuseClonedRepository(alternativeFolder, branch);
                     } else {
-                        System.err.println("Error");
+                        // Repository does not exist -> clone it
+                        if (alternativeFolder.exists()) {
+                            alternativeFolder = new File(oldPath, repoName + "_" + ++n);
+                        }
+                        basePath = delegate.clone(url, branch, alternativeFolder);  
                     }
                 } else {
                     /* Repository already downloaded -> switch to desired branch,
@@ -90,6 +95,12 @@ public class StateFullGitPlugin extends AbstractGitPlugin {
         return basePath;
     }
 
+    /**
+     * Part of {@link #clone()} to reuse an already cloned repository. Updates the local data and switches automatically
+     * to the specified branch.
+     * @param basePath The local path of the cloned repository to use.
+     * @param branch Optional: a branch to use.
+     */
     private void reuseClonedRepository(File basePath, String branch) {
         delegate.setBasePath(basePath);
         if (null != branch) {

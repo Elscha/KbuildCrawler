@@ -46,7 +46,7 @@ public class FailureTrace {
     }
 
     /**
-     * Returns parsed information of how to reproduce an error reported by the Kbuild test robot
+     * Returns parsed information of how to reproduce an error reported by the Kbuild test robot.
      * @return The parsed git information, like clone url, branch and so on.
      */
     public GitData getGitInfo() {
@@ -54,8 +54,8 @@ public class FailureTrace {
     }
 
     /**
-     * Returns the used tt>.config</tt> file of Kconfig, which was used for the report.
-     * @return The used tt>.config</tt> file of Kconfig, maybe <tt>null</tt>.
+     * Returns the used <tt>.config</tt> file of Kconfig, which was used for the report.
+     * @return The used <tt>.config</tt> file of Kconfig, maybe <tt>null</tt>.
      */
     public ConfigProvider getConfig() {
         return config;
