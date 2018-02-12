@@ -85,7 +85,7 @@ public class StreamGobbler extends Thread {
         try {
             int charNo = -1;
             while ((charNo = is.read()) != -1) {
-                out.write(new String("" + (int) charNo).getBytes());
+                out.write(String.valueOf(charNo).getBytes());
             }
         } catch (EOFException eof) {
             // ok, terminate
