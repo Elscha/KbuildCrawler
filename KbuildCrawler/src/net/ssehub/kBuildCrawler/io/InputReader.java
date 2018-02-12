@@ -58,10 +58,8 @@ public class InputReader extends Thread implements IProcessOutputHandler {
         String line = null;
         try {
             while ((line = br.readLine()) != null) {
-                if (null != line) {
-                    sb.append(line);
-                    sb.append("\n");
-                }
+                sb.append(line);
+                sb.append("\n");
             }
         } catch (IOException e) {
             // TODO Auto-generated catch block

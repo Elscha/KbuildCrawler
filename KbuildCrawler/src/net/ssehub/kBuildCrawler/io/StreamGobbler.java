@@ -68,10 +68,8 @@ public class StreamGobbler extends Thread {
             BufferedReader br = new BufferedReader(isr);
             String line = null;
             while ((line = br.readLine()) != null) {
-                if (null != line) {
-                    line += "\n";
-                    out.write(line.getBytes());
-                }
+                line += "\n";
+                out.write(line.getBytes());
             }
         } catch (EOFException eof) {
             // ok, terminate
