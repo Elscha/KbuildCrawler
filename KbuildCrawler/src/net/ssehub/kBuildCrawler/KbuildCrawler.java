@@ -13,6 +13,8 @@ import net.ssehub.kBuildCrawler.mail.Mail;
 import net.ssehub.kBuildCrawler.mail.MailParser;
 import net.ssehub.kBuildCrawler.mail.MailUtils;
 import net.ssehub.kBuildCrawler.mail.ZipMailSource;
+import net.ssehub.kBuildCrawler.metrics.KernelHavenRunner;
+import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
 
 @SuppressWarnings("unused")
 public class KbuildCrawler {
@@ -23,16 +25,16 @@ public class KbuildCrawler {
         //gitCheckoutAndDiff();
         //gitCheckoutAndFetch();
         //downloadOwnRepositoryAndDiff();
-        //downloadAllAugReports();
+        downloadAllAugReports();
         
-        File tmpFolder = new File(System.getProperty("java.io.tmpdir"));
-        tmpFolder = new File(tmpFolder, "gitTest");
+//        File tmpFolder = new File(System.getProperty("java.io.tmpdir"));
+//        tmpFolder = new File(tmpFolder, "gitTest");
 //        GitCmdPlugin cmdPlugin = new GitCmdPlugin(null);
 //        cmdPlugin.setBasePath(new File(tmpFolder, "Linux"));
 //        String remote = cmdPlugin.getRemoteURL();
 //        System.out.println(remote);
-        MultiRepositoryPlugin multiRepos = new MultiRepositoryPlugin(tmpFolder);
-        multiRepos.clone("https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git", "master");
+//        MultiRepositoryPlugin multiRepos = new MultiRepositoryPlugin(tmpFolder);
+//        multiRepos.clone("https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git", "master");
         
 //        multiRepos.clone("https://github.com/QualiMaster/QM-IConf.git", "permissibleParameters");
 //        multiRepos.clone("https://github.com/QualiMaster/Infrastructure.git", null);
@@ -42,8 +44,8 @@ public class KbuildCrawler {
     }
 
     private static void downloadAllAugReports() throws Exception {
-        File tmpFolder = new File(System.getProperty("java.io.tmpdir"));
-        tmpFolder = new File(tmpFolder, "gitTest");
+//        File tmpFolder = new File(System.getProperty("java.io.tmpdir"));
+        File tmpFolder = new File(new File("E:\\tmp"), "gitTest");
         MultiRepositoryPlugin multiRepos = new MultiRepositoryPlugin(tmpFolder);
         
         File zipFile = new File(TESTDATA, "2016-August.txt.gz");
@@ -60,8 +62,10 @@ public class KbuildCrawler {
         // Extract needed infos:
         List<FailureTrace> failures = GitUtils.convertToTraces(mails);
         
+        KernelHavenRunner runner = new KernelHavenRunner();
+        
         for (FailureTrace failureTrace : failures) {
-            multiRepos.restoreCommit(failureTrace.getGitInfo());
+            List<List<MultiMetricResult>> result = runner.run(multiRepos, failureTrace);
         }
     }
 

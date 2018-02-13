@@ -61,7 +61,7 @@ public interface IGitPlugin {
     /**
      * Highlevel operation: Uses a parsed {@link GitData} object to restore a repository, branch and commit in one step.
      * @param commitInfo A parsed commit info to restore a specific commit as it was part of a report.
-     * @return <tt>true</tt> if this operation was successful, <tt>false</tt> if not.
+     * @return The folder where the tree was checked out, or <code>null</code> if not successful.
      */
-    public boolean restoreCommit(GitData commitInfo);
+    public File restoreCommit(GitData commitInfo);
 }

@@ -86,7 +86,7 @@ public class StateFullGitPlugin extends AbstractGitPlugin {
                 basePath = delegate.clone(url, branch);                
             }
             
-            if (oldPath != basePath && basePath.exists()) {
+            if (oldPath != basePath && basePath != null && basePath.exists()) {
                 remoteURL = url;
                 delegate.setBasePath(basePath);
             }

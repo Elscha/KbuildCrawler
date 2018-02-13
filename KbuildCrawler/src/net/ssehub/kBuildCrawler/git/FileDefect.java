@@ -27,6 +27,26 @@ public class FileDefect {
         this.posStart = posStart;
         this.description = description;
     }
+    
+    public String getPath() {
+        return path;
+    }
+    
+    public String getFile() {
+        return file;
+    }
+    
+    public int getLine() {
+        return line;
+    }
+    
+    public int getPosStart() {
+        return posStart;
+    }
+    
+    public String getDescription() {
+        return description;
+    }
 
     @Override
     public String toString() {
@@ -37,4 +57,5 @@ public class FileDefect {
         
         return error;
     }
+    
 }

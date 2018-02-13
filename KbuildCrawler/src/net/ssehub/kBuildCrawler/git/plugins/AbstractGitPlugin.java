@@ -13,21 +13,24 @@ abstract class AbstractGitPlugin implements IGitPlugin {
     protected static final String DEFAULT_BRANCH = "master";
     
     @Override
-    public boolean restoreCommit(GitData commitInfo) {
-        boolean successful = false;
+    public File restoreCommit(GitData commitInfo) {
+        File folder = null;
         if (commitInfo.cloningPossible()) {
             // Clone repository
             String branch = null != commitInfo.getBranch() ? commitInfo.getBranch() : DEFAULT_BRANCH;
-            File folder = clone(commitInfo.getBase(), branch);
+            folder = clone(commitInfo.getBase(), branch);
             setBasePath(folder);
             
             // Checkout desired commit
-            successful = checkout(commitInfo.getCommit());
+            boolean successful = checkout(commitInfo.getCommit());
+            if (!successful) { 
+                folder = null;
+            }
         } else {
             System.err.println("Currently not supported git info: " + commitInfo);
         }
         
-        return successful;
+        return folder;
     }
 
 }
