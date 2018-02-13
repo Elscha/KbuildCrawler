@@ -64,8 +64,28 @@ public class KbuildCrawler {
         
         KernelHavenRunner runner = new KernelHavenRunner();
         
+//        List<List<MultiMetricResult>> result = runner.run(multiRepos, failures.get(5));
         for (FailureTrace failureTrace : failures) {
             List<List<MultiMetricResult>> result = runner.run(multiRepos, failureTrace);
+        
+            // TODO: just print the result out for now
+            System.out.println();
+            System.out.println();
+            System.out.println("Result for failure trace:");
+            System.out.println(failureTrace);
+            System.out.println();
+           
+            int i = 0;
+            for (List<MultiMetricResult> r : result) {
+                System.out.println("[" + i++ + "]");
+                if (r != null) {
+                    for (MultiMetricResult mr : r) {
+                        System.out.println("\t" + mr);
+                    }
+                } else {
+                    System.out.println("\tnull");
+                }
+            }
         }
     }
 

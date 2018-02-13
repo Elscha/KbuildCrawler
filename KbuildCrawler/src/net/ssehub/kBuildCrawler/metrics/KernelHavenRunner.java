@@ -80,13 +80,13 @@ public class KernelHavenRunner implements IAnalysisObserver {
         
         props.setProperty("source_tree", sourceTree.getAbsolutePath());
         props.setProperty("code.extractor.files", defect.getPath() + defect.getFile());
-        
-        // TODO: read line number from defect to detect which function to run the metric for
+        props.setProperty("analysis.code_function.line", String.valueOf(defect.getLine()));
         
         Configuration config = new Configuration(props);
         DefaultSettings.registerAllSettings(config);
         
         AllFunctionMetrics.ADD_OBSERVEABLE = true;
+        AllFunctionMetrics.ADD_LINE_FILTER = true;
         ObservableAnalysis.setObservers(this);
         
         PipelineConfigurator pip = PipelineConfigurator.instance();

@@ -23,7 +23,7 @@ abstract class AbstractGitPlugin implements IGitPlugin {
             
             // Checkout desired commit
             boolean successful = checkout(commitInfo.getCommit());
-            if (!successful) { 
+            if (!successful) {
                 folder = null;
             }
         } else {
