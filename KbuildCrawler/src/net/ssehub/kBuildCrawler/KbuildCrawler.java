@@ -45,7 +45,8 @@ public class KbuildCrawler {
 
     private static void downloadAllAugReports() throws Exception {
 //        File tmpFolder = new File(System.getProperty("java.io.tmpdir"));
-        File tmpFolder = new File(new File("E:\\tmp"), "gitTest");
+//        File tmpFolder = new File(new File("E:\\tmp"), "gitTest");
+        File tmpFolder = new File("gitTest");
         MultiRepositoryPlugin multiRepos = new MultiRepositoryPlugin(tmpFolder);
         
         File zipFile = new File(TESTDATA, "2016-August.txt.gz");
