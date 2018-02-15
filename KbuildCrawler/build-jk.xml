@@ -7,6 +7,7 @@
     <property name="test.dir" value="test"/>
     <!-- Generated folders -->
     <property name="build.base.dir" value="build"/>
+    <property name="build.dependencies.dir" value="${build.base.dir}/dependencies"/>
     <property name="build.classes.dir" value="${build.base.dir}/classes"/>
     <property name="build.test.dir" value="${build.base.dir}/test"/>
     <property name="build.jar.dir" value="${build.base.dir}/jar"/>
@@ -15,6 +16,8 @@
     <property name="libs.all.dir" value="lib"/>
     <property name="libs.compile.dir" value="${libs.all.dir}/compile"/>
     <property name="libs.test.dir" value="${libs.all.dir}/junit"/>
+	  <property name="kernelhaven.location" value="http://jenkins.sse.uni-hildesheim.de/job/KernelHaven_Infrastructure/lastSuccessfulBuild/artifact/build/jar/KernelHaven_withsource.jar" />
+	  <property name="metrichaven.location" value="http://jenkins.sse.uni-hildesheim.de/job/KernelHaven_MetricHaven/lastSuccessfulBuild/artifact/build/jar/MetricHaven_withsource.jar" />
     <!-- Compiler settings -->
     <property name="javacSource" value="1.8"/>
     <property name="javacTarget" value="1.8"/>
@@ -50,18 +53,27 @@
         <mkdir dir="${build.classes.dir}"/>
         <mkdir dir="${build.test.dir}"/>
         <mkdir dir="${build.jar.dir}"/>
+        <mkdir dir="${build.dependencies.dir}"/>
+    	  <get src="${kernelhaven.location}" dest="${build.dependencies.dir}/" />
+    	  <get src="${metrichaven.location}" dest="${build.dependencies.dir}/" />
     </target>
   
     <target name="compile" depends="init">
         <!-- Delivered Code -->
         <javac srcdir="${src.dir}" debug="off" destdir="${build.classes.dir}" includeAntRuntime="no" failonerror="true" source="${javacSource}" target="${javacTarget}" encoding="${javac.encoding}">
             <!-- classpath refid="cp.compile" /-->
+        	  <classpath>
+        		    <fileset dir="${build.dependencies.dir}" includes="**/*.jar"/>
+            </classpath>
         </javac>
         <!-- For running Junit tests -->
         <javac srcdir="${src.dir}" debug="on" destdir="${build.test.dir}" includeAntRuntime="no" failonerror="true" source="${javacSource}" target="${javacTarget}" encoding="${javac.encoding}">
             <src path="${test.dir}"/>
             <!-- classpath refid="cp.compile" /-->
             <classpath refid="cp.test" /> 
+        	  <classpath>
+                <fileset dir="${build.dependencies.dir}" includes="**/*.jar"/>
+            </classpath>
         </javac>
     </target>
   
@@ -84,7 +96,7 @@
             <structure name="${ant.project.name}">
                 <classfiles>
                     <fileset dir="${build.test.dir}">
-                	      <exclude name="**/*Test*.class" />
+                        <exclude name="**/*Test*.class" />
                     </fileset>
                 </classfiles>
                 <sourcefiles encoding="UTF-8">

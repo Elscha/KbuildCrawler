@@ -7,8 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import com.sun.istack.internal.Nullable;
-
 import net.ssehub.kBuildCrawler.git.FailureTrace;
 import net.ssehub.kBuildCrawler.git.FileDefect;
 import net.ssehub.kBuildCrawler.git.plugins.IGitPlugin;
@@ -23,6 +21,7 @@ import net.ssehub.kernel_haven.metric_haven.metric_components.AllLineFilterableF
 import net.ssehub.kernel_haven.metric_haven.metric_components.AllNonLineFilterableFunctionMetrics;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
 import net.ssehub.kernel_haven.util.Logger;
+import net.ssehub.kernel_haven.util.null_checks.Nullable;
 
 /**
  * <p>
