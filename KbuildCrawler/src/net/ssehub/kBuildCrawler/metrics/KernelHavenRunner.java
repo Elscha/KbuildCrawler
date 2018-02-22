@@ -88,7 +88,7 @@ public class KernelHavenRunner implements IAnalysisObserver {
         props.setProperty("source_tree", sourceTree.getAbsolutePath());
         props.setProperty("analysis.class", AllNonLineFilterableFunctionMetrics.class.getCanonicalName());
         
-        AllNonLineFilterableFunctionMetrics.ADD_OBSERVEABLE = true;
+        AllNonLineFilterableFunctionMetrics.setAddObservable(true);
         ObservableAnalysis.setObservers(this);
         
         runKernelHaven(props);
@@ -109,7 +109,7 @@ public class KernelHavenRunner implements IAnalysisObserver {
         props.setProperty("code.extractor.files", defect.getPath() + defect.getFile());
         props.setProperty("analysis.code_function.line", String.valueOf(defect.getLine()));
         
-        AllLineFilterableFunctionMetrics.ADD_OBSERVEABLE = true;
+        AllLineFilterableFunctionMetrics.setAddObservable(true);
         ObservableAnalysis.setObservers(this);
         
         runKernelHaven(props);
