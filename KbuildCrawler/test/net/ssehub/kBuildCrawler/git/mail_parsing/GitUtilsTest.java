@@ -1,10 +1,13 @@
-package net.ssehub.kBuildCrawler.git;
+package net.ssehub.kBuildCrawler.git.mail_parsing;
 
 import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import net.ssehub.kBuildCrawler.git.mail_parsing.FailureTrace;
+import net.ssehub.kBuildCrawler.git.mail_parsing.GitData;
+import net.ssehub.kBuildCrawler.git.mail_parsing.GitUtils;
 import net.ssehub.kBuildCrawler.mail.Mail;
 import net.ssehub.kBuildCrawler.mail.MailUtils;
 import net.ssehub.kBuildCrawler.mail.ZipMailSourceTests;

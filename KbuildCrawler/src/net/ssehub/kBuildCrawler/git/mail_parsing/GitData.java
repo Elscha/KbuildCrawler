@@ -1,4 +1,4 @@
-package net.ssehub.kBuildCrawler.git;
+package net.ssehub.kBuildCrawler.git.mail_parsing;
 
 /**
  * Parsed information of how to reproduce an error reported by the Kbuild test robot.

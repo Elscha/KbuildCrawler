@@ -1,4 +1,4 @@
-package net.ssehub.kBuildCrawler.git;
+package net.ssehub.kBuildCrawler.git.mail_parsing;
 
 import java.util.ArrayList;
 import java.util.List;

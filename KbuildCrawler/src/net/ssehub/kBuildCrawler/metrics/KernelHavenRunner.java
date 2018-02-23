@@ -7,9 +7,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import net.ssehub.kBuildCrawler.git.FailureTrace;
-import net.ssehub.kBuildCrawler.git.FileDefect;
-import net.ssehub.kBuildCrawler.git.plugins.IGitPlugin;
+import net.ssehub.kBuildCrawler.git.GitException;
+import net.ssehub.kBuildCrawler.git.GitInterface;
+import net.ssehub.kBuildCrawler.git.mail_parsing.FailureTrace;
+import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
 import net.ssehub.kernel_haven.PipelineConfigurator;
 import net.ssehub.kernel_haven.SetUpException;
 import net.ssehub.kernel_haven.analysis.IAnalysisObserver;
@@ -39,21 +40,22 @@ public class KernelHavenRunner implements IAnalysisObserver {
     
     private List<MultiMetricResult> analysisResult;
     
-    public @Nullable List<MultiMetricResult> run(IGitPlugin git, FailureTrace ftrace) {
+    public @Nullable List<MultiMetricResult> run(GitInterface git, FailureTrace ftrace) {
         System.out.println("--------------------------------");
         System.out.println("Running KernelHaven metrics for:\n" + ftrace);
         
         List<MultiMetricResult> result = null;
         
-        System.out.println("Restoring commit...");
-        File sourceTree = git.restoreCommit(ftrace.getGitInfo());
-        if (sourceTree != null) {
-            System.out.println("Source tree checked out at " + sourceTree);
+        try {
+            System.out.println("Restoring commit...");
+            git.restoreCommit(ftrace.getGitInfo());
+            
+            System.out.println("Source tree checked out at " + git.getSourceTree());
             
             result = new LinkedList<>();
             
             try {
-                runNonFilterableMetrics(sourceTree);
+                runNonFilterableMetrics(git.getSourceTree());
                 result.addAll(analysisResult);
             } catch (IOException | SetUpException e) {
                 e.printStackTrace();
@@ -61,15 +63,16 @@ public class KernelHavenRunner implements IAnalysisObserver {
             
             for (FileDefect defect : ftrace.getDefects()) {
                 try {
-                    runLineFilteredMetrics(sourceTree, defect);
+                    runLineFilteredMetrics(git.getSourceTree(), defect);
                     result.addAll(analysisResult);
                 } catch (IOException | SetUpException e) {
                     e.printStackTrace();
                 }
             }
             
-        } else {
-            System.out.println("Unable to restore commit");
+        } catch (GitException e) {
+            System.out.println("Unable to restore commit:");
+            e.printStackTrace(System.out);
         }
         
         return result;

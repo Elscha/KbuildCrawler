@@ -1,4 +1,4 @@
-package net.ssehub.kBuildCrawler.git;
+package net.ssehub.kBuildCrawler.git.mail_parsing;
 
 /**
  * Points to a single failure reported in a {@link net.ssehub.kBuildCrawler.mail.Mail}.

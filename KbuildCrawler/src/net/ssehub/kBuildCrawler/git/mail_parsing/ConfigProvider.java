@@ -1,4 +1,4 @@
-package net.ssehub.kBuildCrawler.git;
+package net.ssehub.kBuildCrawler.git.mail_parsing;
 
 /**
  * Stores the location of a <tt>.config</tt> Kconfig file, which was used for a report.
