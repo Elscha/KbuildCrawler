@@ -21,6 +21,7 @@ import net.ssehub.kernel_haven.io.excel.ExcelSheetWriter;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
 import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.Logger;
+import net.ssehub.kernel_haven.util.Logger.Level;
 import net.ssehub.kernel_haven.util.Timestamp;
 
 public class KbuildCrawler {
@@ -29,6 +30,7 @@ public class KbuildCrawler {
     public static void main(String[] args) throws Exception {
         if (Logger.get() == null) {
             Logger.init();
+            Logger.get().setLevel(Level.WARNING);
         }
         
         List<FailureTrace> failures = readMails(new File(TESTDATA, "2016-August.txt.gz"));
