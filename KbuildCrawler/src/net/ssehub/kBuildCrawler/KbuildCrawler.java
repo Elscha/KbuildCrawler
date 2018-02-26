@@ -1,6 +1,5 @@
 package net.ssehub.kBuildCrawler;
 
-
 import java.io.File;
 import java.util.List;
 
@@ -15,11 +14,16 @@ import net.ssehub.kBuildCrawler.mail.MailUtils;
 import net.ssehub.kBuildCrawler.mail.ZipMailSource;
 import net.ssehub.kBuildCrawler.metrics.KernelHavenRunner;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
+import net.ssehub.kernel_haven.util.Logger;
 
 public class KbuildCrawler {
     public final static File TESTDATA = new File("testdata");
 
     public static void main(String[] args) throws Exception {
+        if (Logger.get() == null) {
+            Logger.init();
+        }
+        
         List<FailureTrace> failures = readMails(new File(TESTDATA, "2016-August.txt.gz"));
         runMetrics(new File("gitTest"), failures);
     }
