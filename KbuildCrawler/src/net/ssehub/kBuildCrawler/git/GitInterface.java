@@ -52,7 +52,18 @@ public class GitInterface {
         
         repo.fetch(remoteName);
         
-        repo.checkout(commitInfo.getCommit()); // TODO: use getCommit() or getHead() here? 
+        String commit = commitInfo.getCommit(); // TODO: use getCommit() or getHead() here?
+        
+        // if getCommit() is null, then use getBranch()
+        if (commit == null) {
+            commit = commitInfo.getBranch();
+        }
+        
+        if (commit == null) {
+            throw new GitException("Both commit and branch are null");
+        }
+        
+        repo.checkout(commit); 
     }
     
 }
