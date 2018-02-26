@@ -55,7 +55,9 @@ public class KernelHavenRunner implements IAnalysisObserver {
             
             try {
                 runNonFilterableMetrics(git.getSourceTree());
-                result.addAll(analysisResult);
+                if (analysisResult != null) {
+                    result.addAll(analysisResult);
+                }
             } catch (IOException | SetUpException e) {
                 e.printStackTrace();
             }
@@ -63,7 +65,9 @@ public class KernelHavenRunner implements IAnalysisObserver {
             for (FileDefect defect : ftrace.getDefects()) {
                 try {
                     runLineFilteredMetrics(git.getSourceTree(), defect);
-                    result.addAll(analysisResult);
+                    if (analysisResult != null) {
+                        result.addAll(analysisResult);
+                    }
                 } catch (IOException | SetUpException e) {
                     e.printStackTrace();
                 }
