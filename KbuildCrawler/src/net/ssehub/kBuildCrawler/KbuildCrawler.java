@@ -1,6 +1,9 @@
 package net.ssehub.kBuildCrawler;
 
 import java.io.File;
+import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import net.ssehub.kBuildCrawler.git.GitException;
@@ -13,8 +16,12 @@ import net.ssehub.kBuildCrawler.mail.MailParser;
 import net.ssehub.kBuildCrawler.mail.MailUtils;
 import net.ssehub.kBuildCrawler.mail.ZipMailSource;
 import net.ssehub.kBuildCrawler.metrics.KernelHavenRunner;
+import net.ssehub.kernel_haven.io.excel.ExcelBook;
+import net.ssehub.kernel_haven.io.excel.ExcelSheetWriter;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
+import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.Logger;
+import net.ssehub.kernel_haven.util.Timestamp;
 
 public class KbuildCrawler {
     public final static File TESTDATA = new File("testdata");
@@ -45,26 +52,39 @@ public class KbuildCrawler {
         return failures;
     }
     
-    private static void runMetrics(File gitFolder, List<FailureTrace> failures) throws GitException {
+    private static void runMetrics(File gitFolder, List<FailureTrace> failures) throws GitException, IOException, FormatException {
         GitInterface git = new GitInterface(gitFolder);
         KernelHavenRunner runner = new KernelHavenRunner();
         
-        for (FailureTrace failureTrace : failures) {
-            List<MultiMetricResult> result = runner.run(git, failureTrace);
+        try (ExcelBook output = new ExcelBook(new File(Timestamp.INSTANCE.getFilename("MetricsResult", "xlsx")))) {
         
-            // TODO: just print the result out for now
-            System.out.println();
-            System.out.println();
-            System.out.println("Result for failure trace:");
-            System.out.println(failureTrace);
-            System.out.println();
-           
-            if (result != null) {
-                for (MultiMetricResult mr : result) {
-                    System.out.println(mr);
+            for (FailureTrace failureTrace : failures) {
+                ZonedDateTime zdt = ZonedDateTime.parse(failureTrace.getMail().getDate(), DateTimeFormatter.RFC_1123_DATE_TIME);
+                String dateTimeInfo = zdt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                String gitInfo;
+                if (failureTrace.getGitInfo().getCommit() != null) {
+                    gitInfo = failureTrace.getGitInfo().getCommit().substring(0, 8);
+                } else if (failureTrace.getGitInfo().getBranch() != null) {
+                    gitInfo = failureTrace.getGitInfo().getBranch();
+                } else {
+                    gitInfo = "(unknown)";
                 }
-            } else {
-                System.out.println("null");
+                
+                String name = dateTimeInfo + " " + gitInfo;
+                
+                List<MultiMetricResult> result = runner.run(git, failureTrace);
+                
+                System.out.println("Got result for " + name);
+                try (ExcelSheetWriter writer = output.getWriter(name)) {
+                    if (result != null) {
+                        writer.writeHeader(result.get(0));
+                        for (MultiMetricResult mr : result) {
+                            writer.writeRow(mr);
+                        }
+                    } else {
+                        writer.writeRow("null");
+                    }
+                }
             }
         }
     }
