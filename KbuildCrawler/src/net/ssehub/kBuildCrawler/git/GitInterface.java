@@ -41,28 +41,27 @@ public class GitInterface {
      * @throws GitException If restoring the commit fails.
      */
     public void restoreCommit(GitData commitInfo) throws GitException {
-        System.out.println(commitInfo);
-        
         String remoteUrl = commitInfo.getBase();
-        String remoteName = GitRepository.createRemoteName(remoteUrl);
         
-        if (!repo.getRemotes().contains(remoteName)) {
-            repo.addRemote(remoteName, remoteUrl);
+        if (remoteUrl == null) {
+            throw new GitException("Remote URL is null");
         }
         
-        repo.fetch(remoteName);
+        String remoteName = GitRepository.createRemoteName(remoteUrl);
         
         String commit = commitInfo.getCommit(); // TODO: use getCommit() or getHead() here?
-        
         // if getCommit() is null, then use getBranch()
         if (commit == null) {
             commit = commitInfo.getBranch();
         }
-        
         if (commit == null) {
             throw new GitException("Both commit and branch are null");
         }
         
+        if (!repo.getRemotes().contains(remoteName)) {
+            repo.addRemote(remoteName, remoteUrl);
+        }
+        repo.fetch(remoteName);
         repo.checkout(commit); 
     }
     
