@@ -62,7 +62,7 @@ public class KbuildCrawler {
         
             for (FailureTrace failureTrace : failures) {
                 ZonedDateTime zdt = ZonedDateTime.parse(failureTrace.getMail().getDate(), DateTimeFormatter.RFC_1123_DATE_TIME);
-                String dateTimeInfo = zdt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                String dateTimeInfo = zdt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm.ss"));
                 String gitInfo;
                 if (failureTrace.getGitInfo().getCommit() != null) {
                     gitInfo = failureTrace.getGitInfo().getCommit().substring(0, 8);
