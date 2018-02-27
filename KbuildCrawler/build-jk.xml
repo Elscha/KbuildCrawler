@@ -86,6 +86,7 @@
                 <classpath refid="cp.test"/>
                 <classpath>
                     <pathelement location="${build.test.dir}"/>
+                    <pathelement location="${build.dependencies.dir}"/>
                 </classpath>
                 <formatter type="xml"/>
                 <test name="net.ssehub.kBuildCrawler.AllTests" todir="${build.results.dir}"/>
