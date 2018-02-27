@@ -42,6 +42,9 @@
         <fileset dir="${libs.test.dir}">
             <include name="**/*.jar" />
         </fileset>
+        <fileset dir="${build.dependencies.dir}">
+            <include name="**/*.jar" />
+        </fileset>
     </path>
   
     <!-- Targets  -->
@@ -86,7 +89,6 @@
                 <classpath refid="cp.test"/>
                 <classpath>
                     <pathelement location="${build.test.dir}"/>
-                    <pathelement location="${build.dependencies.dir}"/>
                 </classpath>
                 <formatter type="xml"/>
                 <test name="net.ssehub.kBuildCrawler.AllTests" todir="${build.results.dir}"/>
