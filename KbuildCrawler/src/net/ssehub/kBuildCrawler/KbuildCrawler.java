@@ -79,9 +79,8 @@ public class KbuildCrawler {
                 System.out.println("Got result for " + name);
                 try (ExcelSheetWriter writer = output.getWriter(name)) {
                     if (result != null) {
-                        writer.writeHeader(result.get(0));
                         for (MultiMetricResult mr : result) {
-                            writer.writeRow(mr);
+                            writer.writeObject(mr);
                         }
                     } else {
                         writer.writeRow("null");
