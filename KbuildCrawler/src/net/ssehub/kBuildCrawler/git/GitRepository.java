@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.Util;
 
 /**
@@ -17,6 +18,8 @@ import net.ssehub.kernel_haven.util.Util;
 public class GitRepository {
 
     private static final boolean DEBUG_LOGGING = true;
+    
+    private static final Logger LOGGER = Logger.get();
     
     private File workingDirectory;
     
@@ -159,7 +162,7 @@ public class GitRepository {
         boolean success = false;
         
         if (DEBUG_LOGGING) {
-            System.out.println(Arrays.toString(command));
+            LOGGER.logDebug(Arrays.toString(command));
         }
         
         try {
@@ -170,10 +173,8 @@ public class GitRepository {
             
         } finally {
             if (DEBUG_LOGGING) {
-                System.out.println("Stdout:");
-                System.out.println(stdout.toString().trim());
-                System.out.println("Stderr:");
-                System.out.println(stderr.toString().trim());
+                LOGGER.logDebug("Stdout:", stdout.toString().trim());
+                LOGGER.logDebug("Stderr:", stderr.toString().trim());
             }
         }
         

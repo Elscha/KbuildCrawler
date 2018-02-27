@@ -1,6 +1,7 @@
 package net.ssehub.kBuildCrawler;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -29,8 +30,8 @@ public class KbuildCrawler {
 
     public static void main(String[] args) throws Exception {
         if (Logger.get() == null) {
-            Logger.init();
-            Logger.get().setLevel(Level.WARNING);
+            Logger.init(new FileOutputStream(Timestamp.INSTANCE.getFilename("MailCrawler", "log")));
+            Logger.get().setLevel(Level.DEBUG);
         }
         
         List<FailureTrace> failures = readMails(new File(TESTDATA, "2016-August.txt.gz"));
@@ -76,7 +77,7 @@ public class KbuildCrawler {
                 
                 List<MultiMetricResult> result = runner.run(git, failureTrace);
                 
-                System.out.println("Got result for " + name);
+                Logger.get().logInfo("Got result for " + name);
                 try (ExcelSheetWriter writer = output.getWriter(name)) {
                     if (result != null) {
                         for (MultiMetricResult mr : result) {

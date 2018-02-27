@@ -25,6 +25,8 @@ import net.ssehub.kernel_haven.metric_haven.metric_components.AllFunctionMetrics
 import net.ssehub.kernel_haven.metric_haven.metric_components.AllLineFilterableFunctionMetrics;
 import net.ssehub.kernel_haven.metric_haven.metric_components.AllNonLineFilterableFunctionMetrics;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
+import net.ssehub.kernel_haven.util.Logger;
+import net.ssehub.kernel_haven.util.Logger.Level;
 import net.ssehub.kernel_haven.util.null_checks.Nullable;
 
 /**
@@ -41,19 +43,20 @@ public class KernelHavenRunner implements IAnalysisObserver {
 
     private static boolean pluginsLoaded = false;
     
+    private static final Logger LOGGER = Logger.get();
+    
     private List<MultiMetricResult> analysisResult;
     
     public @Nullable List<MultiMetricResult> run(GitInterface git, FailureTrace ftrace) {
-        System.out.println("--------------------------------");
-        System.out.println("Running KernelHaven metrics for:\n" + ftrace);
+        LOGGER.logInfo("--------------------------------", "Running KernelHaven metrics for:", ftrace.toString());
         
         List<MultiMetricResult> result = null;
         
         try {
-            System.out.println("Restoring commit...");
+            LOGGER.logInfo("Restoring commit...");
             git.restoreCommit(ftrace.getGitInfo());
             
-            System.out.println("Source tree checked out at " + git.getSourceTree());
+            LOGGER.logInfo("Source tree checked out at " + git.getSourceTree());
             
             List<MultiMetricResult> completeTree = null;
             List<List<MultiMetricResult>> functionMetrics = new LinkedList<>();
@@ -79,8 +82,7 @@ public class KernelHavenRunner implements IAnalysisObserver {
             result = joinMultiMetricResults(completeTree, functionMetrics);
             
         } catch (GitException e) {
-            System.out.println("Unable to restore commit:");
-            e.printStackTrace(System.out);
+            LOGGER.logException("Unable to restore commit", e);
         }
         
         return result;
@@ -90,8 +92,7 @@ public class KernelHavenRunner implements IAnalysisObserver {
         // reset
         analysisResult = null;
         
-        System.out.println("Running on full tree: " + sourceTree);
-        System.out.println("---");
+        LOGGER.logInfo("Running on full tree: " + sourceTree);
         
         Properties props = new Properties();
         props.load(new FileReader(new File("res/metric_base.properties")));
@@ -109,8 +110,7 @@ public class KernelHavenRunner implements IAnalysisObserver {
         // reset
         analysisResult = null;
         
-        System.out.println("Running for defect: " + defect);
-        System.out.println("---");
+        LOGGER.logInfo("Running for defect: " + defect);
         
         Properties props = new Properties();
         props.load(new FileReader(new File("res/metric_base.properties")));
@@ -140,14 +140,15 @@ public class KernelHavenRunner implements IAnalysisObserver {
         pip.instantiateExtractors();
         pip.createProviders();
         pip.instantiateAnalysis();
-        pip.runAnalysis();
         
-        System.out.println("---");
+        LOGGER.setLevel(Level.WARNING);
+        pip.runAnalysis();
+        LOGGER.setLevel(Level.DEBUG);
         
         if (analysisResult == null) {
-            System.out.println("Got no result... :-/");
+            LOGGER.logWarning("Got no result... :-/");
         } else {
-            System.out.println("Got " + analysisResult.size() + " multi metric results");
+            LOGGER.logInfo("Got " + analysisResult.size() + " multi metric results");
         }
     }
 
