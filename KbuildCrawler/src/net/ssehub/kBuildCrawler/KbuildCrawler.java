@@ -91,15 +91,17 @@ public class KbuildCrawler {
                 
                 List<MultiMetricResult> result = runner.run(git, failureTrace);
                 
-                Logger.get().logInfo("Got result for " + name);
-                try (ExcelSheetWriter writer = output.getWriter(name)) {
-                    if (result != null) {
+                if (result != null && !result.isEmpty()) {
+                    Logger.get().logInfo("Got result for " + name);
+                    
+                    try (ExcelSheetWriter writer = output.getWriter(name)) {
                         for (MultiMetricResult mr : result) {
                             writer.writeObject(mr);
                         }
-                    } else {
-                        writer.writeRow("null");
                     }
+                    
+                } else {
+                    Logger.get().logInfo("Got NO result for " + name);
                 }
             }
         }
