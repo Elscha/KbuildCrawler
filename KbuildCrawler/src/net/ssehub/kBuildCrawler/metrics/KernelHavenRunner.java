@@ -3,9 +3,13 @@ package net.ssehub.kBuildCrawler.metrics;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import net.ssehub.kBuildCrawler.git.GitException;
 import net.ssehub.kBuildCrawler.git.GitInterface;
@@ -51,13 +55,12 @@ public class KernelHavenRunner implements IAnalysisObserver {
             
             System.out.println("Source tree checked out at " + git.getSourceTree());
             
-            result = new LinkedList<>();
+            List<MultiMetricResult> completeTree = null;
+            List<List<MultiMetricResult>> functionMetrics = new LinkedList<>();
             
             try {
                 runNonFilterableMetrics(git.getSourceTree());
-                if (analysisResult != null) {
-                    result.addAll(analysisResult);
-                }
+                completeTree = analysisResult;
             } catch (IOException | SetUpException e) {
                 e.printStackTrace();
             }
@@ -66,12 +69,14 @@ public class KernelHavenRunner implements IAnalysisObserver {
                 try {
                     runLineFilteredMetrics(git.getSourceTree(), defect);
                     if (analysisResult != null) {
-                        result.addAll(analysisResult);
+                        functionMetrics.add(analysisResult);
                     }
                 } catch (IOException | SetUpException e) {
                     e.printStackTrace();
                 }
             }
+            
+            result = joinMultiMetricResults(completeTree, functionMetrics);
             
         } catch (GitException e) {
             System.out.println("Unable to restore commit:");
@@ -154,6 +159,138 @@ public class KernelHavenRunner implements IAnalysisObserver {
 
     @Override
     public void notifyFinished() {
+    }
+    
+    private static final class FunctionIdentifier {
+        
+        private static boolean HAS_INCLUDED_FILE = false;
+        
+        private static final int FILE_INDEX = 0;
+        private static final int LINE_NUMBER_INDEX = 1;
+        private static final int ELEMNET_INDEX = 2;
+        
+        private String file;
+        private String lineNumber;
+        private String element;
+        
+        public FunctionIdentifier(Object file, Object lineNumber, Object element) {
+            this.file = file == null ? "" : file.toString();
+            this.lineNumber = lineNumber == null ? "" : lineNumber.toString();
+            this.element = element == null ? "" : element.toString();
+        }
+        
+        public FunctionIdentifier(MultiMetricResult multiMetricResult) {
+            this(multiMetricResult.getContent()[getFileIndex()], multiMetricResult.getContent()[getLineNumberIndex()],
+                    multiMetricResult.getContent()[getElementIndex()]);
+        }
+        
+        private static int getFileIndex() {
+            return FILE_INDEX;
+        }
+        
+        private static int getLineNumberIndex() {
+            return HAS_INCLUDED_FILE ? LINE_NUMBER_INDEX + 1 : LINE_NUMBER_INDEX;
+        }
+        
+        private static int getElementIndex() {
+            return HAS_INCLUDED_FILE ? ELEMNET_INDEX + 1 : ELEMNET_INDEX;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            boolean equal = false;
+            if (obj instanceof FunctionIdentifier) {
+                FunctionIdentifier other = (FunctionIdentifier) obj;
+                equal = this.file.equals(other.file);
+                equal = this.lineNumber.equals(other.lineNumber);
+                equal = this.element.equals(other.element);
+            }
+            return equal;
+        }
+        
+        @Override
+        public int hashCode() {
+            return file.hashCode() + lineNumber.hashCode() + element.hashCode();
+        }
+        
+    }
+    
+    static List<MultiMetricResult> joinMultiMetricResults(List<MultiMetricResult> completeTree, List<List<MultiMetricResult>> functionMetrics) {
+        
+        List<MultiMetricResult> result = new LinkedList<>();
+        
+        if (completeTree == null || completeTree.size() == 0) {
+            Set<FunctionIdentifier> functions = new HashSet<>();
+            for (List<MultiMetricResult> metricsForSingleFunction : functionMetrics) {
+                for (MultiMetricResult metricResult : metricsForSingleFunction) {
+                    
+                    FunctionIdentifier.HAS_INCLUDED_FILE = metricResult.getHeader()[1].equals("Included File");
+                    FunctionIdentifier fi = new FunctionIdentifier(metricResult);
+                    
+                    if (!functions.contains(fi)) {
+                        functions.add(fi);
+                        result.add(metricResult);
+                    }
+                }
+            }
+            
+        } else {
+            /*
+             * Join all single function metrics together
+             */
+            Map<FunctionIdentifier, MultiMetricResult> singleFunctionMetrics = new HashMap<>();
+            for (List<MultiMetricResult> metricsForSingleFunction : functionMetrics) {
+                for (MultiMetricResult metricResult : metricsForSingleFunction) {
+                    
+                    FunctionIdentifier.HAS_INCLUDED_FILE = metricResult.getHeader()[1].equals("Included File");
+                    FunctionIdentifier fi = new FunctionIdentifier(metricResult);
+                    singleFunctionMetrics.putIfAbsent(fi, metricResult);
+                }
+            }
+            
+            /*
+             * Go through the completeTree results and pick all functions that we have already seen in the single function metrics
+             */
+            for (MultiMetricResult metricResult : completeTree) {
+                FunctionIdentifier.HAS_INCLUDED_FILE = metricResult.getHeader()[1].equals("Included File");
+                FunctionIdentifier fi = new FunctionIdentifier(metricResult);
+                
+                if (singleFunctionMetrics.containsKey(fi)) {
+                    
+                    MultiMetricResult singleFunctionResult = singleFunctionMetrics.get(fi);
+                    
+                    result.add(joinMultiResult(singleFunctionResult, metricResult));
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    private static MultiMetricResult joinMultiResult(MultiMetricResult r1, MultiMetricResult r2) {
+        boolean r2HasIncludedFile = r2.getHeader()[1].equals("Included File");
+        int r2MetricStartIndex = r2HasIncludedFile ? 4 : 3;
+        
+        String[] header = new String[r1.getHeader().length + r2.getHeader().length - r2MetricStartIndex];
+        int headerIndex = 0;
+        for (int i = 0; i < r1.getHeader().length; i++) {
+            header[headerIndex++] = r1.getHeader()[i];
+        }
+        for (int i = r2MetricStartIndex; i < r2.getHeader().length; i++) {
+            header[headerIndex++] = r2.getHeader()[i];
+        }
+        
+        
+        Object[] values = new Object[r1.getContent().length + r2.getContent().length - r2MetricStartIndex];
+        int valuesIndex = 0;
+        for (int i = 0; i < r1.getContent().length; i++) {
+            values[valuesIndex++] = r1.getContent()[i];
+        }
+        for (int i = r2MetricStartIndex; i < r2.getContent().length; i++) {
+            values[valuesIndex++] = r2.getContent()[i];
+        }
+        
+        return new MultiMetricResult(header, values);
     }
     
 }
