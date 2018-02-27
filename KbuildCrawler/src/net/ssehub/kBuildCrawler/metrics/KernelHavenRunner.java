@@ -65,7 +65,7 @@ public class KernelHavenRunner implements IAnalysisObserver {
                 runNonFilterableMetrics(git.getSourceTree());
                 completeTree = analysisResult;
             } catch (IOException | SetUpException e) {
-                e.printStackTrace();
+                LOGGER.logException("Exception while running on whole tree", e);
             }
             
             for (FileDefect defect : ftrace.getDefects()) {
@@ -75,7 +75,7 @@ public class KernelHavenRunner implements IAnalysisObserver {
                         functionMetrics.add(analysisResult);
                     }
                 } catch (IOException | SetUpException e) {
-                    e.printStackTrace();
+                    LOGGER.logException("Exception while running on whole single function", e);
                 }
             }
             
