@@ -34,8 +34,22 @@ public class KbuildCrawler {
             Logger.get().setLevel(Level.DEBUG);
         }
         
-        List<FailureTrace> failures = readMails(new File(TESTDATA, "2016-August.txt.gz"));
-        runMetrics(new File("gitTest"), failures);
+        File mailZip = new File(TESTDATA, "2016-August.txt.gz");
+        File gitRepo = new File("gitTest");
+        
+        if (args.length >= 1) {
+            mailZip = new File(args[0]);
+        }
+        if (!mailZip.isFile()) {
+            Logger.get().logError(mailZip + " is not a valid file");
+        }
+        
+        if (args.length >= 2) {
+            gitRepo = new File(args[1]);
+        }
+        
+        List<FailureTrace> failures = readMails(mailZip);
+        runMetrics(gitRepo, failures);
     }
 
     private static List<FailureTrace> readMails(File zipFile) throws Exception {
