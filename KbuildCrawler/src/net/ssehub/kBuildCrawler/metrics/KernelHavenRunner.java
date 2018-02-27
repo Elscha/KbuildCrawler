@@ -130,20 +130,26 @@ public class KernelHavenRunner implements IAnalysisObserver {
         Configuration config = new Configuration(props);
         DefaultSettings.registerAllSettings(config);
         
-        PipelineConfigurator pip = PipelineConfigurator.instance();
-        pip.init(config);
-        // don't call pip.execute() every time
-        if (!pluginsLoaded) {
-            pip.loadPlugins();
-            pluginsLoaded = true;
-        }
-        pip.instantiateExtractors();
-        pip.createProviders();
-        pip.instantiateAnalysis();
-        
+        LOGGER.logInfo("Running KernelHaven");
         LOGGER.setLevel(Level.WARNING);
-        pip.runAnalysis();
-        LOGGER.setLevel(Level.DEBUG);
+        
+        try {
+            PipelineConfigurator pip = PipelineConfigurator.instance();
+            pip.init(config);
+            // don't call pip.execute() every time
+            if (!pluginsLoaded) {
+                pip.loadPlugins();
+                pluginsLoaded = true;
+            }
+            
+            pip.instantiateExtractors();
+            pip.createProviders();
+            pip.instantiateAnalysis();
+            pip.runAnalysis();
+            
+        } finally {
+            LOGGER.setLevel(Level.DEBUG);
+        }
         
         if (analysisResult == null) {
             LOGGER.logWarning("Got no result... :-/");
