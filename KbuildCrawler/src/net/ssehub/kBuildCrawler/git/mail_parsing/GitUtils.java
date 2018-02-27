@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import net.ssehub.kBuildCrawler.io.IOUtils;
 import net.ssehub.kBuildCrawler.mail.Mail;
 import net.ssehub.kBuildCrawler.mail.MailUtils;
+import net.ssehub.kernel_haven.util.Logger;
 
 /**
  * Utility methods to extract relevant git information from {@link Mail}s.
@@ -122,7 +123,7 @@ public class GitUtils {
                     String description = matcher.group(matcher.groupCount());
                     defects.add(new FileDefect(path, file, line, charPos, description));
                 } else {
-                    System.err.println("Could not parse: " + lines[i]);
+                    Logger.get().logError("Could not parse: " + lines[i]);
                 }
             }
         }
