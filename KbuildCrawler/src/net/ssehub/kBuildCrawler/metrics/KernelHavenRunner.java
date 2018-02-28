@@ -115,9 +115,17 @@ public class KernelHavenRunner implements IAnalysisObserver {
         Properties props = new Properties();
         props.load(new FileReader(new File("res/metric_base.properties")));
         
+        String file = defect.getPath() + defect.getFile();
+        
+        // check if the file even exists
+        if (!new File(sourceTree, file).isFile()) {
+            LOGGER.logWarning("File " + file + " doesn't exist in checked out tree",  "Skipping single function metrics");
+            return;
+        }
+        
         props.setProperty("source_tree", sourceTree.getAbsolutePath());
         props.setProperty("analysis.class", AllLineFilterableFunctionMetrics.class.getCanonicalName());
-        props.setProperty("code.extractor.files", defect.getPath() + defect.getFile());
+        props.setProperty("code.extractor.files", file);
         props.setProperty("analysis.code_function.line", String.valueOf(defect.getLine()));
         
         AllLineFilterableFunctionMetrics.setAddObservable(true);
