@@ -3,8 +3,6 @@ package net.ssehub.kBuildCrawler;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import net.ssehub.kBuildCrawler.git.GitException;
@@ -76,8 +74,6 @@ public class KbuildCrawler {
         try (ExcelBook output = new ExcelBook(new File(Timestamp.INSTANCE.getFilename("MetricsResult", "xlsx")))) {
         
             for (FailureTrace failureTrace : failures) {
-                ZonedDateTime zdt = ZonedDateTime.parse(failureTrace.getMail().getDate(), DateTimeFormatter.RFC_1123_DATE_TIME);
-                String dateTimeInfo = zdt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm.ss"));
                 String gitInfo;
                 if (failureTrace.getGitInfo().getCommit() != null) {
                     gitInfo = failureTrace.getGitInfo().getCommit().substring(0, 8);
@@ -87,7 +83,7 @@ public class KbuildCrawler {
                     gitInfo = "(unknown)";
                 }
                 
-                String name = dateTimeInfo + " " + gitInfo;
+                String name = failureTrace.getFormattedDate(false) + " " + gitInfo;
                 
                 List<MultiMetricResult> result = runner.run(git, failureTrace);
                 

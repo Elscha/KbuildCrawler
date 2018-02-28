@@ -1,5 +1,8 @@
 package net.ssehub.kBuildCrawler.git.mail_parsing;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import net.ssehub.kBuildCrawler.mail.Mail;
@@ -67,6 +70,24 @@ public class FailureTrace {
      */
     public List<FileDefect> getDefects() {
         return defects;
+    }
+    
+    /**
+     * Returns the date of this mail as a string with the following format: "2017-02-13 14:34:21".
+     * When <code>useColons</code> is <code>false</code>, then the format is "2017-02-13 1434.21" (excel sheet name
+     * compatible).
+     * 
+     * @param useColons Whether colons are allowed in the string or not. 
+     * @return A string containing the date of this mail.
+     * 
+     * @throws DateTimeParseException If the date of the mail could not be parsed.
+     */
+    public String getFormattedDate(boolean useColons) throws DateTimeParseException {
+        ZonedDateTime zdt = ZonedDateTime.parse(mail.getDate(), DateTimeFormatter.RFC_1123_DATE_TIME);
+        
+        String pattern = useColons ? "yyyy-MM-dd HH:mm:ss" : "yyyy-MM-dd HHmm.ss";
+        
+        return zdt.format(DateTimeFormatter.ofPattern(pattern));
     }
 
     @Override

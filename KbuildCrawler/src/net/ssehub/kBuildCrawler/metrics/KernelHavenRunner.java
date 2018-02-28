@@ -54,7 +54,7 @@ public class KernelHavenRunner implements IAnalysisObserver {
         
         try {
             LOGGER.logInfo("Restoring commit...");
-            git.restoreCommit(ftrace.getGitInfo());
+            git.restoreCommit(ftrace.getGitInfo(), ftrace.getFormattedDate(true));
             
             LOGGER.logInfo("Source tree checked out at " + git.getSourceTree());
             

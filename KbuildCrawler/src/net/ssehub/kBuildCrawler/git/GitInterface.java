@@ -37,31 +37,34 @@ public class GitInterface {
      * Restores the given commit.
      * 
      * @param commitInfo The data about the commit to restore.
+     * @param date The date to use when checking out branches. This ensures that branches are not checked out as the
+     *          latest version, but the correct version of the failure report is used. Format: "2017-02-12 12:45:34"
      * 
      * @throws GitException If restoring the commit fails.
      */
-    public void restoreCommit(GitData commitInfo) throws GitException {
+    public void restoreCommit(GitData commitInfo, String date) throws GitException {
         String remoteUrl = commitInfo.getBase();
-        
         if (remoteUrl == null) {
             throw new GitException("Remote URL is null");
         }
         
         String remoteName = GitRepository.createRemoteName(remoteUrl);
         
+        // add and fetch remote
+        if (!repo.getRemotes().contains(remoteName)) {
+            repo.addRemote(remoteName, remoteUrl);
+        }
+        repo.fetch(remoteName);
+        
         String commit = commitInfo.getCommit(); // TODO: use getCommit() or getHead() here?
-        // if getCommit() is null, then use getBranch()
-        if (commit == null) {
-            commit = commitInfo.getBranch();
+        if (commit == null && commitInfo.getBranch() != null) {
+            // if getCommit() is null, then use getBranch() and the date to get the URL
+            commit = repo.getCommitBefore(remoteName, commitInfo.getBranch(), date);
         }
         if (commit == null) {
             throw new GitException("Both commit and branch are null");
         }
         
-        if (!repo.getRemotes().contains(remoteName)) {
-            repo.addRemote(remoteName, remoteUrl);
-        }
-        repo.fetch(remoteName);
         repo.checkout(commit); 
     }
     

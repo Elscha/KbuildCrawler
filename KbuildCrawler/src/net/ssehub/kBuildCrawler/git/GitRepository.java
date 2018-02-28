@@ -137,6 +137,21 @@ public class GitRepository {
     }
     
     /**
+     * Returns the commit hash that is directly before <code>date</code> in the given <code>branch</code>.
+     * 
+     * @param remoteName The name of the remote that has the given branch.
+     * @param branch The branch to get the commit hash for.
+     * @param date The date of the commit. The commit closest to and before this date will be returned.
+     * 
+     * @return The commit hash.
+     */
+    public String getCommitBefore(String remoteName, String branch, String date) throws GitException {
+        String hash = runGitCommand("git", "rev-list", "-n", "1", "--before=" + date, remoteName + "/" + branch);
+        
+        return hash;
+    }
+    
+    /**
      * The working directory of this git repository.
      * 
      * @return The working directory. This is an existing folder.
@@ -150,7 +165,7 @@ public class GitRepository {
      * 
      * @param command The command to run, with command line parameters.
      * 
-     * @return <code>null</code> if successful; error message otherwise.
+     * @return The standard output stream content.
      */
     private String runGitCommand(String... command) throws GitException {
         ProcessBuilder builder = new ProcessBuilder(command);
@@ -184,5 +199,5 @@ public class GitRepository {
         
         return stdout.toString().trim();
     }
-        
+    
 }
