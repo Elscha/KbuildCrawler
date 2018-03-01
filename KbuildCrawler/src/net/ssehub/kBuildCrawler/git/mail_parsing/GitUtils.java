@@ -43,22 +43,29 @@ public class GitUtils {
         String head = null;
         String commit = null;
         
-        try {
             for (int i = 0; i < lines.length; i++) {
                 if (lines[i].startsWith(URL_PREFIX)) {
                     url = lines[i].substring(URL_PREFIX.length()).trim();
                 }
-                if (lines[i].startsWith(BASE_PREFIX)) {
-                    String line = lines[i].substring(BASE_PREFIX.length()).trim();
-                    String[] elements = line.split(" ");
-                    base = elements[0];
-                    branch = elements.length > 0 ? elements[1] : "master";
+                try {
+                    if (lines[i].startsWith(BASE_PREFIX)) {
+                        String line = lines[i].substring(BASE_PREFIX.length()).trim();
+                        String[] elements = line.split(" ");
+                        base = elements[0];
+                        branch = elements.length > 1 ? elements[1] : "master";
+                    }
+                } catch (ArrayIndexOutOfBoundsException exc) {
+                    Logger.get().logException("Could not parse BASE: " + Arrays.toString(lines), exc);
                 }
-                if (lines[i].startsWith(TREE_PREFIX)) {
-                    String line = lines[i].substring(TREE_PREFIX.length()).trim();
-                    String[] elements = line.split(" ");
-                    base = elements[0];
-                    branch = elements.length > 0 ? elements[1] : "master";
+                try {
+                    if (lines[i].startsWith(TREE_PREFIX)) {
+                        String line = lines[i].substring(TREE_PREFIX.length()).trim();
+                        String[] elements = line.split(" ");
+                        base = elements[0];
+                        branch = elements.length > 1 ? elements[1] : "master";
+                    }
+                } catch (ArrayIndexOutOfBoundsException exc) {
+                    Logger.get().logException("Could not parse TREE: " + Arrays.toString(lines), exc);
                 }
                 if (lines[i].startsWith(HEAD_PREFIX)) {
                     String line = lines[i].substring(HEAD_PREFIX.length()).trim();
@@ -71,9 +78,6 @@ public class GitUtils {
                     commit = elements[0];
                 }
             }
-        } catch (ArrayIndexOutOfBoundsException exc) {
-            Logger.get().logException("Could not parse :" + Arrays.toString(lines), exc);
-        }
         
         
         GitData data = new GitData(url, base, branch, head, commit);
