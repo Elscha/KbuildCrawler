@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import net.ssehub.kBuildCrawler.git.GitException;
 import net.ssehub.kBuildCrawler.git.GitInterface;
@@ -16,6 +17,9 @@ import net.ssehub.kBuildCrawler.mail.MailParser;
 import net.ssehub.kBuildCrawler.mail.MailUtils;
 import net.ssehub.kBuildCrawler.mail.ZipMailSource;
 import net.ssehub.kBuildCrawler.metrics.KernelHavenRunner;
+import net.ssehub.kernel_haven.SetUpException;
+import net.ssehub.kernel_haven.config.Configuration;
+import net.ssehub.kernel_haven.config.DefaultSettings;
 import net.ssehub.kernel_haven.io.excel.ExcelBook;
 import net.ssehub.kernel_haven.io.excel.ExcelSheetWriter;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
@@ -27,6 +31,7 @@ import net.ssehub.kernel_haven.util.Timestamp;
 public class KbuildCrawler {
     public final static File TESTDATA = new File("testdata");
     private static final File TEST_ARCHIVE = new File(TESTDATA, "2016-August.txt.gz");
+    private static final boolean DISABLE_KH_LOGGING = true;
 
     public static void main(String[] args) throws Exception {
         if (Logger.get() == null) {
@@ -89,6 +94,17 @@ public class KbuildCrawler {
         GitInterface git = new GitInterface(gitFolder);
         KernelHavenRunner runner = new KernelHavenRunner();
         
+        if (DISABLE_KH_LOGGING) {
+            Properties propreties = new Properties();
+            propreties.setProperty(DefaultSettings.LOG_CONSOLE.getKey(), "false");
+            propreties.setProperty(DefaultSettings.LOG_FILE.getKey(), "false");
+            Configuration config = new Configuration(propreties);
+            try {
+                Logger.get().setup(config);
+            } catch (SetUpException e) {
+                e.printStackTrace();
+            }
+        }
         try (ExcelBook output = new ExcelBook(new File(Timestamp.INSTANCE.getFilename("MetricsResult", "xlsx")))) {
         
             for (FailureTrace failureTrace : failures) {
@@ -102,6 +118,7 @@ public class KbuildCrawler {
                 }
                 
                 String name = failureTrace.getFormattedDate(false) + " " + gitInfo;
+                
                 
                 List<MultiMetricResult> result = runner.run(git, failureTrace);
                 

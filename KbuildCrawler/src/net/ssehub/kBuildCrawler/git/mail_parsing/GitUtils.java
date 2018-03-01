@@ -1,6 +1,7 @@
 package net.ssehub.kBuildCrawler.git.mail_parsing;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,32 +43,36 @@ public class GitUtils {
         String head = null;
         String commit = null;
         
-        for (int i = 0; i < lines.length; i++) {
-            if (lines[i].startsWith(URL_PREFIX)) {
-                url = lines[i].substring(URL_PREFIX.length()).trim();
+        try {
+            for (int i = 0; i < lines.length; i++) {
+                if (lines[i].startsWith(URL_PREFIX)) {
+                    url = lines[i].substring(URL_PREFIX.length()).trim();
+                }
+                if (lines[i].startsWith(BASE_PREFIX)) {
+                    String line = lines[i].substring(BASE_PREFIX.length()).trim();
+                    String[] elements = line.split(" ");
+                    base = elements[0];
+                    branch = elements[1];
+                }
+                if (lines[i].startsWith(TREE_PREFIX)) {
+                    String line = lines[i].substring(TREE_PREFIX.length()).trim();
+                    String[] elements = line.split(" ");
+                    base = elements[0];
+                    branch = elements[1];
+                }
+                if (lines[i].startsWith(HEAD_PREFIX)) {
+                    String line = lines[i].substring(HEAD_PREFIX.length()).trim();
+                    String[] elements = line.split(" ");
+                    head = elements[0];
+                }
+                if (lines[i].startsWith(COMMIT_PREFIX)) {
+                    String line = lines[i].substring(COMMIT_PREFIX.length()).trim();
+                    String[] elements = line.split(" ");
+                    commit = elements[0];
+                }
             }
-            if (lines[i].startsWith(BASE_PREFIX)) {
-                String line = lines[i].substring(BASE_PREFIX.length()).trim();
-                String[] elements = line.split(" ");
-                base = elements[0];
-                branch = elements[1];
-            }
-            if (lines[i].startsWith(TREE_PREFIX)) {
-                String line = lines[i].substring(TREE_PREFIX.length()).trim();
-                String[] elements = line.split(" ");
-                base = elements[0];
-                branch = elements[1];
-            }
-            if (lines[i].startsWith(HEAD_PREFIX)) {
-                String line = lines[i].substring(HEAD_PREFIX.length()).trim();
-                String[] elements = line.split(" ");
-                head = elements[0];
-            }
-            if (lines[i].startsWith(COMMIT_PREFIX)) {
-                String line = lines[i].substring(COMMIT_PREFIX.length()).trim();
-                String[] elements = line.split(" ");
-                commit = elements[0];
-            }
+        } catch (ArrayIndexOutOfBoundsException exc) {
+            Logger.get().logException("Could not parse :" + Arrays.toString(lines), exc);
         }
         
         
