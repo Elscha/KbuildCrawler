@@ -52,13 +52,13 @@ public class GitUtils {
                     String line = lines[i].substring(BASE_PREFIX.length()).trim();
                     String[] elements = line.split(" ");
                     base = elements[0];
-                    branch = elements[1];
+                    branch = elements.length > 0 ? elements[1] : "master";
                 }
                 if (lines[i].startsWith(TREE_PREFIX)) {
                     String line = lines[i].substring(TREE_PREFIX.length()).trim();
                     String[] elements = line.split(" ");
                     base = elements[0];
-                    branch = elements[1];
+                    branch = elements.length > 0 ? elements[1] : "master";
                 }
                 if (lines[i].startsWith(HEAD_PREFIX)) {
                     String line = lines[i].substring(HEAD_PREFIX.length()).trim();
