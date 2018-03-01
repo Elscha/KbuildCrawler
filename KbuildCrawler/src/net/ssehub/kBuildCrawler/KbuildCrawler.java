@@ -36,7 +36,8 @@ public class KbuildCrawler {
     public static void main(String[] args) throws Exception {
         if (Logger.get() == null) {
             Logger.init(new FileOutputStream(Timestamp.INSTANCE.getFilename("MailCrawler", "log")));
-            Logger.get().setLevel(Level.DEBUG);
+            Level logLevel = DISABLE_KH_LOGGING ? Level.ERROR : Level.DEBUG;
+            Logger.get().setLevel(logLevel);
         }
         
         File gitRepo = new File("gitTest");
