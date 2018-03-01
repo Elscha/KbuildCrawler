@@ -102,6 +102,7 @@ public class KbuildCrawler {
             try {
                 config.registerSetting(DefaultSettings.LOG_CONSOLE);
                 config.registerSetting(DefaultSettings.LOG_FILE);
+                config.registerSetting(DefaultSettings.LOG_LEVEL);
                 Logger.get().setup(config);
             } catch (SetUpException e) {
                 e.printStackTrace();
