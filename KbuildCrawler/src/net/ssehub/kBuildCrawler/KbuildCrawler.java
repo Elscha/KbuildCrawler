@@ -100,6 +100,7 @@ public class KbuildCrawler {
             propreties.setProperty(DefaultSettings.LOG_FILE.getKey(), "false");
             Configuration config = new Configuration(propreties);
             try {
+                DefaultSettings.registerAllSettings(config);
                 Logger.get().setup(config);
             } catch (SetUpException e) {
                 e.printStackTrace();
