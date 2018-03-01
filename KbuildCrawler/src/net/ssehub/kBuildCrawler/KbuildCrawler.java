@@ -3,6 +3,7 @@ package net.ssehub.kBuildCrawler;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 
 import net.ssehub.kBuildCrawler.git.GitException;
@@ -25,6 +26,7 @@ import net.ssehub.kernel_haven.util.Timestamp;
 
 public class KbuildCrawler {
     public final static File TESTDATA = new File("testdata");
+    private static final File TEST_ARCHIVE = new File(TESTDATA, "2016-August.txt.gz");
 
     public static void main(String[] args) throws Exception {
         if (Logger.get() == null) {
@@ -32,21 +34,37 @@ public class KbuildCrawler {
             Logger.get().setLevel(Level.DEBUG);
         }
         
-        File mailZip = new File(TESTDATA, "2016-August.txt.gz");
         File gitRepo = new File("gitTest");
         
+        File[] archives = null;
         if (args.length >= 1) {
-            mailZip = new File(args[0]);
+            String[] fileArguments = args[0].split(":");
+            archives = new File[fileArguments.length];
+            for (int i = 0; i < fileArguments.length; i++) {
+                archives[i] = new File(fileArguments[i]);
+                
+                if (!archives[i].isFile()) {
+                    Logger.get().logError(archives[i] + " is not a valid file");
+                }
+            }
         }
-        if (!mailZip.isFile()) {
-            Logger.get().logError(mailZip + " is not a valid file");
+        
+        if (archives == null || archives.length == 0) {
+            archives = new File[] {TEST_ARCHIVE};
+            if (!TEST_ARCHIVE.isFile()) {
+                Logger.get().logError(TEST_ARCHIVE + " is not a valid file");
+                System.exit(0);
+            }
         }
         
         if (args.length >= 2) {
             gitRepo = new File(args[1]);
         }
         
-        List<FailureTrace> failures = readMails(mailZip);
+        List<FailureTrace> failures = new LinkedList<FailureTrace>();
+        for (int i = 0; i < archives.length; i++) {
+            failures.addAll(readMails(archives[i]));
+        }
         runMetrics(gitRepo, failures);
     }
 
