@@ -132,7 +132,8 @@ public class GitUtils {
                     String description = matcher.group(matcher.groupCount());
                     defects.add(new FileDefect(path, file, line, charPos, description));
                 } else {
-                    Logger.get().logError("Could not parse: " + lines[i]);
+                    // We do consider headers here -> log WARNING, not ERROR
+                    Logger.get().logWarning("Could not parse: " + lines[i]);
                 }
             }
         }
