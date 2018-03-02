@@ -3,16 +3,11 @@ package net.ssehub.kBuildCrawler.git.mail_parsing;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import net.ssehub.kBuildCrawler.git.mail_parsing.FailureTrace;
-import net.ssehub.kBuildCrawler.git.mail_parsing.GitData;
-import net.ssehub.kBuildCrawler.git.mail_parsing.GitUtils;
 import net.ssehub.kBuildCrawler.mail.Mail;
 import net.ssehub.kBuildCrawler.mail.MailUtils;
 import net.ssehub.kBuildCrawler.mail.ZipMailSourceTests;
-import net.ssehub.kernel_haven.util.Logger;
 
 /**
  * Tests for the {@link GitUtils}.
@@ -21,11 +16,6 @@ import net.ssehub.kernel_haven.util.Logger;
  */
 public class GitUtilsTest {
 
-    @BeforeClass
-    public static void initLogger() {
-        Logger.init();
-    }
-    
     @Test
     public void testConfigRegEx() {
         String configURL = "URL: <http://lists.01.org/pipermail/kbuild-all/attachments/20160801/6273dda8/"
