@@ -34,8 +34,10 @@ public class KbuildCrawler {
     private static final boolean DISABLE_KH_LOGGING = true;
 
     public static void main(String[] args) throws Exception {
+        FileOutputStream out = null;
         if (Logger.get() == null) {
-            Logger.init(new FileOutputStream(Timestamp.INSTANCE.getFilename("MailCrawler", "log")));
+            out = new FileOutputStream(Timestamp.INSTANCE.getFilename("MailCrawler", "log"));
+            Logger.init(out);
             Level logLevel = DISABLE_KH_LOGGING ? Level.ERROR : Level.DEBUG;
             Logger.get().setLevel(logLevel);
         }
@@ -72,6 +74,10 @@ public class KbuildCrawler {
             failures.addAll(readMails(archives[i]));
         }
         runMetrics(gitRepo, failures);
+        
+        if (out != null) {
+            out.close();
+        }
     }
 
     private static List<FailureTrace> readMails(File zipFile) throws Exception {
