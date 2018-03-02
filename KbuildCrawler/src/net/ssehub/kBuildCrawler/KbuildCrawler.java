@@ -115,7 +115,7 @@ public class KbuildCrawler {
         int step = 0;
         List<MultiMetricResult> aggregatedResults = new LinkedList<>();
         for (FailureTrace failureTrace : failures) {
-            System.err.println("Processing " + ++step + " of " + aggregatedResults.size());
+            System.err.println("Processing " + ++step + " of " + failures.size());
             String gitInfo;
             if (failureTrace.getGitInfo().getCommit() != null) {
                 gitInfo = failureTrace.getGitInfo().getCommit().substring(0, 8);
