@@ -25,19 +25,19 @@ import net.ssehub.kernel_haven.io.excel.ExcelSheetWriter;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
 import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.Logger;
-import net.ssehub.kernel_haven.util.Logger.Level;
 import net.ssehub.kernel_haven.util.Timestamp;
+import net.ssehub.kernel_haven.util.Logger.Level;
 
 public class KbuildCrawler {
     public final static File TESTDATA = new File("testdata");
     private static final File TEST_ARCHIVE = new File(TESTDATA, "2016-August.txt.gz");
-    private static final boolean DISABLE_KH_LOGGING = true;
+    
+    public static final boolean DISABLE_KH_LOGGING = true;
 
     public static void main(String[] args) throws Exception {
         FileOutputStream out = new FileOutputStream(Timestamp.INSTANCE.getFilename("MailCrawler", "log"));
         Logger.get().addTarget(out);
-        Level logLevel = DISABLE_KH_LOGGING ? Level.NONE : Level.DEBUG;
-        Logger.get().setLevel(logLevel);
+        Logger.get().setLevel(Level.DEBUG);
         
         File gitRepo = new File("gitTest");
         

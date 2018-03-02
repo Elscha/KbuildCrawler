@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import net.ssehub.kBuildCrawler.KbuildCrawler;
 import net.ssehub.kBuildCrawler.git.GitException;
 import net.ssehub.kBuildCrawler.git.GitInterface;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FailureTrace;
@@ -139,7 +140,8 @@ public class KernelHavenRunner implements IAnalysisObserver {
         DefaultSettings.registerAllSettings(config);
         
         LOGGER.logInfo("Running KernelHaven");
-        LOGGER.setLevel(Level.WARNING);
+        Level level = KbuildCrawler.DISABLE_KH_LOGGING ? Level.NONE : Level.WARNING;
+        LOGGER.setLevel(level);
         
         try {
             PipelineConfigurator pip = PipelineConfigurator.instance();
