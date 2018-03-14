@@ -27,6 +27,7 @@ import net.ssehub.kernel_haven.metric_haven.metric_components.AllLineFilterableF
 import net.ssehub.kernel_haven.metric_haven.metric_components.AllNonLineFilterableFunctionMetrics;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
 import net.ssehub.kernel_haven.util.Logger;
+import net.ssehub.kernel_haven.util.Timestamp;
 import net.ssehub.kernel_haven.util.Logger.Level;
 import net.ssehub.kernel_haven.util.null_checks.Nullable;
 
@@ -136,6 +137,8 @@ public class KernelHavenRunner implements IAnalysisObserver {
     }
     
     private void runKernelHaven(Properties props) throws SetUpException {
+        Timestamp.INSTANCE.setToNow(); // update Timestamp so result file will have different name
+        
         Configuration config = new Configuration(props);
         DefaultSettings.registerAllSettings(config);
         
