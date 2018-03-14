@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 import net.ssehub.kBuildCrawler.git.GitException;
 import net.ssehub.kBuildCrawler.git.GitInterface;
@@ -17,16 +16,13 @@ import net.ssehub.kBuildCrawler.mail.MailParser;
 import net.ssehub.kBuildCrawler.mail.MailUtils;
 import net.ssehub.kBuildCrawler.mail.ZipMailSource;
 import net.ssehub.kBuildCrawler.metrics.KernelHavenRunner;
-import net.ssehub.kernel_haven.SetUpException;
-import net.ssehub.kernel_haven.config.Configuration;
-import net.ssehub.kernel_haven.config.DefaultSettings;
 import net.ssehub.kernel_haven.io.excel.ExcelBook;
 import net.ssehub.kernel_haven.io.excel.ExcelSheetWriter;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
 import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.Logger;
-import net.ssehub.kernel_haven.util.Timestamp;
 import net.ssehub.kernel_haven.util.Logger.Level;
+import net.ssehub.kernel_haven.util.Timestamp;
 
 public class KbuildCrawler {
     public final static File TESTDATA = new File("testdata");
@@ -95,21 +91,6 @@ public class KbuildCrawler {
     private static void runMetrics(File gitFolder, List<FailureTrace> failures) throws GitException, IOException, FormatException {
         GitInterface git = new GitInterface(gitFolder);
         KernelHavenRunner runner = new KernelHavenRunner();
-        
-        if (DISABLE_KH_LOGGING) {
-            Properties propreties = new Properties();
-            propreties.setProperty(DefaultSettings.LOG_CONSOLE.getKey(), "false");
-            propreties.setProperty(DefaultSettings.LOG_FILE.getKey(), "false");
-            Configuration config = new Configuration(propreties);
-            try {
-                config.registerSetting(DefaultSettings.LOG_CONSOLE);
-                config.registerSetting(DefaultSettings.LOG_FILE);
-                config.registerSetting(DefaultSettings.LOG_LEVEL);
-                Logger.get().setup(config);
-            } catch (SetUpException e) {
-                e.printStackTrace();
-            }
-        }
         
         String[] newHeader = null;
         String year = "";
