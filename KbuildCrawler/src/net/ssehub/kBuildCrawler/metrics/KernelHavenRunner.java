@@ -28,6 +28,7 @@ import net.ssehub.kernel_haven.metric_haven.metric_components.AllNonLineFilterab
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
 import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.Timestamp;
+import net.ssehub.kernel_haven.util.Util;
 import net.ssehub.kernel_haven.util.Logger.Level;
 import net.ssehub.kernel_haven.util.null_checks.Nullable;
 
@@ -169,6 +170,15 @@ public class KernelHavenRunner implements IAnalysisObserver {
         } else {
             LOGGER.logInfo("Got " + analysisResult.size() + " multi metric results");
         }
+        
+        // clear kh/output directory
+        File outputDir = new File("kh/output/");
+        try {
+            Util.deleteFolder(outputDir);
+        } catch (IOException e) {
+            LOGGER.logException("Can't delete output dir", e);
+        }
+        outputDir.mkdir();
     }
 
     @SuppressWarnings("unchecked")
