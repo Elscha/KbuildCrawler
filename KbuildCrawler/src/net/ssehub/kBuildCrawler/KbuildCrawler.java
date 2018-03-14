@@ -93,61 +93,56 @@ public class KbuildCrawler {
         KernelHavenRunner runner = new KernelHavenRunner();
         
         String[] newHeader = null;
-        String year = "";
         int step = 0;
-        List<MultiMetricResult> aggregatedResults = new LinkedList<>();
-        for (FailureTrace failureTrace : failures) {
-            System.err.println("Processing " + ++step + " of " + failures.size());
-            String gitInfo;
-            if (failureTrace.getGitInfo().getCommit() != null) {
-                gitInfo = failureTrace.getGitInfo().getCommit().substring(0, 8);
-            } else if (failureTrace.getGitInfo().getBranch() != null) {
-                gitInfo = failureTrace.getGitInfo().getBranch();
-            } else {
-                gitInfo = "(unknown)";
-            }
-            
-            String name = failureTrace.getFormattedDate(false) + " " + gitInfo;
-            if (year.isEmpty()) {
-                year = failureTrace.getFormattedDate(true).substring(0, 4);
-            }
-            
-            List<MultiMetricResult> result = runner.run(git, failureTrace);
-
-            if (result != null && !result.isEmpty()) {
-                Logger.get().logInfo("Got result for " + name);
-                for (MultiMetricResult multiMetricResult : result) {
-                    int oldLength = multiMetricResult.getHeader().length;
-                    if (null == newHeader) {
-                        newHeader = new String[oldLength + 3];
-                        newHeader[0] = "Date";
-                        newHeader[1] = "Repository";
-                        newHeader[2] = "Commit";
-                        System.arraycopy(multiMetricResult.getHeader(), 0, newHeader, 3, oldLength);
-                    }
-                    
-                    Object[] newValues = new Object[oldLength + 3];
-                    newValues[0] = failureTrace.getMail().getDate();
-                    newValues[1] = failureTrace.getGitInfo().getBase();
-                    newValues[2] = failureTrace.getGitInfo().getCommit();
-                    if (null == newValues[2]) {
-                        newValues[2] = failureTrace.getGitInfo().getBranch();
-                    }
-                    System.arraycopy(multiMetricResult.getContent(), 0, newValues, 3, oldLength);
-                    
-                    aggregatedResults.add(new MultiMetricResult(newHeader, newValues));
-                }
-                
-            } else {
-                Logger.get().logInfo("Got NO result for " + name);
-            }
-        }
-        
         
         try (ExcelBook output = new ExcelBook(new File(Timestamp.INSTANCE.getFilename("MetricsResult", "xlsx")))) {
-            try (ExcelSheetWriter writer = output.getWriter(year)) {
-                for (MultiMetricResult mr : aggregatedResults) {
-                    writer.writeObject(mr);
+            try (ExcelSheetWriter writer = output.getWriter("Result")) {
+        
+//                List<MultiMetricResult> aggregatedResults = new LinkedList<>();
+                for (FailureTrace failureTrace : failures) {
+                    System.err.println("Processing " + ++step + " of " + failures.size());
+                    String gitInfo;
+                    if (failureTrace.getGitInfo().getCommit() != null) {
+                        gitInfo = failureTrace.getGitInfo().getCommit().substring(0, 8);
+                    } else if (failureTrace.getGitInfo().getBranch() != null) {
+                        gitInfo = failureTrace.getGitInfo().getBranch();
+                    } else {
+                        gitInfo = "(unknown)";
+                    }
+                    
+                    String name = failureTrace.getFormattedDate(false) + " " + gitInfo;
+                    
+                    List<MultiMetricResult> result = runner.run(git, failureTrace);
+        
+                    if (result != null && !result.isEmpty()) {
+                        Logger.get().logInfo("Got result for " + name);
+                        for (MultiMetricResult multiMetricResult : result) {
+                            int oldLength = multiMetricResult.getHeader().length;
+                            if (null == newHeader) {
+                                newHeader = new String[oldLength + 3];
+                                newHeader[0] = "Date";
+                                newHeader[1] = "Repository";
+                                newHeader[2] = "Commit";
+                                System.arraycopy(multiMetricResult.getHeader(), 0, newHeader, 3, oldLength);
+                            }
+                            
+                            Object[] newValues = new Object[oldLength + 3];
+                            newValues[0] = failureTrace.getMail().getDate();
+                            newValues[1] = failureTrace.getGitInfo().getBase();
+                            newValues[2] = failureTrace.getGitInfo().getCommit();
+                            if (null == newValues[2]) {
+                                newValues[2] = failureTrace.getGitInfo().getBranch();
+                            }
+                            System.arraycopy(multiMetricResult.getContent(), 0, newValues, 3, oldLength);
+                            
+
+                            writer.writeObject(new MultiMetricResult(newHeader, newValues));
+                            writer.flush();
+                        }
+                        
+                    } else {
+                        Logger.get().logInfo("Got NO result for " + name);
+                    }
                 }
             }
         
