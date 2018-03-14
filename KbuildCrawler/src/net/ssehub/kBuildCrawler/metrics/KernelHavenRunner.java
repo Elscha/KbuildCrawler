@@ -57,21 +57,28 @@ public class KernelHavenRunner implements IAnalysisObserver {
         
         try {
             LOGGER.logInfo("Restoring commit...");
+            long t0 = System.currentTimeMillis();
             git.restoreCommit(ftrace.getGitInfo(), ftrace.getFormattedDate(true));
+            long duration = System.currentTimeMillis() - t0;
+            System.err.println("Restoring commit took " + duration + "ms");
             
             LOGGER.logInfo("Source tree checked out at " + git.getSourceTree());
             
             List<MultiMetricResult> completeTree = null;
             List<List<MultiMetricResult>> functionMetrics = new LinkedList<>();
             
+            t0 = System.currentTimeMillis();
             try {
                 runNonFilterableMetrics(git.getSourceTree());
                 completeTree = analysisResult;
             } catch (IOException | SetUpException e) {
                 LOGGER.logException("Exception while running on whole tree", e);
             }
+            duration = System.currentTimeMillis() - t0;
+            System.err.println("Running non-filterable metrics took " + duration + "ms");
             
             for (FileDefect defect : ftrace.getDefects()) {
+                t0 = System.currentTimeMillis();
                 try {
                     runLineFilteredMetrics(git.getSourceTree(), defect);
                     if (analysisResult != null) {
@@ -80,9 +87,14 @@ public class KernelHavenRunner implements IAnalysisObserver {
                 } catch (IOException | SetUpException e) {
                     LOGGER.logException("Exception while running on whole single function", e);
                 }
+                duration = System.currentTimeMillis() - t0;
+                System.err.println("Running filterable metrics took " + duration + "ms");
             }
-            
+
+            t0 = System.currentTimeMillis();
             result = joinMultiMetricResults(completeTree, functionMetrics);
+            duration = System.currentTimeMillis() - t0;
+            System.err.println("Joining MultiMetricResults took " + duration + "ms");
             
         } catch (GitException e) {
             LOGGER.logException("Unable to restore commit", e);

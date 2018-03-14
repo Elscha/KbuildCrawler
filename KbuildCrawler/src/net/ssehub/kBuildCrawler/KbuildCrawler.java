@@ -114,6 +114,7 @@ public class KbuildCrawler {
                     
                     List<MultiMetricResult> result = runner.run(git, failureTrace);
         
+                    long t0 = System.currentTimeMillis();
                     if (result != null && !result.isEmpty()) {
                         Logger.get().logInfo("Got result for " + name);
                         for (MultiMetricResult multiMetricResult : result) {
@@ -143,6 +144,9 @@ public class KbuildCrawler {
                     } else {
                         Logger.get().logInfo("Got NO result for " + name);
                     }
+                    
+                    long duration = System.currentTimeMillis() - t0;
+                    System.err.println("Handling (+writing) KH output took " + duration + "ms");
                 }
             }
         
