@@ -40,12 +40,14 @@ public class KbuildCrawler {
         
         File[] archives = null;
         if (args.length >= 1) {
+            System.err.println("Mailinglist items: " + args[0]);
             String[] fileArguments = args[0].split(":");
             archives = new File[fileArguments.length];
             for (int i = 0; i < fileArguments.length; i++) {
                 archives[i] = new File(fileArguments[i]);
                 
                 if (!archives[i].isFile()) {
+                    System.err.println(archives[i] + " is not a valid file");
                     Logger.get().logError(archives[i] + " is not a valid file");
                 }
             }
