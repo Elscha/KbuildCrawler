@@ -72,7 +72,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             // Execute the process, keep track of std out stream (we log every thing to console)
             OutputStream outStream = new ByteArrayOutputStream();
             OutputStream errStream = new ByteArrayOutputStream();
-            ProcessBuilder processBuilder = new ProcessBuilder("java", "-Xmx300G", "-Xmx300G", "-jar",
+            ProcessBuilder processBuilder = new ProcessBuilder("java", "-Xmx270G", "-Xmx270G", "-jar",
                 "KernelHaven_withsource.jar", configFile.getAbsolutePath());
             processBuilder.directory(new File(KH_DIR));
             boolean success = Util.executeProcess(processBuilder, "MetricsRunner: " + analysisName, outStream,
