@@ -84,7 +84,9 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                     .forEach(list::add);
                 System.err.println(list.size() + " files produced for " + analysisName + ", start merging them");
                 
+                int fileIndex = 1;
                 for (Path path : list) {
+                    System.err.println("Read file: " + fileIndex++);
                     File file = path.toFile();
                     try (ITableCollection csvCollection = TableCollectionReaderFactory.INSTANCE.openFile(file)) {
                         String firstAndOnlyTable = csvCollection.getTableNames().iterator().next();
