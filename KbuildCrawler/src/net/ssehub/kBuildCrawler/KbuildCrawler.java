@@ -15,7 +15,8 @@ import net.ssehub.kBuildCrawler.mail.Mail;
 import net.ssehub.kBuildCrawler.mail.MailParser;
 import net.ssehub.kBuildCrawler.mail.MailUtils;
 import net.ssehub.kBuildCrawler.mail.ZipMailSource;
-import net.ssehub.kBuildCrawler.metrics.KernelHavenRunner;
+import net.ssehub.kBuildCrawler.metrics.AbstractKernelHavenRunner;
+import net.ssehub.kBuildCrawler.metrics.KernelHavenRunnerFactory;
 import net.ssehub.kernel_haven.io.excel.ExcelBook;
 import net.ssehub.kernel_haven.io.excel.ExcelSheetWriter;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
@@ -93,7 +94,7 @@ public class KbuildCrawler {
     
     private static void runMetrics(File gitFolder, List<FailureTrace> failures) throws GitException, IOException, FormatException {
         GitInterface git = new GitInterface(gitFolder);
-        KernelHavenRunner runner = new KernelHavenRunner();
+        AbstractKernelHavenRunner runner = KernelHavenRunnerFactory.createRunner(true);
         
         String[] newHeader = null;
         int step = 0;
