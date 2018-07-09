@@ -49,7 +49,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
 
     /**
      * Creates the configuration and performs the analysis in (multiple) separate processes.
-     * @param sourceTree The path to the root of the linux tree to analyse
+     * @param sourceTree The path to the root of the linux tree to analyze, i.e., the root of the git repository
      * @param metrics The metrics to apply (either {@link #UNFILTERABLE_METRICS} or {@link #FILTERABLE_METRICS}).
      * @param defect The defect to filter the metrics (required for {@link #FILTERABLE_METRICS}).
      * @return The metric results.
