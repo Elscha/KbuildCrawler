@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
 
-import com.sun.istack.internal.Nullable;
-
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
 import net.ssehub.kernel_haven.SetUpException;
 import net.ssehub.kernel_haven.metric_haven.metric_components.BlocksPerFunctionMetric;
@@ -34,6 +32,7 @@ import net.ssehub.kernel_haven.util.Util;
 import net.ssehub.kernel_haven.util.io.ITableCollection;
 import net.ssehub.kernel_haven.util.io.ITableReader;
 import net.ssehub.kernel_haven.util.io.TableCollectionReaderFactory;
+import net.ssehub.kernel_haven.util.null_checks.Nullable;
 
 /**
  * Alternative implementation of {@link KernelHavenRunner}, which runs KernelHaven in a separate process.
@@ -158,7 +157,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         }
         
         // Save temporary configuration and return file (required as a parameter, later)
-        File tmpProperties = File.createTempFile("SingleMetricAnalysis", "properties");
+        File tmpProperties = File.createTempFile("SingleMetricAnalysis", ".properties");
         tmpProperties.deleteOnExit();
         try (OutputStream output = new FileOutputStream(tmpProperties)) {
             props.store(output, null);
