@@ -115,7 +115,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         }
         long delta = System.currentTimeMillis() - t0;
         String elapsedTime = (new SimpleDateFormat("HH:mm:ss")).format(new Date(delta));
-        System.err.println(metrics.length + " metric analyses (+merging results) took" + elapsedTime);
+        System.err.println(metrics.length + " metric analyses (+merging results) took " + elapsedTime);
         
         return results;
     }
