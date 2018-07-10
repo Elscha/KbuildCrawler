@@ -163,7 +163,13 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         if (null != defects) {
             StringJoiner sj = new StringJoiner(",");
             for (FileDefect fileDefect : defects) {
-                sj.add(fileDefect.getPath() + "/" + fileDefect.getFile());
+                String path = fileDefect.getPath();
+                if (!path.endsWith("/")) {
+                    // Should not be necessary
+                    path += '/';
+                }
+                path += fileDefect.getFile();
+                sj.add(path);
             }
             props.setProperty(MetricsAggregator.FILTER_BY_FILES.getKey(), sj.toString());
         }
