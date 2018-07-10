@@ -10,15 +10,14 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringJoiner;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
 import net.ssehub.kernel_haven.SetUpException;
@@ -114,7 +113,13 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             configFile.delete();
         }
         long delta = System.currentTimeMillis() - t0;
-        String elapsedTime = (new SimpleDateFormat("HH:mm:ss")).format(new Date(delta));
+        // See: https://stackoverflow.com/a/9027379
+        String elapsedTime = String.format("%02d:%02d:%02d", 
+            TimeUnit.MILLISECONDS.toHours(delta),
+            TimeUnit.MILLISECONDS.toMinutes(delta) -  
+            TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(delta)),
+            TimeUnit.MILLISECONDS.toSeconds(delta) - 
+            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(delta)));
         System.err.println(metrics.length + " metric analyses (+ merging " + results.size() + " results) took "
             + elapsedTime);
         
