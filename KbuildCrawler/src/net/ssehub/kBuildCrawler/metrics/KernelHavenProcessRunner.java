@@ -27,6 +27,7 @@ import net.ssehub.kernel_haven.metric_haven.metric_components.DLoC;
 import net.ssehub.kernel_haven.metric_haven.metric_components.FanInOutMetric;
 import net.ssehub.kernel_haven.metric_haven.metric_components.NestingDepthMetric;
 import net.ssehub.kernel_haven.metric_haven.metric_components.VariablesPerFunctionMetric;
+import net.ssehub.kernel_haven.metric_haven.metric_components.config.MetricSettings;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MetricsAggregator;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
 import net.ssehub.kernel_haven.util.Util;
@@ -177,7 +178,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                 path += fileDefect.getFile();
                 sj.add(path);
             }
-            props.setProperty(MetricsAggregator.FILTER_BY_FILES.getKey(), sj.toString());
+            props.setProperty(MetricSettings.FILTER_BY_FILES.getKey(), sj.toString());
         }
         
         // Save temporary configuration and return file (required as a parameter, later)
