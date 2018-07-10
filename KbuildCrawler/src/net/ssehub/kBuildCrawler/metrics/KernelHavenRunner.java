@@ -43,7 +43,9 @@ class KernelHavenRunner extends AbstractKernelHavenRunner implements IAnalysisOb
     private List<MultiMetricResult> analysisResult;
     
     @Override
-    protected List<MultiMetricResult> runNonFilterableMetrics(File sourceTree) throws IOException, SetUpException {
+    protected List<MultiMetricResult> runNonFilterableMetrics(File sourceTree, List<FileDefect> defect)
+        throws IOException, SetUpException {
+        
         // reset
         analysisResult = null;
         
@@ -62,7 +64,9 @@ class KernelHavenRunner extends AbstractKernelHavenRunner implements IAnalysisOb
     }
     
     @Override
-    protected List<MultiMetricResult> runLineFilteredMetrics(File sourceTree, FileDefect defect) throws IOException, SetUpException {
+    protected List<MultiMetricResult> runLineFilteredMetrics(File sourceTree, FileDefect defect)
+        throws IOException, SetUpException {
+        
         // reset
         analysisResult = null;
         

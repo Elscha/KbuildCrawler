@@ -46,7 +46,7 @@ public abstract class AbstractKernelHavenRunner {
             
             t0 = System.currentTimeMillis();
             try {
-                completeTree = runNonFilterableMetrics(git.getSourceTree());
+                completeTree = runNonFilterableMetrics(git.getSourceTree(), ftrace.getDefects());
             } catch (IOException | SetUpException e) {
                 LOGGER.logException("Exception while running on whole tree", e);
             }
@@ -79,9 +79,31 @@ public abstract class AbstractKernelHavenRunner {
         return result;
     }
     
-    protected abstract List<MultiMetricResult> runNonFilterableMetrics(File sourceTree) throws IOException, SetUpException;
+    /**
+     * Executes all metrics, which must be executed on the source code of the <b>complete</b> product line.
+     * <tt>defects</tt> may be used to filter the results <b>after</b> the metric execution.
+     * @param sourceTree The root folder of the source tree to analyze
+     * @param defects Optional list to filter the results after execution.
+     * 
+     * @return The metric results
+     * @throws IOException
+     * @throws SetUpException
+     */
+    protected abstract List<MultiMetricResult> runNonFilterableMetrics(File sourceTree, List<FileDefect> defects)
+        throws IOException, SetUpException;
     
-    protected abstract List<MultiMetricResult> runLineFilteredMetrics(File sourceTree, FileDefect defect) throws IOException, SetUpException;
+    /**
+     * Executes all metrics, which can be executed on a <b>subset</b> of the source code.
+     * <tt>defect</tt> are used to filter the results <b>before</b> the metric execution.
+     * @param sourceTree The root folder of the source tree to analyze
+     * @param defect The metric will only executed on files described by the defect.
+     * 
+     * @return The metric results
+     * @throws IOException
+     * @throws SetUpException
+     */
+    protected abstract List<MultiMetricResult> runLineFilteredMetrics(File sourceTree, FileDefect defect)
+        throws IOException, SetUpException;
     
     
     static List<MultiMetricResult> joinMultiMetricResults(List<MultiMetricResult> completeTree, List<List<MultiMetricResult>> functionMetrics) {

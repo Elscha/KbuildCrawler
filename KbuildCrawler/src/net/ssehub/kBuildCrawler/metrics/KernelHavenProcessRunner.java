@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
+import java.util.StringJoiner;
 import java.util.TreeSet;
 
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
@@ -27,6 +28,7 @@ import net.ssehub.kernel_haven.metric_haven.metric_components.DLoC;
 import net.ssehub.kernel_haven.metric_haven.metric_components.FanInOutMetric;
 import net.ssehub.kernel_haven.metric_haven.metric_components.NestingDepthMetric;
 import net.ssehub.kernel_haven.metric_haven.metric_components.VariablesPerFunctionMetric;
+import net.ssehub.kernel_haven.metric_haven.multi_results.MetricsAggregator;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
 import net.ssehub.kernel_haven.util.Util;
 import net.ssehub.kernel_haven.util.io.ITableCollection;
@@ -57,8 +59,8 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
      * @throws FileNotFoundException
      * @throws IOException
      */
-    private List<MultiMetricResult> runAnalysis(File sourceTree, Class<?>[] metrics, @Nullable FileDefect defect)
-        throws FileNotFoundException, IOException {
+    private List<MultiMetricResult> runAnalysis(File sourceTree, Class<?>[] metrics, @Nullable FileDefect defect,
+        @Nullable List<FileDefect> defects) throws FileNotFoundException, IOException {
         
         List<MultiMetricResult> results = new ArrayList<>();
         
@@ -67,7 +69,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         for (Class<?> metric : metrics) {
             String analysisName = metric.getSimpleName() + " on " + sourceTree.getName();
             System.err.println("Run: " + analysisName);
-            File configFile = prepareConfiguration(sourceTree, metric, defect);
+            File configFile = prepareConfiguration(sourceTree, metric, defect, defects);
             
             // Execute the process, keep track of std out stream (we log every thing to console)
             OutputStream outStream = new ByteArrayOutputStream();
@@ -119,19 +121,20 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
     }
     
     @Override
-    protected List<MultiMetricResult> runNonFilterableMetrics(File sourceTree) throws IOException, SetUpException {
-        return runAnalysis(sourceTree, UNFILTERABLE_METRICS, null);
+    protected List<MultiMetricResult> runNonFilterableMetrics(File sourceTree, List<FileDefect> defects)
+        throws IOException, SetUpException {
+        return runAnalysis(sourceTree, UNFILTERABLE_METRICS, null, defects);
     }
 
     @Override
     protected List<MultiMetricResult> runLineFilteredMetrics(File sourceTree, FileDefect defect)
         throws IOException, SetUpException {
         
-        return runAnalysis(sourceTree, FILTERABLE_METRICS, defect);
+        return runAnalysis(sourceTree, FILTERABLE_METRICS, defect, null);
     }
     
-    private File prepareConfiguration(File sourceTree, Class<?> metricClass, @Nullable FileDefect defect)
-        throws FileNotFoundException, IOException {
+    private File prepareConfiguration(File sourceTree, Class<?> metricClass, @Nullable FileDefect defect,
+        @Nullable List<FileDefect> defects) throws FileNotFoundException, IOException {
         
         // Read configuration template
         // Stores properties in a sorted order (for debugging issues only):
@@ -156,6 +159,13 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             String file = defect.getPath() + defect.getFile();
             props.setProperty("code.extractor.files", file);
             props.setProperty("analysis.code_function.line", String.valueOf(defect.getLine()));            
+        }
+        if (null != defects) {
+            StringJoiner sj = new StringJoiner(",");
+            for (FileDefect fileDefect : defects) {
+                sj.add(fileDefect.getPath() + "/" + fileDefect.getFile());
+            }
+            props.setProperty(MetricsAggregator.FILTER_BY_FILES.getKey(), sj.toString());
         }
         
         // Save temporary configuration and return file (required as a parameter, later)
