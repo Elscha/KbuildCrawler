@@ -77,7 +77,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         long t0 = System.currentTimeMillis();
         for (Class<?> metric : metrics) {
             String analysisName = metric.getSimpleName() + " on " + sourceTree.getName();
-            System.err.println("Run: " + analysisName);
+            System.err.println("  Run: " + analysisName);
             File configFile = prepareConfiguration(sourceTree, metric, defect, defects);
             
             // Execute the process, keep track of std out stream (we log every thing to console)
@@ -103,7 +103,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                         // KH wasn't aborted through time out, there was something critical: No reason to continue loop
                         break;
                     } else {
-                        System.err.println("Timeout occured while running: " + analysisName +", try again "
+                        System.err.println("  Timeout occured while running: " + analysisName +", try again "
                             + (MAX_TRIES - tries) + " times.");
                     }
                 }
@@ -117,7 +117,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                 
                 int fileIndex = 1;
                 for (Path path : list) {
-                    System.err.println("Read file: " + fileIndex++);
+                    System.err.println("  Read file: " + fileIndex++);
                     File file = path.toFile();
                     try (ITableCollection csvCollection = TableCollectionReaderFactory.INSTANCE.openFile(file)) {
                         String firstAndOnlyTable = csvCollection.getTableNames().iterator().next();
@@ -137,7 +137,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                 }
                 
             } else {
-                LOGGER.logError2("Could not execute ", analysisName, ", cause: " + errLog);
+                LOGGER.logError2("  Could not execute ", analysisName, ", cause: " + errLog);
             }
             
             configFile.delete();
@@ -150,7 +150,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(delta)),
             TimeUnit.MILLISECONDS.toSeconds(delta) - 
             TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(delta)));
-        System.err.println(metrics.length + " metric analyses (+ merging " + results.size() + " results) took "
+        System.err.println("  " + metrics.length + " metric analyses (+ merging " + results.size() + " results) took "
             + elapsedTime);
         
         return results;

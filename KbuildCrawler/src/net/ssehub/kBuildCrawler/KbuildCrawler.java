@@ -3,6 +3,8 @@ package net.ssehub.kBuildCrawler;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -98,13 +100,14 @@ public class KbuildCrawler {
         
         String[] newHeader = null;
         int step = 0;
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss (dd.MM.yy)");
         
         try (ExcelBook output = new ExcelBook(new File(Timestamp.INSTANCE.getFilename("MetricsResult", "xlsx")))) {
             try (ExcelSheetWriter writer = output.getWriter("Result")) {
         
-//                List<MultiMetricResult> aggregatedResults = new LinkedList<>();
                 for (FailureTrace failureTrace : failures) {
-                    System.err.println("Processing " + ++step + " of " + failures.size());
+                    System.err.println("Processing " + ++step + " of " + failures.size() + " at "
+                        + sdf.format(Calendar.getInstance().getTime()));
                     String gitInfo;
                     if (failureTrace.getGitInfo().getCommit() != null) {
                         gitInfo = failureTrace.getGitInfo().getCommit().substring(0, 8);
@@ -116,9 +119,8 @@ public class KbuildCrawler {
                     
                     String name = failureTrace.getFormattedDate(false) + " " + gitInfo;
                     
-                    List<MultiMetricResult> result = runner.run(git, failureTrace);
-        
                     long t0 = System.currentTimeMillis();
+                    List<MultiMetricResult> result = runner.run(git, failureTrace);        
                     if (result != null && !result.isEmpty()) {
                         Logger.get().logInfo("Got result for " + name);
                         for (MultiMetricResult multiMetricResult : result) {
