@@ -51,7 +51,11 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
     /**
      * 1h time out.
      */
-    private static final long KH_TIMEOUT = 60 * 60 * 1000;
+    private static final long KH_TIMEOUT_NON_FILTERABLE = 60 * 60 * 1000;
+    /**
+     * 10 min time out.
+     */
+    private static final long KH_TIMEOUT_FILTERABLE = 10 * 60 * 1000;
     private static final int MAX_TRIES = 3;
 
     private static final int MAX_GB_FOR_KH = 100;
@@ -72,6 +76,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         @Nullable List<FileDefect> defects) throws FileNotFoundException, IOException {
         
         List<MultiMetricResult> results = new ArrayList<>();
+        final long timeout = null != defect ? KH_TIMEOUT_FILTERABLE : KH_TIMEOUT_NON_FILTERABLE;
         
         // Iterate over all metric (execute them in independent processes)
         long t0 = System.currentTimeMillis();
@@ -92,14 +97,14 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                     "KernelHaven_withsource.jar", configFile.getAbsolutePath());
                 processBuilder.directory(new File(KH_DIR));
                 success = Util.executeProcess(processBuilder, "MetricsRunner: " + analysisName, outStream,
-                    errStream, KH_TIMEOUT);
+                    errStream, timeout);
                 
                 if (!success) {
                     long executionTime = System.currentTimeMillis() - started;
                     tries++;
                     errLog = outStream.toString();
                     
-                    if (executionTime < KH_TIMEOUT) {
+                    if (executionTime < timeout) {
                         // KH wasn't aborted through time out, there was something critical: No reason to continue loop
                         break;
                     } else {
