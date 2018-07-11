@@ -108,7 +108,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                         // KH wasn't aborted through time out, there was something critical: No reason to continue loop
                         break;
                     } else {
-                        System.err.println("  Timeout occured while running: " + analysisName +", try again "
+                        System.err.println("    Timeout occured while running: " + analysisName +", try again "
                             + (MAX_TRIES - tries) + " times.");
                     }
                 }
@@ -118,11 +118,11 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                 List<Path> list = new ArrayList<>();
                 Files.newDirectoryStream(Paths.get(KH_DIR, "output"), p -> p.toFile().getName().endsWith(".csv"))
                     .forEach(list::add);
-                System.err.println("  " + list.size() + " files produced for " + analysisName + ", start merging them");
+                System.err.println("    " + list.size() + " files produced for " + analysisName + ", start merging them");
                 
                 int fileIndex = 1;
                 for (Path path : list) {
-                    System.err.println("  Read file: " + fileIndex++);
+                    System.err.println("    Read file: " + fileIndex++);
                     File file = path.toFile();
                     try (ITableCollection csvCollection = TableCollectionReaderFactory.INSTANCE.openFile(file)) {
                         String firstAndOnlyTable = csvCollection.getTableNames().iterator().next();
@@ -155,7 +155,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(delta)),
             TimeUnit.MILLISECONDS.toSeconds(delta) - 
             TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(delta)));
-        System.err.println("  " + metrics.length + " metric analyses (+ merging " + results.size() + " results) took "
+        System.err.println("    " + metrics.length + " metric analyses (+ merging " + results.size() + " results) took "
             + elapsedTime);
         
         return results;
