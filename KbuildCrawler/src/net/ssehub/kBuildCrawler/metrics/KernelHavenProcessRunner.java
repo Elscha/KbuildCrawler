@@ -28,7 +28,6 @@ import net.ssehub.kernel_haven.metric_haven.metric_components.FanInOutMetric;
 import net.ssehub.kernel_haven.metric_haven.metric_components.NestingDepthMetric;
 import net.ssehub.kernel_haven.metric_haven.metric_components.VariablesPerFunctionMetric;
 import net.ssehub.kernel_haven.metric_haven.metric_components.config.MetricSettings;
-import net.ssehub.kernel_haven.metric_haven.multi_results.MetricsAggregator;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
 import net.ssehub.kernel_haven.util.Util;
 import net.ssehub.kernel_haven.util.io.ITableCollection;
@@ -48,7 +47,17 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
     private static final Class<?>[] UNFILTERABLE_METRICS = {FanInOutMetric.class};
     private static final Class<?>[] FILTERABLE_METRICS = {BlocksPerFunctionMetric.class, CyclomaticComplexityMetric.class,
         DLoC.class, NestingDepthMetric.class, VariablesPerFunctionMetric.class};
+    
+    /**
+     * 1h time out.
+     */
+    private static final long KH_TIMEOUT = 60 * 60 * 1000;
+    private static final int MAX_TRIES = 3;
 
+    private static final int MAX_GB_FOR_KH = 100;
+    private static final String MAX_MEMORY = "-Xmx" + MAX_GB_FOR_KH + "G";
+    private static final String INITIAL_MEMORY = "-Xms" + MAX_GB_FOR_KH + "G";
+    
     /**
      * Creates the configuration and performs the analysis in (multiple) separate processes.
      * @param sourceTree The path to the root of the linux tree to analyze, i.e., the root of the git repository
@@ -72,13 +81,33 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             File configFile = prepareConfiguration(sourceTree, metric, defect, defects);
             
             // Execute the process, keep track of std out stream (we log every thing to console)
-            OutputStream outStream = new ByteArrayOutputStream();
-            OutputStream errStream = new ByteArrayOutputStream();
-            ProcessBuilder processBuilder = new ProcessBuilder("java", "-Xmx270G", "-Xmx270G", "-jar",
-                "KernelHaven_withsource.jar", configFile.getAbsolutePath());
-            processBuilder.directory(new File(KH_DIR));
-            boolean success = Util.executeProcess(processBuilder, "MetricsRunner: " + analysisName, outStream,
-                errStream, 0);
+            boolean success = false;
+            int tries = 0;
+            String errLog = null;
+            do {
+                long started = System.currentTimeMillis();
+                OutputStream outStream = new ByteArrayOutputStream();
+                OutputStream errStream = new ByteArrayOutputStream();
+                ProcessBuilder processBuilder = new ProcessBuilder("java", INITIAL_MEMORY, MAX_MEMORY, "-jar",
+                    "KernelHaven_withsource.jar", configFile.getAbsolutePath());
+                processBuilder.directory(new File(KH_DIR));
+                success = Util.executeProcess(processBuilder, "MetricsRunner: " + analysisName, outStream,
+                    errStream, KH_TIMEOUT);
+                
+                if (!success) {
+                    long executionTime = System.currentTimeMillis() - started;
+                    tries++;
+                    errLog = outStream.toString();
+                    
+                    if (executionTime < KH_TIMEOUT) {
+                        // KH wasn't aborted through time out, there was something critical: No reason to continue loop
+                        break;
+                    } else {
+                        System.err.println("Timeout occured while running: " + analysisName +", try again "
+                            + (MAX_TRIES - tries) + " times.");
+                    }
+                }
+            } while (!success && tries < MAX_TRIES);
 
             if (success) {
                 List<Path> list = new ArrayList<>();
@@ -108,7 +137,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                 }
                 
             } else {
-                LOGGER.logError2("Could not execute ", analysisName, ", cause: " + outStream.toString());
+                LOGGER.logError2("Could not execute ", analysisName, ", cause: " + errLog);
             }
             
             configFile.delete();
