@@ -37,7 +37,7 @@ public abstract class AbstractKernelHavenRunner {
             long t0 = System.currentTimeMillis();
             git.restoreCommit(ftrace.getGitInfo(), ftrace.getFormattedDate(true));
             long duration = System.currentTimeMillis() - t0;
-            System.err.println("Restoring commit took " + duration + "ms");
+            System.err.println("  Restoring commit took " + duration + "ms");
             
             LOGGER.logInfo("Source tree checked out at " + git.getSourceTree());
             
@@ -51,7 +51,7 @@ public abstract class AbstractKernelHavenRunner {
                 LOGGER.logException("Exception while running on whole tree", e);
             }
             duration = System.currentTimeMillis() - t0;
-            System.err.println("Running non-filterable metrics took " + duration + "ms");
+            System.err.println("  Running non-filterable metrics took " + duration + "ms");
             
             for (FileDefect defect : ftrace.getDefects()) {
                 t0 = System.currentTimeMillis();
@@ -64,13 +64,13 @@ public abstract class AbstractKernelHavenRunner {
                     LOGGER.logException("Exception while running on whole single function", e);
                 }
                 duration = System.currentTimeMillis() - t0;
-                System.err.println("Running filterable metrics took " + duration + "ms");
+                System.err.println("  Running filterable metrics took " + duration + "ms");
             }
 
             t0 = System.currentTimeMillis();
             result = joinMultiMetricResults(completeTree, functionMetrics);
             duration = System.currentTimeMillis() - t0;
-            System.err.println("Joining MultiMetricResults took " + duration + "ms");
+            System.err.println("  Joining MultiMetricResults took " + duration + "ms");
             
         } catch (GitException e) {
             LOGGER.logException("Unable to restore commit", e);
