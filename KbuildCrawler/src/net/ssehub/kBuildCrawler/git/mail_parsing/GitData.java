@@ -11,6 +11,9 @@ package net.ssehub.kBuildCrawler.git.mail_parsing;
  *
  */
 public class GitData {
+    public static final String ZERO_DAY_GIT_URL = "https://github.com/0day-ci/linux.git";
+    private static final String ZERO_DAY_URL = "https://github.com/0day-ci/linux";
+    
     private String url;
     private String base;
     private String branch;
@@ -43,7 +46,7 @@ public class GitData {
 
     /**
      * Returns the url of the whole git repository.
-     * @return the url of the whole git repository., maybe <tt>null</tt>.
+     * @return the url of the whole git repository, maybe <tt>null</tt>.
      */
     public String getBase() {
         return base;
@@ -81,6 +84,26 @@ public class GitData {
      */
     public boolean cloningPossible() {
         return getBase() != null && getCommit() != null;
+    }
+    
+    /**
+     * Returns whether the GitData points to a (set of) patches in the 0Day commit repository. If <tt>true</tt>
+     * {@link #ZERO_DAY_GIT_URL} should be used instead of {@link #getBase()} or {@link #getUrl()}.
+     * @return <tt>true</tt> The data represents a (set of) patches in the 0Day commit repository.
+     */
+    public boolean is0DayCommit() {
+        return url != null && url.startsWith(ZERO_DAY_URL);
+    }
+    
+    public String get0DayBranch() {
+        String branch = null;
+        
+        if (is0DayCommit()) {
+            // Remove https://github.com/0day-ci/linux/commits/ -> first 41 chars
+            branch = url.substring(41);
+        }
+        
+        return branch;
     }
 
     @Override

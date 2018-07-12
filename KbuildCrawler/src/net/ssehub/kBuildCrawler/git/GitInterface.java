@@ -43,7 +43,7 @@ public class GitInterface {
      * @throws GitException If restoring the commit fails.
      */
     public void restoreCommit(GitData commitInfo, String date) throws GitException {
-        String remoteUrl = commitInfo.getBase();
+        String remoteUrl = commitInfo.is0DayCommit() ? GitData.ZERO_DAY_GIT_URL : commitInfo.getBase();
         if (remoteUrl == null) {
             throw new GitException("Remote URL is null");
         }
@@ -57,6 +57,10 @@ public class GitInterface {
         repo.fetch(remoteName);
         
         String commit = commitInfo.getCommit(); // TODO: use getCommit() or getHead() here?
+        if (commitInfo.is0DayCommit()) {
+            commit = repo.getLastCommitOfBranch(remoteName, commitInfo.get0DayBranch());
+        }
+        
         if (commit == null && commitInfo.getBranch() != null) {
             // if getCommit() is null, then use getBranch() and the date to get the URL
             commit = repo.getCommitBefore(remoteName, commitInfo.getBranch(), date);

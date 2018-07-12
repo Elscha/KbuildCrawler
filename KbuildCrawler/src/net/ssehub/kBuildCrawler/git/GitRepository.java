@@ -152,6 +152,20 @@ public class GitRepository {
     }
     
     /**
+     * Returns last commit hash in the given <code>branch</code>.
+     * 
+     * @param remoteName The name of the remote that has the given branch.
+     * @param branch The branch to get the commit hash for.
+     * 
+     * @return The commit hash.
+     */
+    public String getLastCommitOfBranch(String remoteName, String branch) throws GitException {
+        String hash = runGitCommand("git", "rev-list", "-n", "1", remoteName + "/" + branch);
+        
+        return hash;
+    }
+    
+    /**
      * The working directory of this git repository.
      * 
      * @return The working directory. This is an existing folder.

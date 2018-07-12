@@ -64,4 +64,21 @@ public class GitUtilsTest {
         }
     }
 
+    /**
+     * Tests correct identification of 0Day commits, which require a special handling.
+     */
+    @Test
+    public void testExtractGitData_0Day() {
+        String[] lines = {
+            "url:    https://github.com/0day-ci/linux/commits/Hoan-Tran/hwmon-xgene-Add-support-for-X-Gene-hwmon-driver/20160725-015356",
+            "base:   https://git.kernel.org/pub/scm/linux/kernel/git/groeck/linux-staging.git hwmon-next",
+            "config: arm64-allmodconfig (attached as .config)",
+            "compiler: aarch64-linux-gnu-gcc (Debian 5.4.0-6) 5.4.0 20160609",
+        };
+        
+        GitData data = GitUtils.extractGitSettings(lines);
+        Assert.assertTrue(data.is0DayCommit());
+        Assert.assertEquals("Hoan-Tran/hwmon-xgene-Add-support-for-X-Gene-hwmon-driver/20160725-015356",
+            data.get0DayBranch());
+    }
 }

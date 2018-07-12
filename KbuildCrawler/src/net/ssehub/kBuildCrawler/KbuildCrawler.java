@@ -11,6 +11,7 @@ import java.util.List;
 import net.ssehub.kBuildCrawler.git.GitException;
 import net.ssehub.kBuildCrawler.git.GitInterface;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FailureTrace;
+import net.ssehub.kBuildCrawler.git.mail_parsing.GitData;
 import net.ssehub.kBuildCrawler.git.mail_parsing.GitUtils;
 import net.ssehub.kBuildCrawler.mail.IMailSource;
 import net.ssehub.kBuildCrawler.mail.Mail;
@@ -113,6 +114,8 @@ public class KbuildCrawler {
                         gitInfo = failureTrace.getGitInfo().getCommit().substring(0, 8);
                     } else if (failureTrace.getGitInfo().getBranch() != null) {
                         gitInfo = failureTrace.getGitInfo().getBranch();
+                    } else if (failureTrace.getGitInfo().is0DayCommit()) {
+                        gitInfo = GitData.ZERO_DAY_GIT_URL + " -> " + failureTrace.getGitInfo().get0DayBranch();
                     } else {
                         gitInfo = "(unknown)";
                     }
