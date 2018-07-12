@@ -155,7 +155,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(delta)),
             TimeUnit.MILLISECONDS.toSeconds(delta) - 
             TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(delta)));
-        System.err.println("    " + metrics.length + " metric analyses (+ merging " + results.size() + " results) took "
+        System.err.println("  " + metrics.length + " metric analyses (+ merging " + results.size() + " results) took "
             + elapsedTime);
         
         return results;
