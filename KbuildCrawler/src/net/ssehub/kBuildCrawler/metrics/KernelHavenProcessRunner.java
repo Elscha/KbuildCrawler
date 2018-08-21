@@ -161,6 +161,10 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         // Read Header
         final String[] header = reader.readNextRow();
         
+        if (header == null || header.length == 0) {
+            return;
+        }
+        
         boolean hasIncludedFile = header[1].equals("Included File");
         @NonNull String[] metrics = new @NonNull String[header.length - (hasIncludedFile ? 4 : 3)];
         System.arraycopy(header, hasIncludedFile ? 4 : 3, metrics, 0, metrics.length);
