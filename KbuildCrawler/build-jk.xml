@@ -65,7 +65,7 @@
   
     <target name="compile" depends="init">
         <!-- Delivered Code -->
-        <javac srcdir="${src.dir}" debug="off" destdir="${build.classes.dir}" includeAntRuntime="no" failonerror="true" source="${javacSource}" target="${javacTarget}" encoding="${javac.encoding}">
+        <javac srcdir="${src.dir}" debug="on" destdir="${build.classes.dir}" includeAntRuntime="no" failonerror="true" source="${javacSource}" target="${javacTarget}" encoding="${javac.encoding}">
             <!-- classpath refid="cp.compile" /-->
         	  <classpath>
         		    <fileset dir="${build.dependencies.dir}" includes="**/*.jar"/>
