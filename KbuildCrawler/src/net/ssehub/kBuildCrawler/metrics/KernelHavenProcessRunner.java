@@ -28,11 +28,13 @@ import net.ssehub.kernel_haven.metric_haven.metric_components.FanInOutMetric;
 import net.ssehub.kernel_haven.metric_haven.metric_components.NestingDepthMetric;
 import net.ssehub.kernel_haven.metric_haven.metric_components.VariablesPerFunctionMetric;
 import net.ssehub.kernel_haven.metric_haven.metric_components.config.MetricSettings;
+import net.ssehub.kernel_haven.metric_haven.multi_results.MeasuredItem;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
 import net.ssehub.kernel_haven.util.Util;
 import net.ssehub.kernel_haven.util.io.ITableCollection;
 import net.ssehub.kernel_haven.util.io.ITableReader;
 import net.ssehub.kernel_haven.util.io.TableCollectionReaderFactory;
+import net.ssehub.kernel_haven.util.null_checks.NonNull;
 import net.ssehub.kernel_haven.util.null_checks.Nullable;
 
 /**
@@ -127,13 +129,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                     try (ITableCollection csvCollection = TableCollectionReaderFactory.INSTANCE.openFile(file)) {
                         String firstAndOnlyTable = csvCollection.getTableNames().iterator().next();
                         try (ITableReader reader = csvCollection.getReader(firstAndOnlyTable)) {
-                            // Read Header
-                            final String[] header = reader.readNextRow();
-                            String[] content = null;
-                            while ((content = reader.readNextRow()) != null) {
-                                MultiMetricResult result = new MultiMetricResult(header, content);
-                                results.add(result);
-                            }
+                            readMultiMetricResults(reader, results);
                         }
                     }
                     
@@ -159,6 +155,40 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             + elapsedTime);
         
         return results;
+    }
+    
+    private void readMultiMetricResults(ITableReader reader, List<MultiMetricResult> resultList) throws IOException {
+        // Read Header
+        final String[] header = reader.readNextRow();
+        
+        boolean hasIncludedFile = header[1].equals("Included File");
+        @NonNull String[] metrics = new @NonNull String[header.length - (hasIncludedFile ? 4 : 3)];
+        System.arraycopy(header, hasIncludedFile ? 4 : 3, metrics, 0, metrics.length);
+        
+        String[] content = null;
+        while ((content = reader.readNextRow()) != null) {
+            MeasuredItem mi;
+            if (hasIncludedFile) {
+                mi = new MeasuredItem(content[0], content[1], Integer.valueOf(content[2]), content[3]);
+                mi.setConsiderIncludedFile(true);
+            } else {
+                mi = new MeasuredItem(content[0], Integer.valueOf(content[1]), content[2]);
+                mi.setConsiderIncludedFile(false);
+            }
+
+            @Nullable Double[] values = new @Nullable Double[metrics.length];
+            int index = 0;
+            for (int i =  hasIncludedFile ? 4 : 3; i < content.length; i++) {
+                if (!content[i].isEmpty())  {
+                    values[index] = Double.valueOf(content[i]);
+                }
+                
+                index++;
+            }
+            
+            MultiMetricResult result = new MultiMetricResult(mi, metrics, values);
+            resultList.add(result);
+        }
     }
     
     @Override
