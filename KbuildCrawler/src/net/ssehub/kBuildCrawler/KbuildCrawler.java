@@ -32,7 +32,7 @@ public class KbuildCrawler {
     public final static File TESTDATA = new File("testdata");
     private static final File TEST_ARCHIVE = new File(TESTDATA, "2016-August.txt.gz");
     
-    private static final int DEBUG_PROCESS_ONLY = 2;
+    private static final int DEBUG_PROCESS_ONLY = -1;
     
     public static final boolean DISABLE_KH_LOGGING = true;
 
@@ -97,6 +97,7 @@ public class KbuildCrawler {
         return failures;
     }
     
+    @SuppressWarnings("unused") // for the DEBUG_PROCESS_ONLY flag
     private static void runMetrics(File gitFolder, List<FailureTrace> failures) throws GitException, IOException, FormatException {
         GitInterface git = new GitInterface(gitFolder);
         AbstractKernelHavenRunner runner = KernelHavenRunnerFactory.createRunner(true);
