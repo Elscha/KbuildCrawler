@@ -27,6 +27,7 @@ import net.ssehub.kernel_haven.metric_haven.metric_components.CyclomaticComplexi
 import net.ssehub.kernel_haven.metric_haven.metric_components.DLoC;
 import net.ssehub.kernel_haven.metric_haven.metric_components.FanInOutMetric;
 import net.ssehub.kernel_haven.metric_haven.metric_components.NestingDepthMetric;
+import net.ssehub.kernel_haven.metric_haven.metric_components.TanglingDegreeFunctionMetric;
 import net.ssehub.kernel_haven.metric_haven.metric_components.VariablesPerFunctionMetric;
 import net.ssehub.kernel_haven.metric_haven.metric_components.config.MetricSettings;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MeasuredItem;
@@ -49,7 +50,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
     private static final String BASE_CONFIGURATION = "res/single_metric.properties";
     private static final Class<?>[] UNFILTERABLE_METRICS = {FanInOutMetric.class};
     private static final Class<?>[] FILTERABLE_METRICS = {BlocksPerFunctionMetric.class, CyclomaticComplexityMetric.class,
-        DLoC.class, NestingDepthMetric.class, VariablesPerFunctionMetric.class};
+        DLoC.class, NestingDepthMetric.class, VariablesPerFunctionMetric.class, TanglingDegreeFunctionMetric.class};
     
     /**
      * 1h time out.
@@ -83,9 +84,10 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         
         // Iterate over all metric (execute them in independent processes)
         long t0 = System.currentTimeMillis();
+        int metricIndex = 0;
         for (Class<?> metric : metrics) {
             String analysisName = metric.getSimpleName() + " on " + sourceTree.getName();
-            System.err.println("  Run: " + analysisName);
+            System.err.println("  Run: " + analysisName + "(" + (metricIndex++) + " of " + metrics.length + ")");
             File configFile = prepareConfiguration(sourceTree, metric, defect, defects);
             
             // Execute the process, keep track of std out stream (we log every thing to console)
