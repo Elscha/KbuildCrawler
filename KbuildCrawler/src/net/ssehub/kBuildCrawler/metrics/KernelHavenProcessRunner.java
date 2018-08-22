@@ -210,7 +210,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
     protected List<MultiMetricResult> runLineFilteredMetrics(File sourceTree, FileDefect defect)
         throws IOException, SetUpException {
         
-        return runAnalysis(sourceTree, new Class<?>[] {DLoC.class}, defect, null);
+        return runAnalysis(sourceTree, FILTERABLE_METRICS, defect, null);
     }
     
     private File prepareConfiguration(File sourceTree, Class<?> metricClass, @Nullable FileDefect defect,
