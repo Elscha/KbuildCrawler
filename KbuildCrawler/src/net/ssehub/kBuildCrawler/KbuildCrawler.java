@@ -32,6 +32,8 @@ public class KbuildCrawler {
     public final static File TESTDATA = new File("testdata");
     private static final File TEST_ARCHIVE = new File(TESTDATA, "2016-August.txt.gz");
     
+    private static final int DEBUG_PROCESS_ONLY = 2;
+    
     public static final boolean DISABLE_KH_LOGGING = true;
 
     public static void main(String[] args) throws Exception {
@@ -107,6 +109,10 @@ public class KbuildCrawler {
             try (ExcelSheetWriter writer = output.getWriter("Result")) {
         
                 for (FailureTrace failureTrace : failures) {
+                    if (DEBUG_PROCESS_ONLY > 0 && step >= DEBUG_PROCESS_ONLY) {
+                        System.err.println("Stopping early, because DEBUG_PROCESS_ONLY is set to " + DEBUG_PROCESS_ONLY);
+                        break;
+                    }
                     System.err.println("Processing " + ++step + " of " + failures.size() + " at "
                         + sdf.format(Calendar.getInstance().getTime()));
                     String gitInfo;
