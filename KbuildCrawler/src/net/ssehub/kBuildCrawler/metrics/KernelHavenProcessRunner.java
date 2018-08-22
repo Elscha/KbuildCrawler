@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringJoiner;
@@ -129,7 +130,11 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                     try (ITableCollection csvCollection = TableCollectionReaderFactory.INSTANCE.openFile(file)) {
                         String firstAndOnlyTable = csvCollection.getTableNames().iterator().next();
                         try (ITableReader reader = csvCollection.getReader(firstAndOnlyTable)) {
-                            readMultiMetricResults(reader, results);
+                            
+                            List<MultiMetricResult> newResults = new LinkedList<>();
+                            readMultiMetricResults(reader, newResults);
+                            AbstractKernelHavenRunner.joinFullMetricResults(results, newResults);
+                            
                         }
                     }
                     
