@@ -126,7 +126,7 @@ public class KbuildCrawler {
                     List<MultiMetricResult> result = runner.run(git, failureTrace);        
                     if (result != null && !result.isEmpty()) {
                         Logger.get().logInfo("Got result for " + name);
-                        boolean first = false;
+                        boolean first = true;
                         for (MultiMetricResult multiMetricResult : result) {
                             int oldLength = multiMetricResult.getHeader().length;
                             if (null == newHeader) {
@@ -147,6 +147,7 @@ public class KbuildCrawler {
                             System.arraycopy(multiMetricResult.getContent(), 0, newValues, 3, oldLength);
                             
                             if (first) {
+                                first = false;
                                 writer.writeHeader((Object[]) newHeader);
                             }
                             writer.writeRow(newValues);
