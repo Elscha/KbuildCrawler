@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
+import net.ssehub.kBuildCrawler.KbuildCrawler;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FailureTrace;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
 import net.ssehub.kernel_haven.PipelineConfigurator;
@@ -100,8 +101,8 @@ class KernelHavenRunner extends AbstractKernelHavenRunner implements IAnalysisOb
         DefaultSettings.registerAllSettings(config);
         
         LOGGER.logInfo("Running KernelHaven");
-//        Level level = KbuildCrawler.DISABLE_KH_LOGGING ? Level.NONE : Level.WARNING;
-        LOGGER.setLevel(Level.INFO);
+        Level level = KbuildCrawler.DISABLE_KH_LOGGING ? Level.NONE : Level.WARNING;
+        LOGGER.setLevel(level);
         
         try {
             PipelineConfigurator pip = PipelineConfigurator.instance();

@@ -100,7 +100,7 @@ public class KbuildCrawler {
     @SuppressWarnings("unused") // for the DEBUG_PROCESS_ONLY flag
     private static void runMetrics(File gitFolder, List<FailureTrace> failures) throws GitException, IOException, FormatException {
         GitInterface git = new GitInterface(gitFolder);
-        AbstractKernelHavenRunner runner = KernelHavenRunnerFactory.createRunner(false);
+        AbstractKernelHavenRunner runner = KernelHavenRunnerFactory.createRunner(true);
         
         String[] newHeader = null;
         int step = 0;
