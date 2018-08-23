@@ -135,7 +135,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                             
                             List<MultiMetricResult> newResults = new LinkedList<>();
                             readMultiMetricResults(reader, newResults);
-                            AbstractKernelHavenRunner.joinFullMetricResults(results, newResults);
+                            results = AbstractKernelHavenRunner.joinFullMetricResults(results, newResults);
                             
                         }
                     }
