@@ -109,6 +109,7 @@ public class KbuildCrawler {
         try (ExcelBook output = new ExcelBook(new File(Timestamp.INSTANCE.getFilename("MetricsResult", "xlsx")))) {
             try (ExcelSheetWriter writer = output.getWriter("Result")) {
         
+                boolean firstExcelLine = true;
                 for (FailureTrace failureTrace : failures) {
                     if (DEBUG_PROCESS_ONLY > 0 && step >= DEBUG_PROCESS_ONLY) {
                         System.err.println("Stopping early, because DEBUG_PROCESS_ONLY is set to " + DEBUG_PROCESS_ONLY);
@@ -133,7 +134,6 @@ public class KbuildCrawler {
                     List<MultiMetricResult> result = runner.run(git, failureTrace);        
                     if (result != null && !result.isEmpty()) {
                         Logger.get().logInfo("Got result for " + name);
-                        boolean first = true;
                         for (MultiMetricResult multiMetricResult : result) {
                             int oldLength = multiMetricResult.getHeader().length;
                             if (null == newHeader) {
@@ -153,8 +153,8 @@ public class KbuildCrawler {
                             }
                             System.arraycopy(multiMetricResult.getContent(), 0, newValues, 3, oldLength);
                             
-                            if (first) {
-                                first = false;
+                            if (firstExcelLine) {
+                                firstExcelLine = false;
                                 writer.writeHeader((Object[]) newHeader);
                             }
                             writer.writeRow(newValues);
