@@ -36,6 +36,7 @@ import net.ssehub.kernel_haven.util.Util;
 import net.ssehub.kernel_haven.util.io.ITableCollection;
 import net.ssehub.kernel_haven.util.io.ITableReader;
 import net.ssehub.kernel_haven.util.io.TableCollectionReaderFactory;
+import net.ssehub.kernel_haven.util.io.csv.CsvWriter;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 import net.ssehub.kernel_haven.util.null_checks.Nullable;
 
@@ -145,6 +146,17 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                             List<MultiMetricResult> newResults = new LinkedList<>();
                             readMultiMetricResults(reader, newResults);
                             results = AbstractKernelHavenRunner.joinFullMetricResults(results, newResults);
+                            
+                            // TODO: Debug log current result
+                            System.err.println("After joining intermediate result, result list has size "
+                                    + results.size());
+                            System.err.println("Content of result:");
+                            @SuppressWarnings("resource")
+                            CsvWriter debugOut = new CsvWriter(System.err);
+                            for (MultiMetricResult mmr : results) {
+                                debugOut.writeObject(mmr);
+                            }
+                            System.out.println("(end of content of result)");
                             
                         }
                     }
