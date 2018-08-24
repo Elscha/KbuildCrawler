@@ -125,10 +125,6 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                     .forEach(list::add);
                 System.err.println("    " + list.size() + " files produced for " + analysisName + ", start merging them");
                 
-                /*
-                 * Add all result files for this metric into a single list, then (after the for loop) join them
-                 * with the previous result list.
-                 */
                 int fileIndex = 1;
                 for (Path path : list) {
                     System.err.println("    Read file: " + fileIndex++);
