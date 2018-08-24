@@ -129,7 +129,6 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                  * Add all result files for this metric into a single list, then (after the for loop) join them
                  * with the previous result list.
                  */
-                List<MultiMetricResult> newResults = new LinkedList<>();
                 int fileIndex = 1;
                 for (Path path : list) {
                     System.err.println("    Read file: " + fileIndex++);
@@ -146,15 +145,17 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                     try (ITableCollection csvCollection = TableCollectionReaderFactory.INSTANCE.openFile(file)) {
                         String firstAndOnlyTable = csvCollection.getTableNames().iterator().next();
                         try (ITableReader reader = csvCollection.getReader(firstAndOnlyTable)) {
+                            
+                            List<MultiMetricResult> newResults = new LinkedList<>();
                             readMultiMetricResults(reader, newResults);
+                            results = AbstractKernelHavenRunner.joinFullMetricResults(results, newResults);
+                            
                         }
                     }
                     
                     // Delete temporarily created output of KernelHaven
                     file.delete();
                 }
-                
-                results = AbstractKernelHavenRunner.joinFullMetricResults(results, newResults);
                 
             } else {
                 LOGGER.logError2("  Could not execute ", analysisName, ", cause: " + errLog);
