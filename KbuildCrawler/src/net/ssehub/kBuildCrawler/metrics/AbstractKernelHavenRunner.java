@@ -229,7 +229,7 @@ public abstract class AbstractKernelHavenRunner {
         for (MultiMetricResult metricResult : l2) {
             if (!Arrays.equals(l2Metrics, metricResult.getMetrics())) {
                 throw new IllegalArgumentException("Elements in l2 contain different metric header (expected: "
-                        + Arrays.toString(l1Metrics) + " but got " + Arrays.toString(metricResult.getMetrics()) + ")");
+                        + Arrays.toString(l2Metrics) + " but got " + Arrays.toString(metricResult.getMetrics()) + ")");
             }
             
             MeasuredItem mi = metricResult.getMeasuredItem();

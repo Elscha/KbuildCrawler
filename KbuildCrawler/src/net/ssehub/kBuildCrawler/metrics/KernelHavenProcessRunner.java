@@ -87,7 +87,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         int metricIndex = 0;
         for (Class<?> metric : metrics) {
             String analysisName = metric.getSimpleName() + " on " + sourceTree.getName();
-            System.err.println("  Run: " + analysisName + "(" + (++metricIndex) + " of " + metrics.length + ")");
+            System.err.println("  Run: " + analysisName + " (Metric " + (++metricIndex) + " of " + metrics.length + ")");
             File configFile = prepareConfiguration(sourceTree, metric, defect, defects);
             
             // Execute the process, keep track of std out stream (we log every thing to console)
