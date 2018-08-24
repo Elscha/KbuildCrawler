@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -36,7 +37,6 @@ import net.ssehub.kernel_haven.util.Util;
 import net.ssehub.kernel_haven.util.io.ITableCollection;
 import net.ssehub.kernel_haven.util.io.ITableReader;
 import net.ssehub.kernel_haven.util.io.TableCollectionReaderFactory;
-import net.ssehub.kernel_haven.util.io.csv.CsvWriter;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 import net.ssehub.kernel_haven.util.null_checks.Nullable;
 
@@ -150,13 +150,10 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                             // TODO: Debug log current result
                             System.err.println("After joining intermediate result, result list has size "
                                     + results.size());
-                            System.err.println("Content of result:");
-                            @SuppressWarnings("resource")
-                            CsvWriter debugOut = new CsvWriter(System.err);
-                            for (MultiMetricResult mmr : results) {
-                                debugOut.writeObject(mmr);
+                            if (!results.isEmpty()) {
+                                System.err.println("Metrics in result:");
+                                System.err.println(Arrays.toString(results.get(0).getMetrics()));
                             }
-                            System.out.println("(end of content of result)");
                             
                         }
                     }
