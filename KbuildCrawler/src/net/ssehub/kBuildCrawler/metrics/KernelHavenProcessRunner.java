@@ -134,6 +134,15 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                 for (Path path : list) {
                     System.err.println("    Read file: " + fileIndex++);
                     File file = path.toFile();
+                    
+                    // TODO: DEBUG: copy file
+                    File copy = new File("out_copy/" + file.getName());
+                    int i = 1;
+                    while (copy.exists()) {
+                        copy = new File("out_copy/" + file.getName() + "_" + (i++));
+                    }
+                    Util.copyFile(file, copy);
+                    
                     try (ITableCollection csvCollection = TableCollectionReaderFactory.INSTANCE.openFile(file)) {
                         String firstAndOnlyTable = csvCollection.getTableNames().iterator().next();
                         try (ITableReader reader = csvCollection.getReader(firstAndOnlyTable)) {
