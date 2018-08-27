@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
@@ -103,7 +104,8 @@ public class KbuildCrawler {
         AbstractKernelHavenRunner runner = KernelHavenRunnerFactory.createRunner(true);
         
         String[] newHeader = null;
-        int step = 0;
+        int failureIndex = 0;
+        int resultLineIndex = 1;
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss (dd.MM.yy)");
         
         try (ExcelBook output = new ExcelBook(new File(Timestamp.INSTANCE.getFilename("MetricsResult", "xlsx")))) {
@@ -111,11 +113,11 @@ public class KbuildCrawler {
         
                 boolean firstExcelLine = true;
                 for (FailureTrace failureTrace : failures) {
-                    if (DEBUG_PROCESS_ONLY > 0 && step >= DEBUG_PROCESS_ONLY) {
+                    if (DEBUG_PROCESS_ONLY > 0 && failureIndex >= DEBUG_PROCESS_ONLY) {
                         System.err.println("Stopping early, because DEBUG_PROCESS_ONLY is set to " + DEBUG_PROCESS_ONLY);
                         break;
                     }
-                    System.err.println("Processing " + ++step + " of " + failures.size() + " at "
+                    System.err.println("Processing " + ++failureIndex + " of " + failures.size() + " at "
                         + sdf.format(Calendar.getInstance().getTime()));
                     String gitInfo;
                     if (failureTrace.getGitInfo().getCommit() != null) {
@@ -134,7 +136,19 @@ public class KbuildCrawler {
                     List<MultiMetricResult> result = runner.run(git, failureTrace);        
                     if (result != null && !result.isEmpty()) {
                         Logger.get().logInfo("Got result for " + name);
+                        int multiResultIndex = 0;
                         for (MultiMetricResult multiMetricResult : result) {
+                            
+                            // TODO: temporary debug output
+                            multiResultIndex++;
+                            resultLineIndex++;
+                            System.err.println("> Result " + multiResultIndex + " for failure " + failureIndex
+                                    + " (line " + resultLineIndex + " in excel sheet)");
+                            System.err.println("\t> Number of Metrics: " + multiMetricResult.getMetrics().length);
+                            System.err.println("\t> Metrics: " + Arrays.toString(multiMetricResult.getMetrics()));
+                            System.err.println("\t> Number of Values: " + multiMetricResult.getValues().length);
+                            System.err.println("\t> Values: " + Arrays.toString(multiMetricResult.getValues()));
+                            
                             int oldLength = multiMetricResult.getHeader().length;
                             if (null == newHeader) {
                                 newHeader = new String[oldLength + 3];
