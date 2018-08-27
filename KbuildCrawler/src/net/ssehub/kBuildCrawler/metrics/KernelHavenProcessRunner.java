@@ -250,10 +250,6 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             filesSetting.replace(filesSetting.length() - 2, filesSetting.length(), ""); // remove trailing ", "
             linesSetting.replace(linesSetting.length() - 2, linesSetting.length(), ""); // remove trailing ", "
             
-            // TODO: debug output
-            System.err.println(" > fileSetting = " + filesSetting.toString());
-            System.err.println(" > linesSetting = " + linesSetting.toString());
-            
             props.setProperty("code.extractor.files", filesSetting.toString());
             props.setProperty("analysis.code_function.lines", linesSetting.toString());            
         }
