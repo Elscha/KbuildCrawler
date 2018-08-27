@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -131,14 +130,6 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                     System.err.println("    Read file: " + fileIndex++);
                     File file = path.toFile();
                     
-                    // TODO: DEBUG: copy file
-                    File copy = new File("out_copy/" + file.getName());
-                    int i = 1;
-                    while (copy.exists()) {
-                        copy = new File("out_copy/" + file.getName() + "_" + (i++));
-                    }
-                    Util.copyFile(file, copy);
-                    
                     try (ITableCollection csvCollection = TableCollectionReaderFactory.INSTANCE.openFile(file)) {
                         String firstAndOnlyTable = csvCollection.getTableNames().iterator().next();
                         try (ITableReader reader = csvCollection.getReader(firstAndOnlyTable)) {
@@ -146,15 +137,6 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                             List<MultiMetricResult> newResults = new LinkedList<>();
                             readMultiMetricResults(reader, newResults);
                             results = AbstractKernelHavenRunner.joinFullMetricResults(results, newResults);
-                            
-                            // TODO: Debug log current result
-                            System.err.println("After joining intermediate result, result list has size "
-                                    + results.size());
-                            if (!results.isEmpty()) {
-                                System.err.println("Metrics in result:");
-                                System.err.println(Arrays.toString(results.get(0).getMetrics()));
-                            }
-                            
                         }
                     }
                     
