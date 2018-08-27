@@ -64,29 +64,35 @@ class KernelHavenRunner extends AbstractKernelHavenRunner implements IAnalysisOb
     }
     
     @Override
-    protected List<MultiMetricResult> runLineFilteredMetrics(File sourceTree, FileDefect defect)
+    protected List<MultiMetricResult> runLineFilteredMetrics(File sourceTree, List<FileDefect> defects)
         throws IOException, SetUpException {
         
         // reset
         analysisResult = null;
         
-        LOGGER.logInfo("Running for defect: " + defect);
+        LOGGER.logInfo("Running for defects: " + defects.toString());
         
         Properties props = new Properties();
         props.load(new FileReader(new File("res/metric_base.properties")));
         
-        String file = defect.getPath() + defect.getFile();
+        StringBuilder filesSetting = new StringBuilder();
+        StringBuilder linesSetting = new StringBuilder();
         
-        // check if the file even exists
-        if (!new File(sourceTree, file).isFile()) {
-            LOGGER.logWarning("File " + file + " doesn't exist in checked out tree",  "Skipping single function metrics");
-            return null;
+        for (FileDefect defect : defects) {
+            filesSetting.append(defect.getPath()).append(defect.getFile()).append(", ");
+            linesSetting.append(defect.getPath()).append(defect.getFile()).append(":").append(defect.getLine())
+            .append(", ");
         }
+        filesSetting.replace(filesSetting.length() - 2, filesSetting.length(), ""); // remove trailing ", "
+        linesSetting.replace(linesSetting.length() - 2, linesSetting.length(), ""); // remove trailing ", "
+        
+        props.setProperty("code.extractor.files", filesSetting.toString());
+        props.setProperty("analysis.code_function.lines", linesSetting.toString());       
         
         props.setProperty("source_tree", sourceTree.getAbsolutePath());
         props.setProperty("analysis.class", AllLineFilterableFunctionMetrics.class.getCanonicalName());
-        props.setProperty("code.extractor.files", file);
-        props.setProperty("analysis.code_function.line", String.valueOf(defect.getLine()));
+        props.setProperty("code.extractor.files", filesSetting.toString());
+        props.setProperty("analysis.code_function.line", linesSetting.toString());
         
         AllLineFilterableFunctionMetrics.setAddObservable(true);
         ObservableAnalysis.setObservers(this);

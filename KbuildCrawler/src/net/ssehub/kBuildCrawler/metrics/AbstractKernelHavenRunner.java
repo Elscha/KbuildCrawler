@@ -55,19 +55,17 @@ public abstract class AbstractKernelHavenRunner {
             duration = System.currentTimeMillis() - t0;
             System.err.println("  Running non-filterable metrics took " + duration + "ms");
             
-            for (FileDefect defect : ftrace.getDefects()) {
-                t0 = System.currentTimeMillis();
-                try {
-                    List<MultiMetricResult> filteredResults = runLineFilteredMetrics(git.getSourceTree(), defect);
-                    if (filteredResults != null) {
-                        functionMetrics = joinFullMetricResults(functionMetrics, filteredResults);
-                    }
-                } catch (IOException | SetUpException e) {
-                    LOGGER.logException("Exception while running on whole single function", e);
+            t0 = System.currentTimeMillis();
+            try {
+                List<MultiMetricResult> filteredResults = runLineFilteredMetrics(git.getSourceTree(), ftrace.getDefects());
+                if (filteredResults != null) {
+                    functionMetrics = filteredResults;
                 }
-                duration = System.currentTimeMillis() - t0;
-                System.err.println("  Running filterable metrics took " + duration + "ms");
+            } catch (IOException | SetUpException e) {
+                LOGGER.logException("Exception while running on whole single function", e);
             }
+            duration = System.currentTimeMillis() - t0;
+            System.err.println("  Running filterable metrics took " + duration + "ms");
 
             t0 = System.currentTimeMillis();
             result = joinFunctionAndCompleteMetricResults(completeTree, functionMetrics);
@@ -98,13 +96,13 @@ public abstract class AbstractKernelHavenRunner {
      * Executes all metrics, which can be executed on a <b>subset</b> of the source code.
      * <tt>defect</tt> are used to filter the results <b>before</b> the metric execution.
      * @param sourceTree The root folder of the source tree to analyze
-     * @param defect The metric will only executed on files described by the defect.
+     * @param defects The metric will only executed on files described by these defects.
      * 
      * @return The metric results
      * @throws IOException
      * @throws SetUpException
      */
-    protected abstract List<MultiMetricResult> runLineFilteredMetrics(File sourceTree, FileDefect defect)
+    protected abstract List<MultiMetricResult> runLineFilteredMetrics(File sourceTree, List<FileDefect> defects)
         throws IOException, SetUpException;
     
     

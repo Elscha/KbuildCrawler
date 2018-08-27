@@ -76,11 +76,11 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
      * @throws FileNotFoundException
      * @throws IOException
      */
-    private List<MultiMetricResult> runAnalysis(File sourceTree, Class<?>[] metrics, @Nullable FileDefect defect,
-        @Nullable List<FileDefect> defects) throws FileNotFoundException, IOException {
+    private List<MultiMetricResult> runAnalysis(File sourceTree, Class<?>[] metrics, @Nullable List<FileDefect> defects,
+            boolean filteredOnly) throws FileNotFoundException, IOException {
         
         List<MultiMetricResult> results = new ArrayList<>();
-        final long timeout = null != defect ? KH_TIMEOUT_FILTERABLE : KH_TIMEOUT_NON_FILTERABLE;
+        final long timeout = filteredOnly ? KH_TIMEOUT_FILTERABLE : KH_TIMEOUT_NON_FILTERABLE;
         
         // Iterate over all metric (execute them in independent processes)
         long t0 = System.currentTimeMillis();
@@ -88,7 +88,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         for (Class<?> metric : metrics) {
             String analysisName = metric.getSimpleName() + " on " + sourceTree.getName();
             System.err.println("  Run: " + analysisName + " (Metric " + (++metricIndex) + " of " + metrics.length + ")");
-            File configFile = prepareConfiguration(sourceTree, metric, defect, defects);
+            File configFile = prepareConfiguration(sourceTree, metric, defects, filteredOnly);
             
             // Execute the process, keep track of std out stream (we log every thing to console)
             boolean success = false;
@@ -205,18 +205,18 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
     @Override
     protected List<MultiMetricResult> runNonFilterableMetrics(File sourceTree, List<FileDefect> defects)
         throws IOException, SetUpException {
-        return runAnalysis(sourceTree, UNFILTERABLE_METRICS, null, defects);
+        return runAnalysis(sourceTree, UNFILTERABLE_METRICS, defects, false);
     }
 
     @Override
-    protected List<MultiMetricResult> runLineFilteredMetrics(File sourceTree, FileDefect defect)
+    protected List<MultiMetricResult> runLineFilteredMetrics(File sourceTree, List<FileDefect> defects)
         throws IOException, SetUpException {
         
-        return runAnalysis(sourceTree, FILTERABLE_METRICS, defect, null);
+        return runAnalysis(sourceTree, FILTERABLE_METRICS, defects, true);
     }
     
-    private File prepareConfiguration(File sourceTree, Class<?> metricClass, @Nullable FileDefect defect,
-        @Nullable List<FileDefect> defects) throws FileNotFoundException, IOException {
+    private File prepareConfiguration(File sourceTree, Class<?> metricClass, @Nullable List<FileDefect> defects,
+            boolean filteredOnly) throws FileNotFoundException, IOException {
         
         // Read configuration template
         // Stores properties in a sorted order (for debugging issues only):
@@ -237,10 +237,25 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         // Adapt configuration based to current checkout and metric to execute
         props.setProperty("source_tree", sourceTree.getAbsolutePath());
         props.setProperty("analysis.metrics_runner.metrics_class", metricClass.getCanonicalName());
-        if (null != defect) {
-            String file = defect.getPath() + defect.getFile();
-            props.setProperty("code.extractor.files", file);
-            props.setProperty("analysis.code_function.line", String.valueOf(defect.getLine()));            
+        if (filteredOnly) {
+            
+            StringBuilder filesSetting = new StringBuilder();
+            StringBuilder linesSetting = new StringBuilder();
+            
+            for (FileDefect defect : defects) {
+                filesSetting.append(defect.getPath()).append(defect.getFile()).append(", ");
+                linesSetting.append(defect.getPath()).append(defect.getFile()).append(":").append(defect.getLine())
+                .append(", ");
+            }
+            filesSetting.replace(filesSetting.length() - 2, filesSetting.length(), ""); // remove trailing ", "
+            linesSetting.replace(linesSetting.length() - 2, linesSetting.length(), ""); // remove trailing ", "
+            
+            // TODO: debug output
+            System.err.println(" > fileSetting = " + filesSetting.toString());
+            System.err.println(" > linesSetting = " + linesSetting.toString());
+            
+            props.setProperty("code.extractor.files", filesSetting.toString());
+            props.setProperty("analysis.code_function.lines", linesSetting.toString());            
         }
         if (null != defects) {
             StringJoiner sj = new StringJoiner(",");
