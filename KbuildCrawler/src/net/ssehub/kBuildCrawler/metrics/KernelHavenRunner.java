@@ -92,7 +92,7 @@ class KernelHavenRunner extends AbstractKernelHavenRunner implements IAnalysisOb
         props.setProperty("source_tree", sourceTree.getAbsolutePath());
         props.setProperty("analysis.class", AllLineFilterableFunctionMetrics.class.getCanonicalName());
         props.setProperty("code.extractor.files", filesSetting.toString());
-        props.setProperty("analysis.code_function.line", linesSetting.toString());
+        props.setProperty("analysis.code_function.lines", linesSetting.toString());
         
         AllLineFilterableFunctionMetrics.setAddObservable(true);
         ObservableAnalysis.setObservers(this);
