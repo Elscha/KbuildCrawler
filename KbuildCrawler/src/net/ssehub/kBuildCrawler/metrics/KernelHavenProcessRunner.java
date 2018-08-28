@@ -123,6 +123,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                 List<Path> list = new ArrayList<>();
                 Files.newDirectoryStream(Paths.get(KH_DIR, "output"), p -> p.toFile().getName().endsWith(".csv"))
                     .forEach(list::add);
+                Collections.sort(list);
                 System.err.println("    " + list.size() + " files produced for " + analysisName + ", start merging them");
                 
                 int fileIndex = 1;
