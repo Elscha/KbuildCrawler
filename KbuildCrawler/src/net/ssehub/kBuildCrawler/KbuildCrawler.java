@@ -103,15 +103,13 @@ public class KbuildCrawler {
         GitInterface git = new GitInterface(gitFolder);
         AbstractKernelHavenRunner runner = KernelHavenRunnerFactory.createRunner(true);
         
-        String[] newHeader = null;
         int failureIndex = 0;
-        int resultLineIndex = 1;
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss (dd.MM.yy)");
+        String[] previousHeader = null;
         
         try (ExcelBook output = new ExcelBook(new File(Timestamp.INSTANCE.getFilename("MetricsResult", "xlsx")))) {
             try (ExcelSheetWriter writer = output.getWriter("Result")) {
         
-                boolean firstExcelLine = true;
                 for (FailureTrace failureTrace : failures) {
                     if (DEBUG_PROCESS_ONLY > 0 && failureIndex >= DEBUG_PROCESS_ONLY) {
                         System.err.println("Stopping early, because DEBUG_PROCESS_ONLY is set to " + DEBUG_PROCESS_ONLY);
@@ -136,27 +134,32 @@ public class KbuildCrawler {
                     List<MultiMetricResult> result = runner.run(git, failureTrace);        
                     if (result != null && !result.isEmpty()) {
                         Logger.get().logInfo("Got result for " + name);
-                        int multiResultIndex = 0;
                         for (MultiMetricResult multiMetricResult : result) {
                             
-                            // TODO: temporary debug output
-                            multiResultIndex++;
-                            resultLineIndex++;
-                            System.err.println("> Result " + multiResultIndex + " for failure " + failureIndex
-                                    + " (line " + resultLineIndex + " in excel sheet)");
-                            System.err.println("\t> Number of Metrics: " + multiMetricResult.getMetrics().length);
-                            System.err.println("\t> Metrics: " + Arrays.toString(multiMetricResult.getMetrics()));
-                            System.err.println("\t> Number of Values: " + multiMetricResult.getValues().length);
-                            System.err.println("\t> Values: " + Arrays.toString(multiMetricResult.getValues()));
-                            
                             int oldLength = multiMetricResult.getHeader().length;
-                            if (null == newHeader) {
-                                newHeader = new String[oldLength + 3];
+                            
+                            String[] currentHeader = multiMetricResult.getHeader();
+                            
+                            if (previousHeader == null || !Arrays.equals(previousHeader, currentHeader)) {
+                                
+                                if (previousHeader != null) {
+                                    System.err.println("Warning: Got a MultiMetricResult with a different set of "
+                                            + "metrics than the previous lines (writing an additional header line)");
+                                    System.err.println("\tExpected: " + Arrays.toString(previousHeader));
+                                    System.err.println("\tGot: " + Arrays.toString(currentHeader));
+                                }
+                                
+                                String[] newHeader = new String[oldLength + 3];
                                 newHeader[0] = "Date";
                                 newHeader[1] = "Repository";
                                 newHeader[2] = "Commit";
-                                System.arraycopy(multiMetricResult.getHeader(), 0, newHeader, 3, oldLength);
+                                System.arraycopy(currentHeader, 0, newHeader, 3, oldLength);
+                                
+                                writer.writeHeader((Object[]) newHeader);
+                                
+                                previousHeader = currentHeader;
                             }
+                            
                             
                             Object[] newValues = new Object[oldLength + 3];
                             newValues[0] = failureTrace.getMail().getDate();
@@ -167,10 +170,6 @@ public class KbuildCrawler {
                             }
                             System.arraycopy(multiMetricResult.getContent(), 0, newValues, 3, oldLength);
                             
-                            if (firstExcelLine) {
-                                firstExcelLine = false;
-                                writer.writeHeader((Object[]) newHeader);
-                            }
                             writer.writeRow(newValues);
                             writer.flush();
                         }
