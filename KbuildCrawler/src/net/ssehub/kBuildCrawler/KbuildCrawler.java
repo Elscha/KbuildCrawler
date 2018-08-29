@@ -105,7 +105,8 @@ public class KbuildCrawler {
         
         int failureIndex = 0;
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss (dd.MM.yy)");
-        String[] previousHeader = null;
+        String[] previousMetrics = null;
+        Boolean previousConsideredIncludedFile = null;
         
         try (ExcelBook output = new ExcelBook(new File(Timestamp.INSTANCE.getFilename("MetricsResult", "xlsx")))) {
             try (ExcelSheetWriter writer = output.getWriter("Result")) {
@@ -138,28 +139,37 @@ public class KbuildCrawler {
                             
                             int oldLength = multiMetricResult.getHeader().length;
                             
-                            String[] currentHeader = multiMetricResult.getHeader();
-                            
-                            if (previousHeader == null || !Arrays.equals(previousHeader, currentHeader)) {
+                            if (previousMetrics == null) {
+                                previousMetrics = multiMetricResult.getMetrics();
+                                previousConsideredIncludedFile = multiMetricResult.getMeasuredItem().isConsiderIncludedFile();
                                 
-                                if (previousHeader != null) {
-                                    System.err.println("Warning: Got a MultiMetricResult with a different set of "
-                                            + "metrics than the previous lines (writing an additional header line)");
-                                    System.err.println("\tExpected: " + Arrays.toString(previousHeader));
-                                    System.err.println("\tGot: " + Arrays.toString(currentHeader));
-                                }
-                                
+                                // write excel header
                                 String[] newHeader = new String[oldLength + 3];
                                 newHeader[0] = "Date";
                                 newHeader[1] = "Repository";
                                 newHeader[2] = "Commit";
-                                System.arraycopy(currentHeader, 0, newHeader, 3, oldLength);
-                                
+                                System.arraycopy(multiMetricResult.getHeader(), 0, newHeader, 3, oldLength);
                                 writer.writeHeader((Object[]) newHeader);
-                                
-                                previousHeader = currentHeader;
                             }
                             
+                            try {
+                                multiMetricResult = AbstractKernelHavenRunner.tryFixToFormat(previousMetrics, multiMetricResult);
+                            } catch (IllegalArgumentException e) {
+                                System.err.println("Error! Can't adapt MultiMetricResult to expected format");
+                                System.err.println("Expected Metrics: " + Arrays.toString(previousMetrics));
+                                System.err.println("Actual Metrics:   " + Arrays.toString(multiMetricResult.getMetrics()));
+                                System.err.println("Skipping this line");
+                                continue;
+                            }
+                            
+                            if (multiMetricResult.getMeasuredItem().isConsiderIncludedFile() != previousConsideredIncludedFile) {
+                                System.err.println("Warning: Found element with isConsiderIncludedFile = "
+                                        + multiMetricResult.getMeasuredItem().isConsiderIncludedFile() + ", but expected "
+                                        + previousConsideredIncludedFile);
+                                System.err.println("Forcibly setting value to " + previousConsideredIncludedFile
+                                        + " to match header (potential loss of information)");
+                                multiMetricResult.getMeasuredItem().setConsiderIncludedFile(previousConsideredIncludedFile);
+                            }
                             
                             Object[] newValues = new Object[oldLength + 3];
                             newValues[0] = failureTrace.getMail().getDate();

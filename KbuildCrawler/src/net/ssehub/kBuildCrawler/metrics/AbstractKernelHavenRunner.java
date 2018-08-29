@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.ssehub.kBuildCrawler.git.GitException;
 import net.ssehub.kBuildCrawler.git.GitInterface;
@@ -299,6 +301,78 @@ public abstract class AbstractKernelHavenRunner {
         System.arraycopy(values2, 0, combinedValues, values1.length, values2.length);
         
         return new MultiMetricResult(r1.getMeasuredItem(), combinedMetrics, combinedValues);
+    }
+    
+    /**
+     * <p>
+     * Tries to convert the given multiResult in a way that it matches the expected header. If the order of the entries
+     * is different, they are reordered. If entries are missing, <code>null</code> elements are added in their place.
+     * </p>
+     * <p>
+     * If the {@link MultiMetricResult} contains metrics that are not in the expected header, the result can't be
+     * converted and an {@link IllegalArgumentException} is thrown.
+     * </p>
+     * 
+     * @param expectedMetrics The expected list of metrics.
+     * @param multiResult The {@link MultiMetricResult} to convert to the expected header.
+     * 
+     * @return A fixed {@link MultiMetricResult}. (no-op if the multiResult already matches expectedMetrics)
+     * 
+     * @throws IllegalArgumentException If the multiResult can't be adapted to the expected metrics.
+     */
+    public static MultiMetricResult tryFixToFormat(String[] expectedMetrics, MultiMetricResult multiResult)
+        throws IllegalArgumentException {
+        
+        MultiMetricResult result;
+        
+        if (Arrays.equals(expectedMetrics, multiResult.getMetrics())) {
+            // no problem, everything matches :-)
+            result = multiResult;
+            
+        } else {
+            
+            // convert both metric lists to sets
+            Set<String> expectedMetricSet = new HashSet<>();
+            for (String expectedMetric : expectedMetrics) {
+                boolean newEntry = expectedMetricSet.add(expectedMetric);
+                if (!newEntry) {
+                    throw new IllegalArgumentException("Found same metric name twice: " + expectedMetric);
+                }
+            }
+            
+            Set<String> actualMetricSet = new HashSet<>();
+            for (String actualMetric : multiResult.getMetrics()) {
+                boolean newEntry = actualMetricSet.add(actualMetric);
+                if (!newEntry) {
+                    throw new IllegalArgumentException("Found same metric name twice: " + actualMetric);
+                }
+            }
+            
+            // check that actualMetricSet is a subset of expectedMetricSet
+            if (!expectedMetricSet.containsAll(actualMetricSet)) {
+                actualMetricSet.removeAll(expectedMetricSet);
+                throw new IllegalArgumentException("Found new metrics that are not in the expected list: " + actualMetricSet);
+            }
+            
+            // convert actual result to a map
+            Map<String, Double> actualMetricMap = new HashMap<>();
+            for (int i = 0; i < multiResult.getMetrics().length; i++) {
+                actualMetricMap.put(multiResult.getMetrics()[i], multiResult.getValues()[i]);
+            }
+            
+            // build a new MultiMetricResult in correct order, and with null values filled
+            String[] newMetrics = new String[expectedMetrics.length];
+            Double[] newValues = new Double[expectedMetrics.length];
+            for (int i = 0; i < expectedMetrics.length; i++) {
+                String metric = expectedMetrics[i];
+                newMetrics[i] = metric;
+                newValues[i] = actualMetricMap.getOrDefault(metric, null);
+            }
+            
+            result = new MultiMetricResult(multiResult.getMeasuredItem(), newMetrics, newValues);
+        }
+        
+        return result;
     }
     
 }

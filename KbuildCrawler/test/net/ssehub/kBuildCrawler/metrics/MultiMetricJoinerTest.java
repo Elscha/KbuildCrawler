@@ -110,4 +110,114 @@ public class MultiMetricJoinerTest {
                 result.get(1).getContent());
     }
     
+    @Test
+    public void testTryFixToFormat_CorrectMetrics() {
+        MultiMetricResult mmr = new MultiMetricResult(new MeasuredItem("some/file.c", 14, "func1"),
+                new String[] {"Fan In", "Fan Out"},
+                new Double[] {13.2, -34.2}
+        );
+        String[] expecteMetrics = {"Fan In", "Fan Out"};
+        
+        MultiMetricResult fixed = KernelHavenRunner.tryFixToFormat(expecteMetrics, mmr);
+        
+        assertArrayEquals(
+                new String[] {"Source File", "Line No.", "Element", "Fan In", "Fan Out"},
+                fixed.getHeader());
+        
+        assertArrayEquals(
+                new Object[] {"some/file.c", 14, "func1", 13.2, -34.2},
+                fixed.getContent());
+    }
+    
+    @Test
+    public void testTryFixToFormat_MissingValue() {
+        MultiMetricResult mmr = new MultiMetricResult(new MeasuredItem("some/file.c", 14, "func1"),
+                new String[] {"Fan In", "Fan Out"},
+                new Double[] {13.2, -34.2}
+        );
+        String[] expecteMetrics = {"Fan In", "Fan Out", "McCabe"};
+        
+        MultiMetricResult fixed = KernelHavenRunner.tryFixToFormat(expecteMetrics, mmr);
+        
+        assertArrayEquals(
+                new String[] {"Source File", "Line No.", "Element", "Fan In", "Fan Out", "McCabe"},
+                fixed.getHeader());
+        
+        assertArrayEquals(
+                new Object[] {"some/file.c", 14, "func1", 13.2, -34.2, null},
+                fixed.getContent());
+    }
+    
+    @Test
+    public void testTryFixToFormat_WrongOrder() {
+        MultiMetricResult mmr = new MultiMetricResult(new MeasuredItem("some/file.c", 14, "func1"),
+                new String[] {"Fan In", "Fan Out"},
+                new Double[] {13.2, -34.2}
+        );
+        String[] expecteMetrics = {"Fan Out", "Fan In"};
+        
+        MultiMetricResult fixed = KernelHavenRunner.tryFixToFormat(expecteMetrics, mmr);
+        
+        assertArrayEquals(
+                new String[] {"Source File", "Line No.", "Element", "Fan Out", "Fan In"},
+                fixed.getHeader());
+        
+        assertArrayEquals(
+                new Object[] {"some/file.c", 14, "func1", -34.2, 13.2},
+                fixed.getContent());
+    }
+    
+    @Test
+    public void testTryFixToFormat_WrongOrderAndMissing() {
+        MultiMetricResult mmr = new MultiMetricResult(new MeasuredItem("some/file.c", 14, "func1"),
+                new String[] {"Fan In", "Fan Out"},
+                new Double[] {13.2, -34.2}
+        );
+        String[] expecteMetrics = {"Fan Out", "McCabe", "Fan In"};
+        
+        MultiMetricResult fixed = KernelHavenRunner.tryFixToFormat(expecteMetrics, mmr);
+        
+        assertArrayEquals(
+                new String[] {"Source File", "Line No.", "Element", "Fan Out", "McCabe", "Fan In"},
+                fixed.getHeader());
+        
+        assertArrayEquals(
+                new Object[] {"some/file.c", 14, "func1", -34.2, null, 13.2},
+                fixed.getContent());
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testTryFixToFormat_DoubleActualName() {
+        MultiMetricResult mmr = new MultiMetricResult(new MeasuredItem("some/file.c", 14, "func1"),
+                new String[] {"Fan In", "Fan In"},
+                new Double[] {13.2, -34.2}
+        );
+        String[] expecteMetrics = {"Fan Out", "Fan In"};
+        
+        KernelHavenRunner.tryFixToFormat(expecteMetrics, mmr);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testTryFixToFormat_DoubleExpectedName() {
+        MultiMetricResult mmr = new MultiMetricResult(new MeasuredItem("some/file.c", 14, "func1"),
+                new String[] {"Fan In", "Fan Out"},
+                new Double[] {13.2, -34.2}
+        );
+        String[] expecteMetrics = {"Fan Out", "Fan Out"};
+        
+        KernelHavenRunner.tryFixToFormat(expecteMetrics, mmr);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testTryFixToFormat_ActualContainsMore() {
+        MultiMetricResult mmr = new MultiMetricResult(new MeasuredItem("some/file.c", 14, "func1"),
+                new String[] {"Fan In", "Fan Out", "McCabe"},
+                new Double[] {13.2, -34.2, 2.0}
+        );
+        String[] expecteMetrics = {"Fan In", "Fan Out"};
+        
+        KernelHavenRunner.tryFixToFormat(expecteMetrics, mmr);
+    }
+
+    
 }
