@@ -75,23 +75,23 @@ class KernelHavenRunner extends AbstractKernelHavenRunner implements IAnalysisOb
         Properties props = new Properties();
         props.load(new FileReader(new File("res/metric_base.properties")));
         
-        StringBuilder filesSetting = new StringBuilder();
+//        StringBuilder filesSetting = new StringBuilder();
         StringBuilder linesSetting = new StringBuilder();
         
         for (FileDefect defect : defects) {
-            filesSetting.append(defect.getPath()).append(defect.getFile()).append(", ");
+//            filesSetting.append(defect.getPath()).append(defect.getFile()).append(", ");
             linesSetting.append(defect.getPath()).append(defect.getFile()).append(":").append(defect.getLine())
             .append(", ");
         }
-        filesSetting.replace(filesSetting.length() - 2, filesSetting.length(), ""); // remove trailing ", "
+//        filesSetting.replace(filesSetting.length() - 2, filesSetting.length(), ""); // remove trailing ", "
         linesSetting.replace(linesSetting.length() - 2, linesSetting.length(), ""); // remove trailing ", "
         
-        props.setProperty("code.extractor.files", filesSetting.toString());
+//        props.setProperty("code.extractor.files", filesSetting.toString());
         props.setProperty("analysis.code_function.lines", linesSetting.toString());       
         
         props.setProperty("source_tree", sourceTree.getAbsolutePath());
         props.setProperty("analysis.class", AllLineFilterableFunctionMetrics.class.getCanonicalName());
-        props.setProperty("code.extractor.files", filesSetting.toString());
+//        props.setProperty("code.extractor.files", filesSetting.toString());
         props.setProperty("analysis.code_function.lines", linesSetting.toString());
         
         AllLineFilterableFunctionMetrics.setAddObservable(true);

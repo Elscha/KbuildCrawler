@@ -240,18 +240,18 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         props.setProperty("analysis.metrics_runner.metrics_class", metricClass.getCanonicalName());
         if (filteredOnly) {
             
-            StringBuilder filesSetting = new StringBuilder();
+//            StringBuilder filesSetting = new StringBuilder();
             StringBuilder linesSetting = new StringBuilder();
             
             for (FileDefect defect : defects) {
-                filesSetting.append(defect.getPath()).append(defect.getFile()).append(", ");
+//                filesSetting.append(defect.getPath()).append(defect.getFile()).append(", ");
                 linesSetting.append(defect.getPath()).append(defect.getFile()).append(":").append(defect.getLine())
                 .append(", ");
             }
-            filesSetting.replace(filesSetting.length() - 2, filesSetting.length(), ""); // remove trailing ", "
+//            filesSetting.replace(filesSetting.length() - 2, filesSetting.length(), ""); // remove trailing ", "
             linesSetting.replace(linesSetting.length() - 2, linesSetting.length(), ""); // remove trailing ", "
             
-            props.setProperty("code.extractor.files", filesSetting.toString());
+//            props.setProperty("code.extractor.files", filesSetting.toString());
             props.setProperty("analysis.code_function.lines", linesSetting.toString());            
         }
         if (null != defects) {
