@@ -1,5 +1,7 @@
 package net.ssehub.kBuildCrawler;
 
+import static net.ssehub.kernel_haven.util.null_checks.NullHelpers.notNull;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -41,7 +43,7 @@ public class KbuildCrawler {
         FileOutputStream out = new FileOutputStream(Timestamp.INSTANCE.getFilename("MailCrawler", "log"));
         Logger.get().clearAllTargets();
         Logger.get().addTarget(out);
-        Logger.get().setLevel(Level.DEBUG);
+        Logger.get().setLevel(Level.INFO);
         
         File gitRepo = new File("gitTest");
         
@@ -168,7 +170,7 @@ public class KbuildCrawler {
                                         + previousConsideredIncludedFile);
                                 System.err.println("Forcibly setting value to " + previousConsideredIncludedFile
                                         + " to match header (potential loss of information)");
-                                multiMetricResult.getMeasuredItem().setConsiderIncludedFile(previousConsideredIncludedFile);
+                                multiMetricResult.getMeasuredItem().setConsiderIncludedFile(notNull(previousConsideredIncludedFile));
                             }
                             
                             Object[] newValues = new Object[oldLength + 3];
