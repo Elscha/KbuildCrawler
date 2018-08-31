@@ -43,7 +43,7 @@ public class KbuildCrawler {
         FileOutputStream out = new FileOutputStream(Timestamp.INSTANCE.getFilename("MailCrawler", "log"));
         Logger.get().clearAllTargets();
         Logger.get().addTarget(out);
-        Logger.get().setLevel(Level.INFO);
+        Logger.get().setLevel(Level.DEBUG);
         
         File gitRepo = new File("gitTest");
         

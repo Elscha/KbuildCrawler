@@ -166,6 +166,49 @@ public class GitRepository {
     }
     
     /**
+     * Checks if the given remote branch is checked out in the local git repo.
+     * 
+     * @param remote The remote name.
+     * @param branch The branch name of the remote
+     * 
+     * @return Whether the repository contains the given remote branch.
+     * 
+     * @throws GitException 
+     */
+    public boolean containsRemoteBranch(String remote, String branch) throws GitException {
+        String output = runGitCommand("git", "branch", "-r");
+        
+        Set<String> branches = new HashSet<>();
+        
+        for (String line : output.split("\\n")) {
+            branches.add(line.trim());
+        }
+        
+        return branches.contains(remote + "/" + branch);
+    }
+    
+    /**
+     * Checks if the given commit is checked out in the local git repo.
+     * 
+     * @param commit The commit to check.
+     * 
+     * @return Whether the repository contains the given commit. Also <code>false</code> if something else goes wrong.
+     */
+    public boolean containsCommit(String commit) {
+        boolean exists;
+        
+        try {
+            runGitCommand("git", "cat-file", "-e", commit + "^{commit}");
+            exists = true;
+            
+        } catch (GitException e) {
+            exists = false;
+        }
+        
+        return exists;
+    }
+    
+    /**
      * The working directory of this git repository.
      * 
      * @return The working directory. This is an existing folder.

@@ -3,6 +3,7 @@ package net.ssehub.kBuildCrawler.git;
 import java.io.File;
 
 import net.ssehub.kBuildCrawler.git.mail_parsing.GitData;
+import net.ssehub.kernel_haven.util.Logger;
 
 /**
  * Interface for KbuildCrawler for interacting with git.
@@ -49,25 +50,49 @@ public class GitInterface {
         }
         
         String remoteName = GitRepository.createRemoteName(remoteUrl);
+        boolean fetched = false; // we only fetch on-demand; this stores if we already fetched
         
         // add and fetch remote
         if (!repo.getRemotes().contains(remoteName)) {
             repo.addRemote(remoteName, remoteUrl);
+            
+            // always fetch if we add a new remote
+            repo.fetch(remoteName);
+            fetched = true;
         }
-        repo.fetch(remoteName);
         
         String commit = commitInfo.getCommit(); // TODO: use getCommit() or getHead() here?
         if (commitInfo.is0DayCommit()) {
+            // only fetch if we don't yet have the branch
+            if (!fetched && !repo.containsRemoteBranch(remoteName, commitInfo.get0DayBranch())) {
+                repo.fetch(remoteName);
+                fetched = true;
+            }
             commit = repo.getLastCommitOfBranch(remoteName, commitInfo.get0DayBranch());
         }
         
         if (commit == null && commitInfo.getBranch() != null) {
             // if getCommit() is null, then use getBranch() and the date to get the URL
+            
+            // only fetch if we don't yet have the branch
+            if (!fetched && !repo.containsRemoteBranch(remoteName, commitInfo.getBranch())) {
+                repo.fetch(remoteName);
+                fetched = true;
+            }
+            
             commit = repo.getCommitBefore(remoteName, commitInfo.getBranch(), date);
         }
         if (commit == null) {
             throw new GitException("Both commit and branch are null");
         }
+        
+        // if we haven't fetched yet, check if we need to fetch in order to get the required commit
+        if (!fetched && !repo.containsCommit(commit)) {
+            repo.fetch(remoteName);
+            fetched = true;
+        }
+        
+        Logger.get().logDebug("Didn't need to fetch because commit " + commit + " already existed");
         
         repo.checkout(commit); 
     }
