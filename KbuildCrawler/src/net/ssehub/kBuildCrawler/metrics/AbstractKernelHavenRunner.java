@@ -128,7 +128,7 @@ public abstract class AbstractKernelHavenRunner {
         
         for (FileDefect defect : defects) {
             
-            if (checker.isWithinFunction(new File(defect.getFile()), defect.getLine())) {
+            if (checker.isWithinFunction(new File(defect.getPath(), defect.getFile()), defect.getLine())) {
                 return true;
             }
             
