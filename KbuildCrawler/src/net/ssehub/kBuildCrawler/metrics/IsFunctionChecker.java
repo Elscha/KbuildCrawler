@@ -14,6 +14,7 @@ import net.ssehub.kernel_haven.code_model.ast.ISyntaxElementVisitor;
 import net.ssehub.kernel_haven.config.Configuration;
 import net.ssehub.kernel_haven.config.DefaultSettings;
 import net.ssehub.kernel_haven.srcml.SrcMLExtractor;
+import net.ssehub.kernel_haven.test_utils.TestConfiguration;
 import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
@@ -44,7 +45,7 @@ public class IsFunctionChecker {
         Holder holder = new Holder();
         
         try {
-            Configuration config = new Configuration(new Properties());
+            Configuration config = new TestConfiguration(new Properties());
             
             config.registerSetting(DefaultSettings.SOURCE_TREE);
             config.setValue(DefaultSettings.SOURCE_TREE, sourceTree);
