@@ -16,9 +16,10 @@
     <property name="libs.all.dir" value="lib"/>
     <property name="libs.compile.dir" value="${libs.all.dir}/compile"/>
     <property name="libs.test.dir" value="${libs.all.dir}/junit"/>
-	  <property name="kernelhaven.location" value="http://jenkins.sse.uni-hildesheim.de/job/KernelHaven_Infrastructure/lastSuccessfulBuild/artifact/build/jar/KernelHaven_withsource.jar" />
-	  <property name="metrichaven.location" value="http://jenkins.sse.uni-hildesheim.de/job/KernelHaven_MetricHaven/lastSuccessfulBuild/artifact/build/jar/MetricHaven_withsource.jar" />
-	  <property name="ioutils.location" value="http://jenkins.sse.uni-hildesheim.de/job/KernelHaven_IOUtils/lastSuccessfulBuild/artifact/build/jar/IOUtils_withsource.jar" />
+	<property name="kernelhaven.location" value="http://jenkins.sse.uni-hildesheim.de/job/KernelHaven_Infrastructure/lastSuccessfulBuild/artifact/build/jar/KernelHaven_withsource.jar" />
+	<property name="metrichaven.location" value="http://jenkins.sse.uni-hildesheim.de/job/KernelHaven_MetricHaven/lastSuccessfulBuild/artifact/build/jar/MetricHaven_withsource.jar" />
+	<property name="ioutils.location" value="http://jenkins.sse.uni-hildesheim.de/job/KernelHaven_IOUtils/lastSuccessfulBuild/artifact/build/jar/IOUtils_withsource.jar" />
+	<property name="srcml.location" value="https://jenkins.sse.uni-hildesheim.de/job/KernelHaven_SrcMlExtractor/lastSuccessfulBuild/artifact/build/jar/SrcMLExtractor_withsource.jar" />
     <!-- Compiler settings -->
     <property name="javacSource" value="1.8"/>
     <property name="javacTarget" value="1.8"/>
@@ -61,6 +62,7 @@
     	  <get src="${kernelhaven.location}" dest="${build.dependencies.dir}/" />
     	  <get src="${metrichaven.location}" dest="${build.dependencies.dir}/" />
     	  <get src="${ioutils.location}" dest="${build.dependencies.dir}/" />
+    	  <get src="${srcml.location}" dest="${build.dependencies.dir}/" />
     </target>
   
     <target name="compile" depends="init">
