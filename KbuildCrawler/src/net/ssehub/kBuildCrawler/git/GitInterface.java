@@ -92,7 +92,9 @@ public class GitInterface {
             fetched = true;
         }
         
-        Logger.get().logDebug("Didn't need to fetch because commit " + commit + " already existed");
+        if (!fetched) {
+            Logger.get().logDebug("Didn't need to fetch because commit " + commit + " already existed");
+        }
         
         repo.checkout(commit); 
     }
