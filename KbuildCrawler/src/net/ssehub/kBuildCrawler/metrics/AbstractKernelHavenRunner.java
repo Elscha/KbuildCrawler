@@ -45,6 +45,12 @@ public abstract class AbstractKernelHavenRunner {
             
             LOGGER.logInfo("Source tree checked out at " + git.getSourceTree());
             
+            if (!checkIfNeedToRun(git.getSourceTree(), ftrace.getDefects())) {
+                LOGGER.logInfo("Don't need to run this, because no defect lies within a function");
+                
+                return result;
+            }
+            
             List<MultiMetricResult> completeTree = null;
             List<MultiMetricResult> functionMetrics = new LinkedList<>();
             
@@ -107,6 +113,27 @@ public abstract class AbstractKernelHavenRunner {
     protected abstract List<MultiMetricResult> runLineFilteredMetrics(File sourceTree, List<FileDefect> defects)
         throws IOException, SetUpException;
     
+    
+    /**
+     * Checks if any of the given defects lies within a function. If this is not the case, then we don't need to run
+     * our metrics.
+     * 
+     * @param defects The defects to check.
+     * @return Whether any of the defects lies within a function
+     */
+    private boolean checkIfNeedToRun(File sourceTree, List<FileDefect> defects) {
+        IsFunctionChecker checker = new IsFunctionChecker(sourceTree);
+        
+        for (FileDefect defect : defects) {
+            
+            if (checker.isWithinFunction(new File(defect.getFile()), defect.getLine())) {
+                return true;
+            }
+            
+        }
+        
+        return false;
+    }
     
     /**
      * <p>
