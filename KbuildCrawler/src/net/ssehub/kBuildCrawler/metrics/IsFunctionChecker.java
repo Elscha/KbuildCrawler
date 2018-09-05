@@ -52,11 +52,11 @@ public class IsFunctionChecker {
             
             SrcMLExtractor extractor = new SrcMLExtractor();
             
-            Method initMethod = extractor.getClass().getMethod("init", Configuration.class);
+            Method initMethod = extractor.getClass().getDeclaredMethod("init", Configuration.class);
             initMethod.setAccessible(true);
             initMethod.invoke(extractor, config);
             
-            Method runOnFileMethod = extractor.getClass().getMethod("runOnFile", File.class);
+            Method runOnFileMethod = extractor.getClass().getDeclaredMethod("runOnFile", File.class);
             runOnFileMethod.setAccessible(true);
             SourceFile result = (SourceFile) runOnFileMethod.invoke(extractor, file);
             
