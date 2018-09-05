@@ -2,7 +2,6 @@ package net.ssehub.kBuildCrawler.metrics;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Properties;
 
 import net.ssehub.kernel_haven.SetUpException;
@@ -14,7 +13,6 @@ import net.ssehub.kernel_haven.code_model.ast.ISyntaxElementVisitor;
 import net.ssehub.kernel_haven.config.Configuration;
 import net.ssehub.kernel_haven.config.DefaultSettings;
 import net.ssehub.kernel_haven.srcml.SrcMLExtractor;
-import net.ssehub.kernel_haven.test_utils.TestConfiguration;
 import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.null_checks.NonNull;
 
@@ -35,9 +33,6 @@ public class IsFunctionChecker {
     }
     
     public boolean isWithinFunction(File file, int line) {
-        Properties props = new Properties();
-        props.setProperty("resource_dir", resourceDir.getAbsolutePath());
-
         // isInFunction is wrapped inside a class, so its accessible to the anonymous inner class below
         class Holder {
             boolean isInFunction; 
@@ -45,16 +40,15 @@ public class IsFunctionChecker {
         Holder holder = new Holder();
         
         try {
-            Configuration config = new TestConfiguration(new Properties());
+            Properties props = new Properties();
+            props.setProperty(DefaultSettings.SOURCE_TREE.getKey(), sourceTree.getAbsolutePath());
+            props.setProperty(DefaultSettings.RESOURCE_DIR.getKey(), resourceDir.getAbsolutePath());
+            props.setProperty(DefaultSettings.CODE_EXTRACTOR_FILES.getKey(), file.getPath());
             
+            Configuration config = new Configuration(props);
             config.registerSetting(DefaultSettings.SOURCE_TREE);
-            config.setValue(DefaultSettings.SOURCE_TREE, sourceTree);
-            
             config.registerSetting(DefaultSettings.RESOURCE_DIR);
-            config.setValue(DefaultSettings.RESOURCE_DIR, resourceDir);
-            
             config.registerSetting(DefaultSettings.CODE_EXTRACTOR_FILES);
-            config.setValue(DefaultSettings.CODE_EXTRACTOR_FILES, Arrays.asList(file.getPath()));
             
             SrcMLExtractor extractor = new SrcMLExtractor();
             
