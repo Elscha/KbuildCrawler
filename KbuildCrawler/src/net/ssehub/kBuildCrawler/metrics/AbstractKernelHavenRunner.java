@@ -45,11 +45,13 @@ public abstract class AbstractKernelHavenRunner {
             
             LOGGER.logInfo("Source tree checked out at " + git.getSourceTree());
             
+            LOGGER.logInfo("Checking if we need to run metrics...");
             if (!checkIfNeedToRun(git.getSourceTree(), ftrace.getDefects())) {
                 LOGGER.logInfo("Don't need to run this, because no defect lies within a function");
                 
                 return result;
             }
+            LOGGER.logInfo("Starting to run metrics");
             
             List<MultiMetricResult> completeTree = null;
             List<MultiMetricResult> functionMetrics = new LinkedList<>();
