@@ -60,7 +60,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
      * 10 min time out.
      */
     private static final long KH_TIMEOUT_FILTERABLE = 10 * 60 * 1000;
-    private static final int MAX_TRIES = 3;
+    private static final int MAX_TRIES = 1;
 
     private static final int MAX_GB_FOR_KH = 50;
     private static final String MAX_MEMORY = "-Xmx" + MAX_GB_FOR_KH + "G";
