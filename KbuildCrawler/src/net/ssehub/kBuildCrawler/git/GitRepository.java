@@ -245,8 +245,8 @@ public class GitRepository {
             
         } finally {
             if (DEBUG_LOGGING) {
-                LOGGER.logDebug("Stdout:", stdout.toString().trim());
-                LOGGER.logDebug("Stderr:", stderr.toString().trim());
+                logWithLimit("Stdout:", stdout.toString().trim(), 20);
+                logWithLimit("Stderr:", stderr.toString().trim(), 50);
             }
         }
         
@@ -255,6 +255,15 @@ public class GitRepository {
         }
         
         return stdout.toString().trim();
+    }
+    
+    private void logWithLimit(String header, String message, int limit) {
+        if (message.chars().filter((c) -> c == '\n').count() > limit) {
+            LOGGER.logDebug(header, "<too long>");
+        } else {
+            LOGGER.logDebug(header, message);
+            
+        }
     }
     
 }
