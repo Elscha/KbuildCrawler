@@ -95,6 +95,10 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             int tries = 0;
             String errLog = null;
             do {
+                // clear output folder of kernelhaven before starting
+                File outputFolder = new File("kh/output");
+                Util.clearFolder(outputFolder);
+                
                 long started = System.currentTimeMillis();
                 OutputStream outStream = new ByteArrayOutputStream();
                 OutputStream errStream = new ByteArrayOutputStream();
