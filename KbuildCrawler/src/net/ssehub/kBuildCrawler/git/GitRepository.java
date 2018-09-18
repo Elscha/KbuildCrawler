@@ -246,7 +246,7 @@ public class GitRepository {
         } finally {
             if (DEBUG_LOGGING) {
                 logWithLimit("Stdout:", stdout.toString().trim(), 20);
-                logWithLimit("Stderr:", stderr.toString().trim(), 50);
+                logWithLimit("Stderr:", stderr.toString().trim(), 1000);
             }
         }
         
