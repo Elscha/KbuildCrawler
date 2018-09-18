@@ -52,6 +52,8 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
     private static final Class<?>[] FILTERABLE_METRICS = {BlocksPerFunctionMetric.class, CyclomaticComplexityMetric.class,
         DLoC.class, NestingDepthMetric.class, VariablesPerFunctionMetric.class, TanglingDegreeFunctionMetric.class};
     
+    private static final File SD_CACHE_FILE = new File("kh/sd_cache.csv");
+    
     /**
      * 1h time out.
      */
@@ -65,6 +67,26 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
     private static final int MAX_GB_FOR_KH = 50;
     private static final String MAX_MEMORY = "-Xmx" + MAX_GB_FOR_KH + "G";
     private static final String INITIAL_MEMORY = "-Xms" + MAX_GB_FOR_KH + "G";
+    
+    public KernelHavenProcessRunner() {
+        if (SD_CACHE_FILE.exists()) {
+            SD_CACHE_FILE.delete();
+        }
+        
+        if (SD_CACHE_FILE.exists()) {
+            LOGGER.logError("ScatteringDegree cache file " + SD_CACHE_FILE + " exists (but shouldn't)!");
+        }
+    }
+    
+    @Override
+    protected void clearAfterFullRun() {
+        SD_CACHE_FILE.delete();
+        
+        LOGGER.logDebug("Cleared SD cache");
+        if (SD_CACHE_FILE.exists()) {
+            LOGGER.logError("Unable to clear ScatteringDegree cache file " + SD_CACHE_FILE);
+        }
+    }
     
     /**
      * Creates the configuration and performs the analysis in (multiple) separate processes.
@@ -247,18 +269,22 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         props.setProperty("analysis.metrics_runner.metrics_class", metricClass.getCanonicalName());
         if (filteredOnly) {
             
-//            StringBuilder filesSetting = new StringBuilder();
+            StringBuilder filesSetting = new StringBuilder();
             StringBuilder linesSetting = new StringBuilder();
             
             for (FileDefect defect : defects) {
-//                filesSetting.append(defect.getPath()).append(defect.getFile()).append(", ");
+                filesSetting.append(defect.getPath()).append(defect.getFile()).append(", ");
                 linesSetting.append(defect.getPath()).append(defect.getFile()).append(":").append(defect.getLine())
                 .append(", ");
             }
-//            filesSetting.replace(filesSetting.length() - 2, filesSetting.length(), ""); // remove trailing ", "
+            filesSetting.replace(filesSetting.length() - 2, filesSetting.length(), ""); // remove trailing ", "
             linesSetting.replace(linesSetting.length() - 2, linesSetting.length(), ""); // remove trailing ", "
             
-//            props.setProperty("code.extractor.files", filesSetting.toString());
+            if (sdCacheValid()) {
+                // if the ScatteringDegree cache exists and is valid, we can filter the source files that we need to parse
+                LOGGER.logDebug("Filtering code files because SD cache is valid", "Filter: " + filesSetting.toString());
+                props.setProperty("code.extractor.files", filesSetting.toString());
+            }
             props.setProperty("analysis.code_function.lines", linesSetting.toString());            
         }
         if (null != defects) {
@@ -283,6 +309,10 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         }
         
         return tmpProperties;
+    }
+    
+    private boolean sdCacheValid() {
+        return SD_CACHE_FILE.isFile() && SD_CACHE_FILE.length() > 33; // header length is 33 bytes
     }
 
 }

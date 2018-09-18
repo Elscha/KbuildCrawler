@@ -76,6 +76,8 @@ public abstract class AbstractKernelHavenRunner {
             }
             duration = System.currentTimeMillis() - t0;
             System.err.println("  Running filterable metrics took " + duration + "ms");
+            
+            clearAfterFullRun();
 
             t0 = System.currentTimeMillis();
             result = joinFunctionAndCompleteMetricResults(completeTree, functionMetrics);
@@ -89,6 +91,14 @@ public abstract class AbstractKernelHavenRunner {
         return result;
     }
     
+    /**
+     * Called each time a run of unfiltered and filtered metric calls was executed. After this, the source tree
+     * will likely change, thus all cache should be cleared.
+     */
+    protected void clearAfterFullRun() {
+        // nothing to do by default
+    }
+
     /**
      * Executes all metrics, which must be executed on the source code of the <b>complete</b> product line.
      * <tt>defects</tt> may be used to filter the results <b>after</b> the metric execution.
