@@ -6,14 +6,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import net.ssehub.kBuildCrawler.git.GitException;
 import net.ssehub.kBuildCrawler.git.GitInterface;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FailureTrace;
+import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
+import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect.Type;
 import net.ssehub.kBuildCrawler.git.mail_parsing.GitData;
 import net.ssehub.kBuildCrawler.git.mail_parsing.GitUtils;
 import net.ssehub.kBuildCrawler.mail.IMailSource;
@@ -25,6 +30,7 @@ import net.ssehub.kBuildCrawler.metrics.AbstractKernelHavenRunner;
 import net.ssehub.kBuildCrawler.metrics.KernelHavenRunnerFactory;
 import net.ssehub.kernel_haven.io.excel.ExcelBook;
 import net.ssehub.kernel_haven.io.excel.ExcelSheetWriter;
+import net.ssehub.kernel_haven.metric_haven.multi_results.MeasuredItem;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
 import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.Logger;
@@ -137,7 +143,11 @@ public class KbuildCrawler {
                     List<MultiMetricResult> result = runner.run(git, failureTrace);        
                     if (result != null && !result.isEmpty()) {
                         Logger.get().logInfo("Got result for " + name);
+                        
+                        List<Type> types = determineTypes(result, failureTrace.getDefects());
+                        int resultIndex = -1;
                         for (MultiMetricResult multiMetricResult : result) {
+                            resultIndex++;
                             
                             int oldLength = multiMetricResult.getHeader().length;
                             
@@ -146,11 +156,12 @@ public class KbuildCrawler {
                                 previousConsideredIncludedFile = multiMetricResult.getMeasuredItem().isConsiderIncludedFile();
                                 
                                 // write excel header
-                                String[] newHeader = new String[oldLength + 3];
+                                String[] newHeader = new String[oldLength + 4];
                                 newHeader[0] = "Date";
                                 newHeader[1] = "Repository";
                                 newHeader[2] = "Commit";
-                                System.arraycopy(multiMetricResult.getHeader(), 0, newHeader, 3, oldLength);
+                                newHeader[3] = "Type";
+                                System.arraycopy(multiMetricResult.getHeader(), 0, newHeader, 4, oldLength);
                                 writer.writeHeader((Object[]) newHeader);
                             }
                             
@@ -173,14 +184,15 @@ public class KbuildCrawler {
                                 multiMetricResult.getMeasuredItem().setConsiderIncludedFile(notNull(previousConsideredIncludedFile));
                             }
                             
-                            Object[] newValues = new Object[oldLength + 3];
+                            Object[] newValues = new Object[oldLength + 4];
                             newValues[0] = failureTrace.getMail().getDate();
                             newValues[1] = failureTrace.getGitInfo().getBase();
                             newValues[2] = failureTrace.getGitInfo().getCommit();
                             if (null == newValues[2]) {
                                 newValues[2] = failureTrace.getGitInfo().getBranch();
                             }
-                            System.arraycopy(multiMetricResult.getContent(), 0, newValues, 3, oldLength);
+                            newValues[3] = types.get(resultIndex).name();
+                            System.arraycopy(multiMetricResult.getContent(), 0, newValues, 4, oldLength);
                             
                             writer.writeRow(newValues);
                             writer.flush();
@@ -196,6 +208,65 @@ public class KbuildCrawler {
             }
         
         }
+    }
+    
+    /**
+     * Package visiblity for test cases.
+     */
+    static List<Type> determineTypes(List<MultiMetricResult> result, List<FileDefect> defects) {
+        List<Type> types = new ArrayList<>(result.size());
+        
+        // "sort" result by file
+        Map<File, List<MeasuredItem>> resultByFileMap = new HashMap<>();
+        for (MultiMetricResult mmi: result) {
+            File file = new File(mmi.getMeasuredItem().getMainFile());
+            resultByFileMap.putIfAbsent(file, new LinkedList<>());
+            resultByFileMap.get(file).add(mmi.getMeasuredItem());
+        }
+        
+        for (MultiMetricResult mmr : result) {
+            
+            int nextMiLineNumber = Integer.MAX_VALUE;
+            
+            // find the line number of the next result item after the current item
+            File file = new File(mmr.getMeasuredItem().getMainFile());
+            for (MeasuredItem otherMi : resultByFileMap.get(file)) {
+                // the line number of the next item has to be > than the current line number
+                // and we want to find the lowest next line number possible
+                if (otherMi.getLineNo() > mmr.getMeasuredItem().getLineNo() && otherMi.getLineNo() < nextMiLineNumber) {
+                    nextMiLineNumber = otherMi.getLineNo();
+                }
+            }
+            
+            
+            types.add(determineType(mmr, defects, nextMiLineNumber));
+        }
+        
+        return types;
+    }
+
+    private static Type determineType(MultiMetricResult mmr, List<FileDefect> defects, int nextMiLineNumber) {
+        Type result = Type.UNKNOWN;
+        
+        MeasuredItem mi = mmr.getMeasuredItem();
+        File miFile = new File(mi.getMainFile());
+        
+        for (FileDefect defect : defects) {
+            File defectFile = new File(defect.getPath() + defect.getFile());
+            
+            // check if file is the same and measured line number is <= defect line (that means, it is possible that
+            // defect lies within the function described by measured item)
+            // also check that the defect line is not >= the line number of the next measured item (that would mean that
+            // the defect is inside the next function)
+            if (miFile.equals(defectFile) && mi.getLineNo() <= defect.getLine() && defect.getLine() < nextMiLineNumber) {
+                
+                if (defect.getType().ordinal() < result.ordinal()) {
+                    result = defect.getType();
+                }
+            }
+        }
+        
+        return result;
     }
 
 }

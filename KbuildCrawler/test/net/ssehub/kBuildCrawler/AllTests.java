@@ -15,6 +15,7 @@ import net.ssehub.kBuildCrawler.metrics.MultiMetricJoinerTest;
     AllGitTests.class,
     MultiMetricJoinerTest.class,
     
+    KbuildCrawlerTest.class,
     })
 public class AllTests {
     public static final File TESTDATA = new File("testdata");
