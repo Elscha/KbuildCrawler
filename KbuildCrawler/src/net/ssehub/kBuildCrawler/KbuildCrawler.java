@@ -41,7 +41,7 @@ public class KbuildCrawler {
     public final static File TESTDATA = new File("testdata");
     private static final File TEST_ARCHIVE = new File(TESTDATA, "2016-August.txt.gz");
     
-    private static final int DEBUG_PROCESS_ONLY = -1;
+    private static final int DEBUG_PROCESS_ONLY = 2;
     
     public static final boolean DISABLE_KH_LOGGING = true;
 
