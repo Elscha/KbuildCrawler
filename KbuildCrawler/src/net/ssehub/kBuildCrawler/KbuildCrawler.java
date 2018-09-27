@@ -27,7 +27,7 @@ import net.ssehub.kBuildCrawler.mail.MailParser;
 import net.ssehub.kBuildCrawler.mail.MailUtils;
 import net.ssehub.kBuildCrawler.mail.ZipMailSource;
 import net.ssehub.kBuildCrawler.metrics.AbstractKernelHavenRunner;
-import net.ssehub.kBuildCrawler.metrics.KernelHavenRunnerFactory;
+import net.ssehub.kBuildCrawler.metrics.KernelHavenProcessRunner;
 import net.ssehub.kernel_haven.io.excel.ExcelBook;
 import net.ssehub.kernel_haven.io.excel.ExcelSheetWriter;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MeasuredItem;
@@ -109,7 +109,7 @@ public class KbuildCrawler {
     @SuppressWarnings("unused") // for the DEBUG_PROCESS_ONLY flag
     private static void runMetrics(File gitFolder, List<FailureTrace> failures) throws GitException, IOException, FormatException {
         GitInterface git = new GitInterface(gitFolder);
-        AbstractKernelHavenRunner runner = KernelHavenRunnerFactory.createRunner(true);
+        AbstractKernelHavenRunner runner = new KernelHavenProcessRunner();
         
         int failureIndex = 0;
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss (dd.MM.yy)");

@@ -15,7 +15,6 @@ import net.ssehub.kBuildCrawler.git.GitInterface;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FailureTrace;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
 import net.ssehub.kernel_haven.SetUpException;
-import net.ssehub.kernel_haven.metric_haven.MetricResult;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MeasuredItem;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
 import net.ssehub.kernel_haven.util.Logger;
@@ -53,36 +52,14 @@ public abstract class AbstractKernelHavenRunner {
             }
             LOGGER.logInfo("Starting to run metrics");
             
-            List<MultiMetricResult> completeTree = null;
-            List<MultiMetricResult> functionMetrics = new LinkedList<>();
-            
             t0 = System.currentTimeMillis();
             try {
-                completeTree = runNonFilterableMetrics(git.getSourceTree(), ftrace.getDefects());
+                result = runMetrics(git.getSourceTree(), ftrace.getDefects());
             } catch (IOException | SetUpException e) {
-                LOGGER.logException("Exception while running on whole tree", e);
+                LOGGER.logException("Exception while running metrics", e);
             }
             duration = System.currentTimeMillis() - t0;
-            System.err.println("  Running non-filterable metrics took " + duration + "ms");
-            
-            t0 = System.currentTimeMillis();
-            try {
-                List<MultiMetricResult> filteredResults = runLineFilteredMetrics(git.getSourceTree(), ftrace.getDefects());
-                if (filteredResults != null) {
-                    functionMetrics = filteredResults;
-                }
-            } catch (IOException | SetUpException e) {
-                LOGGER.logException("Exception while running on whole single function", e);
-            }
-            duration = System.currentTimeMillis() - t0;
-            System.err.println("  Running filterable metrics took " + duration + "ms");
-            
-            clearAfterFullRun();
-
-            t0 = System.currentTimeMillis();
-            result = joinFunctionAndCompleteMetricResults(completeTree, functionMetrics);
-            duration = System.currentTimeMillis() - t0;
-            System.err.println("  Joining MultiMetricResults took " + duration + "ms");
+            System.err.println("  Running metrics took " + duration + "ms");
             
         } catch (GitException e) {
             LOGGER.logException("Unable to restore commit", e);
@@ -92,37 +69,14 @@ public abstract class AbstractKernelHavenRunner {
     }
     
     /**
-     * Called each time a run of unfiltered and filtered metric calls was executed. After this, the source tree
-     * will likely change, thus all cache should be cleared.
-     */
-    protected void clearAfterFullRun() {
-        // nothing to do by default
-    }
-
-    /**
-     * Executes all metrics, which must be executed on the source code of the <b>complete</b> product line.
-     * <tt>defects</tt> may be used to filter the results <b>after</b> the metric execution.
-     * @param sourceTree The root folder of the source tree to analyze
-     * @param defects Optional list to filter the results after execution.
+     * Executes all metrics.
      * 
-     * @return The metric results
-     * @throws IOException
-     * @throws SetUpException
-     */
-    protected abstract List<MultiMetricResult> runNonFilterableMetrics(File sourceTree, List<FileDefect> defects)
-        throws IOException, SetUpException;
-    
-    /**
-     * Executes all metrics, which can be executed on a <b>subset</b> of the source code.
-     * <tt>defect</tt> are used to filter the results <b>before</b> the metric execution.
      * @param sourceTree The root folder of the source tree to analyze
      * @param defects The metric will only executed on files described by these defects.
      * 
      * @return The metric results
-     * @throws IOException
-     * @throws SetUpException
      */
-    protected abstract List<MultiMetricResult> runLineFilteredMetrics(File sourceTree, List<FileDefect> defects)
+    protected abstract List<MultiMetricResult> runMetrics(File sourceTree, List<FileDefect> defects)
         throws IOException, SetUpException;
     
     
@@ -145,59 +99,6 @@ public abstract class AbstractKernelHavenRunner {
         }
         
         return false;
-    }
-    
-    /**
-     * <p>
-     * Does a right-join on the metric results for the complete tree and the metric results for the filtered functions.
-     * This means, that the result list will contain all functions that are in the functionMetrics list, with the
-     * added metric values from completeTree.
-     * </p>
-     * 
-     * Package visibility for test cases.
-     * 
-     * @throws IllegalArgumentException If functionMetrics contains two {@link MetricResult}s for the same
-     *      {@link MeasuredItem}.
-     */
-    static List<MultiMetricResult> joinFunctionAndCompleteMetricResults(List<MultiMetricResult> completeTree,
-            List<MultiMetricResult> functionMetrics) throws IllegalArgumentException {
-        
-        List<MultiMetricResult> result = new LinkedList<>();
-        
-        if (completeTree == null || completeTree.size() == 0) {
-            result = functionMetrics;
-            
-        } else {
-            /*
-             * Collect all single function metrics
-             */
-            Map<MeasuredItem, MultiMetricResult> functionMap = new HashMap<>();
-            for (MultiMetricResult metricResult : functionMetrics) {
-                MeasuredItem mi = metricResult.getMeasuredItem();
-                
-                if (functionMap.containsKey(mi)) {
-                    throw new IllegalArgumentException("Found multiple filtered function results for: " + mi.toString());
-                }
-                
-                functionMap.put(mi, metricResult);
-            }
-            
-            /*
-             * Go through the completeTree results and pick all functions that we have already seen in the single function metrics
-             */
-            for (MultiMetricResult metricResult : completeTree) {
-                MeasuredItem mi = metricResult.getMeasuredItem();
-                
-                if (functionMap.containsKey(mi)) {
-                    
-                    MultiMetricResult singleFunctionResult = functionMap.get(mi);
-                    
-                    result.add(joinMultiResult(singleFunctionResult, metricResult));
-                }
-            }
-        }
-        
-        return result;
     }
     
     /**

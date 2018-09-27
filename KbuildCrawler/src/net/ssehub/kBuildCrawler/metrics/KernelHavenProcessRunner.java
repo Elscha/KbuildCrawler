@@ -16,19 +16,12 @@ import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import java.util.StringJoiner;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
 import net.ssehub.kernel_haven.SetUpException;
-import net.ssehub.kernel_haven.metric_haven.metric_components.BlocksPerFunctionMetric;
-import net.ssehub.kernel_haven.metric_haven.metric_components.CyclomaticComplexityMetric;
-import net.ssehub.kernel_haven.metric_haven.metric_components.DLoC;
-import net.ssehub.kernel_haven.metric_haven.metric_components.FanInOutMetric;
-import net.ssehub.kernel_haven.metric_haven.metric_components.NestingDepthMetric;
-import net.ssehub.kernel_haven.metric_haven.metric_components.TanglingDegreeFunctionMetric;
-import net.ssehub.kernel_haven.metric_haven.metric_components.VariablesPerFunctionMetric;
+import net.ssehub.kernel_haven.config.DefaultSettings;
 import net.ssehub.kernel_haven.metric_haven.metric_components.config.MetricSettings;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MeasuredItem;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
@@ -47,152 +40,17 @@ import net.ssehub.kernel_haven.util.null_checks.Nullable;
 public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
     
     private static final String KH_DIR = "kh";
-    private static final String BASE_CONFIGURATION = "res/single_metric.properties";
-    private static final Class<?>[] UNFILTERABLE_METRICS = {FanInOutMetric.class};
-    private static final Class<?>[] FILTERABLE_METRICS = {BlocksPerFunctionMetric.class, CyclomaticComplexityMetric.class,
-        DLoC.class, NestingDepthMetric.class, VariablesPerFunctionMetric.class, TanglingDegreeFunctionMetric.class};
+    private static final String BASE_CONFIGURATION = "res/all_metrics.properties";
     
-    private static final File SD_CACHE_FILE = new File("kh/sd_cache.csv");
-    
-    /**
-     * 1h time out.
-     */
-    private static final long KH_TIMEOUT_NON_FILTERABLE = 60 * 60 * 1000;
     /**
      * 10 min time out.
      */
-    private static final long KH_TIMEOUT_FILTERABLE = 10 * 60 * 1000;
+    private static final long KH_TIMEOUT = 10 * 60 * 1000;
     private static final int MAX_TRIES = 1;
 
     private static final int MAX_GB_FOR_KH = 50;
     private static final String MAX_MEMORY = "-Xmx" + MAX_GB_FOR_KH + "G";
     private static final String INITIAL_MEMORY = "-Xms" + MAX_GB_FOR_KH + "G";
-    
-    public KernelHavenProcessRunner() {
-        if (SD_CACHE_FILE.exists()) {
-            SD_CACHE_FILE.delete();
-        }
-        
-        if (SD_CACHE_FILE.exists()) {
-            LOGGER.logError("ScatteringDegree cache file " + SD_CACHE_FILE + " exists (but shouldn't)!");
-        }
-    }
-    
-    @Override
-    protected void clearAfterFullRun() {
-        SD_CACHE_FILE.delete();
-        
-        LOGGER.logDebug("Cleared SD cache");
-        if (SD_CACHE_FILE.exists()) {
-            LOGGER.logError("Unable to clear ScatteringDegree cache file " + SD_CACHE_FILE);
-        }
-    }
-    
-    /**
-     * Creates the configuration and performs the analysis in (multiple) separate processes.
-     * @param sourceTree The path to the root of the linux tree to analyze, i.e., the root of the git repository
-     * @param metrics The metrics to apply (either {@link #UNFILTERABLE_METRICS} or {@link #FILTERABLE_METRICS}).
-     * @param defect The defect to filter the metrics (required for {@link #FILTERABLE_METRICS}).
-     * @return The metric results.
-     * 
-     * @throws FileNotFoundException
-     * @throws IOException
-     */
-    private List<MultiMetricResult> runAnalysis(File sourceTree, Class<?>[] metrics, @Nullable List<FileDefect> defects,
-            boolean filteredOnly) throws FileNotFoundException, IOException {
-        
-        List<MultiMetricResult> results = new ArrayList<>();
-        final long timeout = filteredOnly ? KH_TIMEOUT_FILTERABLE : KH_TIMEOUT_NON_FILTERABLE;
-        
-        // Iterate over all metric (execute them in independent processes)
-        long t0 = System.currentTimeMillis();
-        int metricIndex = 0;
-        for (Class<?> metric : metrics) {
-            String analysisName = metric.getSimpleName() + " on " + sourceTree.getName();
-            System.err.println("  Run: " + analysisName + " (Metric " + (++metricIndex) + " of " + metrics.length + ")");
-            File configFile = prepareConfiguration(sourceTree, metric, defects, filteredOnly);
-            
-            // Execute the process, keep track of std out stream (we log every thing to console)
-            boolean success = false;
-            int tries = 0;
-            String errLog = null;
-            do {
-                // clear output folder of kernelhaven before starting
-                File outputFolder = new File("kh/output");
-                Util.clearFolder(outputFolder);
-                
-                File tempFolder = new File("kh/tmp");
-                Util.clearFolder(tempFolder);
-                
-                long started = System.currentTimeMillis();
-                OutputStream outStream = new ByteArrayOutputStream();
-                OutputStream errStream = new ByteArrayOutputStream();
-                ProcessBuilder processBuilder = new ProcessBuilder("java", "-Djava.io.tmpdir=" + tempFolder.getAbsolutePath(),
-                        INITIAL_MEMORY, MAX_MEMORY, "-jar", "KernelHaven_withsource.jar", configFile.getAbsolutePath());
-                processBuilder.directory(new File(KH_DIR));
-                success = Util.executeProcess(processBuilder, "MetricsRunner: " + analysisName, outStream,
-                    errStream, timeout);
-                
-                if (!success) {
-                    long executionTime = System.currentTimeMillis() - started;
-                    tries++;
-                    errLog = outStream.toString();
-                    
-                    if (executionTime < timeout) {
-                        // KH wasn't aborted through time out, there was something critical: No reason to continue loop
-                        break;
-                    } else {
-                        System.err.println("    Timeout occured while running: " + analysisName +", try again "
-                            + (MAX_TRIES - tries) + " times.");
-                    }
-                }
-            } while (!success && tries < MAX_TRIES);
-
-            if (success) {
-                List<Path> list = new ArrayList<>();
-                Files.newDirectoryStream(Paths.get(KH_DIR, "output"), p -> p.toFile().getName().endsWith(".csv"))
-                    .forEach(list::add);
-                Collections.sort(list);
-                System.err.println("    " + list.size() + " files produced for " + analysisName + ", start merging them");
-                
-                int fileIndex = 1;
-                for (Path path : list) {
-                    System.err.println("    Read file: " + fileIndex++);
-                    File file = path.toFile();
-                    
-                    try (ITableCollection csvCollection = TableCollectionReaderFactory.INSTANCE.openFile(file)) {
-                        String firstAndOnlyTable = csvCollection.getTableNames().iterator().next();
-                        try (ITableReader reader = csvCollection.getReader(firstAndOnlyTable)) {
-                            
-                            List<MultiMetricResult> newResults = new LinkedList<>();
-                            readMultiMetricResults(reader, newResults);
-                            results = AbstractKernelHavenRunner.joinFullMetricResults(results, newResults);
-                        }
-                    }
-                    
-                    // Delete temporarily created output of KernelHaven
-                    file.delete();
-                }
-                
-            } else {
-                LOGGER.logError2("  Could not execute ", analysisName, ", cause: " + errLog);
-            }
-            
-            configFile.delete();
-        }
-        long delta = System.currentTimeMillis() - t0;
-        // See: https://stackoverflow.com/a/9027379
-        String elapsedTime = String.format("%02d:%02d:%02d", 
-            TimeUnit.MILLISECONDS.toHours(delta),
-            TimeUnit.MILLISECONDS.toMinutes(delta) -  
-            TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(delta)),
-            TimeUnit.MILLISECONDS.toSeconds(delta) - 
-            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(delta)));
-        System.err.println("  " + metrics.length + " metric analyses (+ merging " + results.size() + " results) took "
-            + elapsedTime);
-        
-        return results;
-    }
     
     private void readMultiMetricResults(ITableReader reader, List<MultiMetricResult> resultList) throws IOException {
         // Read Header
@@ -233,20 +91,102 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
     }
     
     @Override
-    protected List<MultiMetricResult> runNonFilterableMetrics(File sourceTree, List<FileDefect> defects)
-        throws IOException, SetUpException {
-        return runAnalysis(sourceTree, UNFILTERABLE_METRICS, defects, false);
+    protected List<MultiMetricResult> runMetrics(File sourceTree, List<FileDefect> defects)
+            throws IOException, SetUpException {
+        
+        List<MultiMetricResult> results = new ArrayList<>();
+        
+        long t0 = System.currentTimeMillis();
+        File configFile = prepareConfiguration(sourceTree, defects);
+        
+        // Execute the process, keep track of std out stream (we log every thing to console)
+        boolean success = false;
+        int tries = 0;
+        String errLog = null;
+        do {
+            // clear output folder of kernelhaven before starting
+            File outputFolder = new File("kh/output");
+            Util.clearFolder(outputFolder);
+            
+            File tempFolder = new File("kh/tmp");
+            Util.clearFolder(tempFolder);
+            
+            long started = System.currentTimeMillis();
+            OutputStream outStream = new ByteArrayOutputStream();
+            OutputStream errStream = new ByteArrayOutputStream();
+            ProcessBuilder processBuilder = new ProcessBuilder("java", "-Djava.io.tmpdir=" + tempFolder.getAbsolutePath(),
+                    INITIAL_MEMORY, MAX_MEMORY, "-jar", "KernelHaven_withsource.jar", configFile.getAbsolutePath());
+            processBuilder.directory(new File(KH_DIR));
+            success = Util.executeProcess(processBuilder, "MetricsRunner", outStream,
+                errStream, KH_TIMEOUT);
+            
+            if (!success) {
+                long executionTime = System.currentTimeMillis() - started;
+                tries++;
+                errLog = outStream.toString();
+                
+                if (executionTime < KH_TIMEOUT) {
+                    // KH wasn't aborted through time out, there was something critical: No reason to continue loop
+                    break;
+                } else {
+                    System.err.println("    Timeout occured while running metrics, try again "
+                        + (MAX_TRIES - tries) + " times.");
+                }
+            }
+        } while (!success && tries < MAX_TRIES);
+
+        if (success) {
+            List<Path> list = new ArrayList<>();
+            Files.newDirectoryStream(Paths.get(KH_DIR, "output"), p -> p.toFile().getName().endsWith(".csv"))
+                .forEach(list::add);
+            Collections.sort(list);
+            System.err.println("    " + list.size() + " files produced, start merging them");
+            
+            /*
+             * There should only ever be exactly 1 file, but we join stuff just to be sure.
+             */
+            
+            int fileIndex = 1;
+            for (Path path : list) {
+                System.err.println("    Read file: " + fileIndex++);
+                File file = path.toFile();
+                
+                try (ITableCollection csvCollection = TableCollectionReaderFactory.INSTANCE.openFile(file)) {
+                    String firstAndOnlyTable = csvCollection.getTableNames().iterator().next();
+                    try (ITableReader reader = csvCollection.getReader(firstAndOnlyTable)) {
+                        
+                        List<MultiMetricResult> newResults = new LinkedList<>();
+                        readMultiMetricResults(reader, newResults);
+                        results = AbstractKernelHavenRunner.joinFullMetricResults(results, newResults);
+                    }
+                }
+                
+                // Delete temporarily created output of KernelHaven
+                file.delete();
+            }
+            
+        } else {
+            LOGGER.logError2("  Could not execute metrics, cause: " + errLog);
+        }
+        
+        configFile.delete();
+        
+        long delta = System.currentTimeMillis() - t0;
+        // See: https://stackoverflow.com/a/9027379
+        String elapsedTime = String.format("%02d:%02d:%02d", 
+            TimeUnit.MILLISECONDS.toHours(delta),
+            TimeUnit.MILLISECONDS.toMinutes(delta) -  
+            TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(delta)),
+            TimeUnit.MILLISECONDS.toSeconds(delta) - 
+            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(delta)));
+        System.err.println("  Metric execution (+ merging " + results.size() + " results) took "
+            + elapsedTime);
+        
+        return results;
     }
 
-    @Override
-    protected List<MultiMetricResult> runLineFilteredMetrics(File sourceTree, List<FileDefect> defects)
-        throws IOException, SetUpException {
-        
-        return runAnalysis(sourceTree, FILTERABLE_METRICS, defects, true);
-    }
-    
-    private File prepareConfiguration(File sourceTree, Class<?> metricClass, @Nullable List<FileDefect> defects,
-            boolean filteredOnly) throws FileNotFoundException, IOException {
+    private File prepareConfiguration(File sourceTree, @Nullable List<FileDefect> defects)
+            throws FileNotFoundException, IOException {
         
         // Read configuration template
         // Stores properties in a sorted order (for debugging issues only):
@@ -265,41 +205,23 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         props.load(new FileReader(new File(BASE_CONFIGURATION)));
         
         // Adapt configuration based to current checkout and metric to execute
-        props.setProperty("source_tree", sourceTree.getAbsolutePath());
-        props.setProperty("analysis.metrics_runner.metrics_class", metricClass.getCanonicalName());
-        if (filteredOnly) {
+        props.setProperty(DefaultSettings.SOURCE_TREE.getKey(), sourceTree.getAbsolutePath());
             
             StringBuilder filesSetting = new StringBuilder();
-            StringBuilder linesSetting = new StringBuilder();
-            
-            for (FileDefect defect : defects) {
-                filesSetting.append(defect.getPath()).append(defect.getFile()).append(", ");
-                linesSetting.append(defect.getPath()).append(defect.getFile()).append(":").append(defect.getLine())
-                .append(", ");
-            }
-            filesSetting.replace(filesSetting.length() - 2, filesSetting.length(), ""); // remove trailing ", "
-            linesSetting.replace(linesSetting.length() - 2, linesSetting.length(), ""); // remove trailing ", "
-            
-            if (sdCacheValid()) {
-                // if the ScatteringDegree cache exists and is valid, we can filter the source files that we need to parse
-                LOGGER.logDebug("Filtering code files because SD cache is valid", "Filter: " + filesSetting.toString());
-                props.setProperty("code.extractor.files", filesSetting.toString());
-            }
-            props.setProperty("analysis.code_function.lines", linesSetting.toString());            
+        StringBuilder linesSetting = new StringBuilder();
+        
+        for (FileDefect defect : defects) {
+            filesSetting.append(defect.getPath()).append(defect.getFile()).append(", ");
+            linesSetting.append(defect.getPath()).append(defect.getFile()).append(":").append(defect.getLine())
+            .append(", ");
         }
-        if (null != defects) {
-            StringJoiner sj = new StringJoiner(",");
-            for (FileDefect fileDefect : defects) {
-                String path = fileDefect.getPath();
-                if (!path.endsWith("/")) {
-                    // Should not be necessary
-                    path += '/';
-                }
-                path += fileDefect.getFile();
-                sj.add(path);
-            }
-            props.setProperty(MetricSettings.FILTER_BY_FILES.getKey(), sj.toString());
-        }
+        filesSetting.replace(filesSetting.length() - 2, filesSetting.length(), ""); // remove trailing ", "
+        linesSetting.replace(linesSetting.length() - 2, linesSetting.length(), ""); // remove trailing ", "
+        
+        // we can't filter code files, since ScatteringDegree and FanInOut need the complete code model
+        // props.setProperty("code.extractor.files", filesSetting.toString());
+        props.setProperty(MetricSettings.FILTER_BY_FILES.getKey(), filesSetting.toString());
+        props.setProperty(MetricSettings.LINE_NUMBER_SETTING.getKey(), linesSetting.toString());            
         
         // Save temporary configuration and return file (required as a parameter, later)
         File tmpProperties = File.createTempFile("SingleMetricAnalysis", ".properties");
@@ -311,8 +233,4 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         return tmpProperties;
     }
     
-    private boolean sdCacheValid() {
-        return SD_CACHE_FILE.isFile() && SD_CACHE_FILE.length() > 33; // header length is 33 bytes
-    }
-
 }
