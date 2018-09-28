@@ -86,7 +86,6 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             }
             
             MultiMetricResult result = new MultiMetricResult(mi, metrics, values);
-            LOGGER.logDebug("Read MMR: " + result.toString()); // TODO: debugging
             resultList.add(result);
         }
     }
@@ -163,7 +162,6 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                 }
                 
                 // Delete temporarily created output of KernelHaven
-                Util.copyFile(file, new File(file.getName())); // TODO: copy to current dir for inspection
                 file.delete();
             }
             
