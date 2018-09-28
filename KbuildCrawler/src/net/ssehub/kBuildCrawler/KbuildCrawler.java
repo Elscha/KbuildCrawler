@@ -167,6 +167,7 @@ public class KbuildCrawler {
                             
                             try {
                                 multiMetricResult = AbstractKernelHavenRunner.tryFixToFormat(previousMetrics, multiMetricResult);
+                                oldLength = multiMetricResult.getHeader().length;
                             } catch (IllegalArgumentException e) {
                                 System.err.println("Error! Can't adapt MultiMetricResult to expected format");
                                 System.err.println("Expected Metrics: " + Arrays.toString(previousMetrics));
@@ -174,6 +175,8 @@ public class KbuildCrawler {
                                 System.err.println("Skipping this line");
                                 continue;
                             }
+                            
+                            Logger.get().logDebug("After tryFixToFormat: " + multiMetricResult); // TODO: debugging
                             
                             if (multiMetricResult.getMeasuredItem().isConsiderIncludedFile() != previousConsideredIncludedFile) {
                                 System.err.println("Warning: Found element with isConsiderIncludedFile = "

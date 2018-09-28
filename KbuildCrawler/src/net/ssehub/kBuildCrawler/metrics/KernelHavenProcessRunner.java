@@ -86,6 +86,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             }
             
             MultiMetricResult result = new MultiMetricResult(mi, metrics, values);
+            LOGGER.logDebug("Read MMR: " + result.toString()); // TODO: debugging
             resultList.add(result);
         }
     }
@@ -181,6 +182,14 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(delta)));
         System.err.println("  Metric execution (+ merging " + results.size() + " results) took "
             + elapsedTime);
+        
+        // TODO: debugging
+        List<String> lines = new LinkedList<>();
+        lines.add("Result of merging:");
+        for (MultiMetricResult mmr : results) {
+            lines.add("\t" + mmr);
+        }
+        LOGGER.logDebug(lines.toArray(new String[0]));
         
         return results;
     }
