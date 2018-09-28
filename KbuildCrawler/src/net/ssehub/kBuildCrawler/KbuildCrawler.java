@@ -176,8 +176,6 @@ public class KbuildCrawler {
                                 continue;
                             }
                             
-                            Logger.get().logDebug("After tryFixToFormat: " + multiMetricResult); // TODO: debugging
-                            
                             if (multiMetricResult.getMeasuredItem().isConsiderIncludedFile() != previousConsideredIncludedFile) {
                                 System.err.println("Warning: Found element with isConsiderIncludedFile = "
                                         + multiMetricResult.getMeasuredItem().isConsiderIncludedFile() + ", but expected "

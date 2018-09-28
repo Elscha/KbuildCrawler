@@ -163,6 +163,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                 }
                 
                 // Delete temporarily created output of KernelHaven
+                Util.copyFile(file, new File(file.getName())); // TODO: copy to current dir for inspection
                 file.delete();
             }
             
@@ -182,14 +183,6 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(delta)));
         System.err.println("  Metric execution (+ merging " + results.size() + " results) took "
             + elapsedTime);
-        
-        // TODO: debugging
-        List<String> lines = new LinkedList<>();
-        lines.add("Result of merging:");
-        for (MultiMetricResult mmr : results) {
-            lines.add("\t" + mmr);
-        }
-        LOGGER.logDebug(lines.toArray(new String[0]));
         
         return results;
     }
