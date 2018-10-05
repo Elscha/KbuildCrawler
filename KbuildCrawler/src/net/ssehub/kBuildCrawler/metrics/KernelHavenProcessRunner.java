@@ -148,8 +148,8 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             
             int fileIndex = 1;
             for (Path path : list) {
-                System.err.println("    Read file: " + fileIndex++);
                 File file = path.toFile();
+                System.err.println("    Read file: " + fileIndex++ + " (" + file.length() + " bytes)");
                 
                 try (ITableCollection csvCollection = TableCollectionReaderFactory.INSTANCE.openFile(file)) {
                     String firstAndOnlyTable = csvCollection.getTableNames().iterator().next();
