@@ -55,17 +55,14 @@ public class GitInterface {
         // add and fetch remote
         if (!repo.getRemotes().contains(remoteName)) {
             repo.addRemote(remoteName, remoteUrl);
-            
-            // always fetch if we add a new remote
-            repo.fetch(remoteName);
-            fetched = true;
+            // do not fetch yet; fetches are done with proper commit or branch target later on
         }
         
         String commit = commitInfo.getCommit(); // TODO: use getCommit() or getHead() here?
         if (commitInfo.is0DayCommit()) {
             // only fetch if we don't yet have the branch
             if (!fetched && !repo.containsRemoteBranch(remoteName, commitInfo.get0DayBranch())) {
-                repo.fetch(remoteName);
+                repo.fetch(remoteName, commitInfo.get0DayBranch());
                 fetched = true;
             }
             commit = repo.getLastCommitOfBranch(remoteName, commitInfo.get0DayBranch());
@@ -76,7 +73,7 @@ public class GitInterface {
             
             // only fetch if we don't yet have the branch
             if (!fetched && !repo.containsRemoteBranch(remoteName, commitInfo.getBranch())) {
-                repo.fetch(remoteName);
+                repo.fetch(remoteName, commitInfo.getBranch());
                 fetched = true;
             }
             
@@ -88,7 +85,7 @@ public class GitInterface {
         
         // if we haven't fetched yet, check if we need to fetch in order to get the required commit
         if (!fetched && !repo.containsCommit(commit)) {
-            repo.fetch(remoteName);
+            repo.fetch(remoteName, commit);
             fetched = true;
         }
         

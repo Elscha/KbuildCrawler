@@ -118,6 +118,18 @@ public class GitRepository {
     }
     
     /**
+     * Fetches the given remote to retrieve the given commit or branch.
+     * 
+     * @param remoteName The remote to fetch.
+     * @param commitOrBranch The commit or branch that should be fetched. All history leading up to this is fetched.
+     * 
+     * @throws GitException If fetching fails.
+     */
+    public void fetch(String remoteName, String commitOrBranch) throws GitException {
+        runGitCommand("git", "fetch", remoteName, commitOrBranch);
+    }
+    
+    /**
      * Checks out the given commit.
      * 
      * @param commitHash The commit to check out. May also be a branch or tag name.
