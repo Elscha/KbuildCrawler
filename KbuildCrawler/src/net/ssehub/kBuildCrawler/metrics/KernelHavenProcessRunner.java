@@ -206,8 +206,22 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         
         // Adapt configuration based to current checkout and metric to execute
         props.setProperty(DefaultSettings.SOURCE_TREE.getKey(), sourceTree.getAbsolutePath());
-            
-            StringBuilder filesSetting = new StringBuilder();
+        
+        // check if all folders in code.extractor.files exist
+        String[] folders = props.getProperty(DefaultSettings.CODE_EXTRACTOR_FILES.getKey()).split(",");
+        StringBuilder codeFilesSetting = new StringBuilder();
+        for (String folder : folders) {
+            if (new File(sourceTree, folder).isDirectory()) {
+                codeFilesSetting.append(folder).append(",");
+            } else {
+                LOGGER.logWarning(folder + " doesn't exist (yet) in Linux source tree; omitting from code.extractor.files");
+            }
+        }
+        codeFilesSetting.deleteCharAt(codeFilesSetting.length() - 1); // remove trailing ","
+        props.setProperty(DefaultSettings.CODE_EXTRACTOR_FILES.getKey(), codeFilesSetting.toString());
+        
+        
+        StringBuilder filesSetting = new StringBuilder();
         StringBuilder linesSetting = new StringBuilder();
         
         for (FileDefect defect : defects) {
