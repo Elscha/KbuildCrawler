@@ -118,7 +118,8 @@ public class GitRepository {
     }
     
     /**
-     * Fetches the given remote to retrieve the given commit or branch.
+     * Fetches the given remote to retrieve the given commit or branch. Some remote servers do not support this feature;
+     * in this case, this method automatically falls back to {@link #fetch(String)} to fetch the complete remote.
      * 
      * @param remoteName The remote to fetch.
      * @param commitOrBranch The commit or branch that should be fetched. All history leading up to this is fetched.
@@ -126,7 +127,16 @@ public class GitRepository {
      * @throws GitException If fetching fails.
      */
     public void fetch(String remoteName, String commitOrBranch) throws GitException {
-        runGitCommand("git", "fetch", remoteName, commitOrBranch);
+        try {
+            runGitCommand("git", "fetch", remoteName, commitOrBranch);
+        } catch (GitException e) {
+            if (e.getMessage().startsWith("error: Server does not allow request for unadvertised object")) {
+                LOGGER.logWarning("Remote does not support fetching commits; falling back to fetching full remote");
+                fetch(remoteName);
+            } else {
+                throw e;
+            }
+        }
     }
     
     /**
