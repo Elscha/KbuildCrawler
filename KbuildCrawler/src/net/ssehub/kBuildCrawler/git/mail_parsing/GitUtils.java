@@ -22,7 +22,7 @@ public class GitUtils {
     private static final String C_FILE_PATH = "(.*/)+([^/]*\\.c)";
     private static final String NUMBER = "(\\p{Digit}+)";
     private static final String RANGE = NUMBER + "(\\-" + NUMBER + ")?";
-    static final String DEFECT_REGEX = "^>> " + C_FILE_PATH + ":" + NUMBER + "(:" + RANGE + ")?: (.*)$";
+    static final String DEFECT_REGEX = ">> " + C_FILE_PATH + ":" + NUMBER + "(:" + RANGE + ")?: (.*)";
     
     private static final String URL_PREFIX = "url: ";
     private static final String BASE_PREFIX = "base: ";
@@ -117,7 +117,7 @@ public class GitUtils {
         for (int i = 0; i < lines.length; i++) {
             if (lines[i].startsWith(MailUtils.NEW_ERROR_PREFIX)) {
                 Matcher matcher = pattern.matcher(lines[i]);
-                if (matcher.find()) {
+                if (matcher.matches()) {
                     String path = matcher.group(1);
                     String file = matcher.group(2);
                     String lineNo = matcher.group(3);
