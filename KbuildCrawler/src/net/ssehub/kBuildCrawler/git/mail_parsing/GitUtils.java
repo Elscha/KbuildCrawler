@@ -19,7 +19,7 @@ public class GitUtils {
     
     static final String CONFIG_REGEX = "^URL: <(.*obj)>$";
     
-    private static final String C_FILE_PATH = "([^ ]*/)+([^/]*\\.c)";
+    private static final String C_FILE_PATH = "([^:]*/)+([^/:]*\\.c)";
     private static final String NUMBER = "(\\p{Digit}+)";
     private static final String RANGE = NUMBER + "(\\-" + NUMBER + ")?";
     static final String DEFECT_REGEX = ">> " + C_FILE_PATH + ":" + NUMBER + "(:" + RANGE + ")?: (.*)";
