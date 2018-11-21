@@ -32,7 +32,6 @@ import net.ssehub.kernel_haven.io.excel.ExcelBook;
 import net.ssehub.kernel_haven.io.excel.ExcelSheetWriter;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MeasuredItem;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
-import net.ssehub.kernel_haven.util.FormatException;
 import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.Logger.Level;
 import net.ssehub.kernel_haven.util.Timestamp;
@@ -107,7 +106,7 @@ public class KbuildCrawler {
     }
     
     @SuppressWarnings("unused") // for the DEBUG_PROCESS_ONLY flag
-    private static void runMetrics(File gitFolder, List<FailureTrace> failures) throws GitException, IOException, FormatException {
+    private static void runMetrics(File gitFolder, List<FailureTrace> failures) throws GitException, IOException {
         GitInterface git = new GitInterface(gitFolder);
         AbstractKernelHavenRunner runner = new KernelHavenProcessRunner();
         
