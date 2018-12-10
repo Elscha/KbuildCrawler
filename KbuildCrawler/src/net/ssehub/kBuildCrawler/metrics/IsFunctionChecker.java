@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.util.Properties;
 
 import net.ssehub.kernel_haven.SetUpException;
-import net.ssehub.kernel_haven.code_model.CodeElement;
 import net.ssehub.kernel_haven.code_model.SourceFile;
 import net.ssehub.kernel_haven.code_model.ast.Function;
 import net.ssehub.kernel_haven.code_model.ast.ISyntaxElement;
@@ -63,8 +62,8 @@ public class IsFunctionChecker {
             SourceFile<ISyntaxElement> result = (SourceFile<ISyntaxElement>) runOnFileMethod.invoke(extractor, file);
             
             holder.isInFunction = false;
-            for (CodeElement<ISyntaxElement> element : result) {
-                ((ISyntaxElement) element).accept(new ISyntaxElementVisitor() {
+            for (ISyntaxElement element : result) {
+                element.accept(new ISyntaxElementVisitor() {
                     
                     @Override
                     public void visitFunction(@NonNull Function function) {
