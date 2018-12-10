@@ -58,10 +58,12 @@ public class IsFunctionChecker {
             
             Method runOnFileMethod = extractor.getClass().getDeclaredMethod("runOnFile", File.class);
             runOnFileMethod.setAccessible(true);
-            SourceFile result = (SourceFile) runOnFileMethod.invoke(extractor, file);
+            // srcML returns SourceFile<ISyntaxElement> elements
+            @SuppressWarnings("unchecked")
+            SourceFile<ISyntaxElement> result = (SourceFile<ISyntaxElement>) runOnFileMethod.invoke(extractor, file);
             
             holder.isInFunction = false;
-            for (CodeElement element : result) {
+            for (CodeElement<ISyntaxElement> element : result) {
                 ((ISyntaxElement) element).accept(new ISyntaxElementVisitor() {
                     
                     @Override
