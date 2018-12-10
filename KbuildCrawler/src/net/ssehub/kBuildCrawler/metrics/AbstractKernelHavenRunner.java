@@ -27,8 +27,9 @@ import net.ssehub.kernel_haven.util.null_checks.Nullable;
  * @author Adam
  */
 public abstract class AbstractKernelHavenRunner {
-
+   
     protected static final Logger LOGGER = Logger.get();
+    private static final boolean RUN_ALL_VARIATIONS = false;
     
     public final @Nullable List<MultiMetricResult> run(GitInterface git, FailureTrace ftrace) {
         LOGGER.logInfo("--------------------------------", "Running KernelHaven metrics for:", ftrace.toString());
@@ -54,7 +55,9 @@ public abstract class AbstractKernelHavenRunner {
             
             t0 = System.currentTimeMillis();
             try {
-                result = runMetrics(git.getSourceTree(), ftrace.getDefects());
+                result = RUN_ALL_VARIATIONS
+                    ? runMetrics(git.getSourceTree(), ftrace.getDefects())
+                    : runFeatureSizeMetrics(git.getSourceTree(), ftrace.getDefects());
             } catch (IOException | SetUpException e) {
                 LOGGER.logException("Exception while running metrics", e);
             }
@@ -77,6 +80,21 @@ public abstract class AbstractKernelHavenRunner {
      * @return The metric results
      */
     protected abstract List<MultiMetricResult> runMetrics(File sourceTree, List<FileDefect> defects)
+        throws IOException, SetUpException;
+    
+    /**
+     * Special version of {@link #runMetrics(File, List)} that runs only <b>Feature Size</b> metrics and not all
+     * 22.000 metric variations.
+     * @param sourceTree The root folder of the source tree to analyze
+     * @param defects The metric will only executed on files described by these defects.
+     * 
+     * @return The metric results
+     * 
+     * @throws IOException
+     * @throws SetUpException If the configuration file contains errors and KErnelHaven can not be executed with these
+     *      errors.
+     */
+    protected abstract List<MultiMetricResult> runFeatureSizeMetrics(File sourceTree, List<FileDefect> defects)
         throws IOException, SetUpException;
     
     

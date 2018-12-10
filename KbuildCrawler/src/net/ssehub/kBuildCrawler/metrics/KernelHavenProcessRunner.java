@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
 import net.ssehub.kernel_haven.SetUpException;
 import net.ssehub.kernel_haven.config.DefaultSettings;
+import net.ssehub.kernel_haven.metric_haven.metric_components.config.FeatureSizeType;
 import net.ssehub.kernel_haven.metric_haven.metric_components.config.MetricSettings;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MeasuredItem;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MultiMetricResult;
@@ -91,13 +92,43 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
     }
     
     @Override
+    protected List<MultiMetricResult> runFeatureSizeMetrics(File sourceTree, List<FileDefect> defects)
+        throws IOException, SetUpException {
+        
+        // Selection of Feature Size metrics only
+        Properties featureSizeSettings = new Properties();
+        featureSizeSettings.setProperty(MetricSettings.ALL_METRIC_VARIATIONS.getKey(), "false");
+        featureSizeSettings.setProperty(MetricSettings.FEATURE_SIZE_MEASURING_SETTING.getKey(),
+            FeatureSizeType.POSITIVE_SIZES.name());
+        
+        // First run: Positive Feature Sizes
+        File configFile = prepareConfiguration(sourceTree, defects, featureSizeSettings);
+        List<MultiMetricResult> result = runMetricsWithConfig(sourceTree, defects, configFile);
+        
+        // Second run: Total Feature Sizes
+        featureSizeSettings.setProperty(MetricSettings.FEATURE_SIZE_MEASURING_SETTING.getKey(),
+            FeatureSizeType.TOTAL_SIZES.name());
+        File secondConfigFile = prepareConfiguration(sourceTree, defects, featureSizeSettings);
+        List<MultiMetricResult> secondResult = runMetricsWithConfig(sourceTree, defects, secondConfigFile);
+        
+        // Return joined/merged result list
+        return AbstractKernelHavenRunner.joinFullMetricResults(result, secondResult);
+    }
+    
+    @Override
     protected List<MultiMetricResult> runMetrics(File sourceTree, List<FileDefect> defects)
+            throws IOException, SetUpException {
+        
+        File configFile = prepareConfiguration(sourceTree, defects, null);
+        return runMetricsWithConfig(sourceTree, defects, configFile);
+    }
+    
+    private List<MultiMetricResult> runMetricsWithConfig(File sourceTree, List<FileDefect> defects, File configFile)
             throws IOException, SetUpException {
         
         List<MultiMetricResult> results = new ArrayList<>();
         
         long t0 = System.currentTimeMillis();
-        File configFile = prepareConfiguration(sourceTree, defects);
         
         // Execute the process, keep track of std out stream (we log every thing to console)
         boolean success = false;
@@ -185,8 +216,8 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         return results;
     }
 
-    private File prepareConfiguration(File sourceTree, @Nullable List<FileDefect> defects)
-            throws FileNotFoundException, IOException {
+    private File prepareConfiguration(File sourceTree, @Nullable List<FileDefect> defects,
+        @Nullable Properties settings) throws FileNotFoundException, IOException {
         
         // Read configuration template
         // Stores properties in a sorted order (for debugging issues only):
@@ -235,7 +266,12 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         // we can't filter code files, since ScatteringDegree and FanInOut need the complete code model
         // props.setProperty("code.extractor.files", filesSetting.toString());
         props.setProperty(MetricSettings.FILTER_BY_FILES.getKey(), filesSetting.toString());
-        props.setProperty(MetricSettings.LINE_NUMBER_SETTING.getKey(), linesSetting.toString());            
+        props.setProperty(MetricSettings.LINE_NUMBER_SETTING.getKey(), linesSetting.toString());
+        
+        // Add extra settings, if defined
+        if (null != settings) {
+            props.putAll(settings);
+        }
         
         // Save temporary configuration and return file (required as a parameter, later)
         File tmpProperties = File.createTempFile("SingleMetricAnalysis", ".properties");
