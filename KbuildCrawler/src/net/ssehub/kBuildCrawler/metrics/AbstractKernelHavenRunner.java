@@ -29,7 +29,7 @@ import net.ssehub.kernel_haven.util.null_checks.Nullable;
 public abstract class AbstractKernelHavenRunner {
    
     protected static final Logger LOGGER = Logger.get();
-    private static final boolean RUN_ALL_VARIATIONS = false;
+    private static final boolean RUN_ALL_VARIATIONS = Boolean.getBoolean("RUN_ALL_VARIATIONS"); // TODO: debug
     
     public final @Nullable List<MultiMetricResult> run(GitInterface git, FailureTrace ftrace) {
         LOGGER.logInfo("--------------------------------", "Running KernelHaven metrics for:", ftrace.toString());
