@@ -17,7 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
 
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
 import net.ssehub.kernel_haven.SetUpException;
@@ -203,15 +202,8 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         configFile.delete();
         
         long delta = System.currentTimeMillis() - t0;
-        // See: https://stackoverflow.com/a/9027379
-        String elapsedTime = String.format("%02d:%02d:%02d", 
-            TimeUnit.MILLISECONDS.toHours(delta),
-            TimeUnit.MILLISECONDS.toMinutes(delta) -  
-            TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(delta)),
-            TimeUnit.MILLISECONDS.toSeconds(delta) - 
-            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(delta)));
         System.err.println("  Metric execution (+ merging " + results.size() + " results) took "
-            + elapsedTime);
+            + Util.formatDurationMs(delta));
         
         return results;
     }
