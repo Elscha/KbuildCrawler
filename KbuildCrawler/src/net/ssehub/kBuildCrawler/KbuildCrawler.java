@@ -97,7 +97,7 @@ public class KbuildCrawler {
         out.close();
     }
 
-    private static List<FailureTrace> readMails(File zipFile) throws Exception {
+    static List<FailureTrace> readMails(File zipFile) throws Exception {
         IMailSource augMails = new ZipMailSource(zipFile);
         MailParser parser = new MailParser();
         
