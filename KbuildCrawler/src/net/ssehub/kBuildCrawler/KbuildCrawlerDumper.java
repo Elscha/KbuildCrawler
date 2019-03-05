@@ -5,12 +5,16 @@ import java.io.FileOutputStream;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.ssehub.kBuildCrawler.git.GitException;
+import net.ssehub.kBuildCrawler.git.GitInterface;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FailureTrace;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
 import net.ssehub.kBuildCrawler.git.mail_parsing.GitData;
+import net.ssehub.kBuildCrawler.metrics.IsFunctionChecker;
 import net.ssehub.kernel_haven.util.Logger;
 import net.ssehub.kernel_haven.util.Logger.Level;
 import net.ssehub.kernel_haven.util.Timestamp;
+import net.ssehub.kernel_haven.util.Util;
 import net.ssehub.kernel_haven.util.io.ITableWriter;
 import net.ssehub.kernel_haven.util.io.TableElement;
 import net.ssehub.kernel_haven.util.io.TableRow;
@@ -26,6 +30,8 @@ public class KbuildCrawlerDumper {
         Logger.get().clearAllTargets();
         Logger.get().addTarget(out);
         Logger.get().setLevel(Level.DEBUG);
+        
+        File gitFolder = new File("gitTest");
         
         File[] archives = null;
         if (args.length >= 1) {
@@ -50,12 +56,20 @@ public class KbuildCrawlerDumper {
             }
         }
         
+        if (args.length >= 2) {
+            gitFolder = new File(args[1]);
+        }
+        
         List<FailureTrace> failures = new LinkedList<FailureTrace>();
         for (int i = 0; i < archives.length; i++) {
             failures.addAll(KbuildCrawler.readMails(archives[i]));
         }
         
         try (ITableWriter tableOut = new CsvWriter(System.out)) {
+            
+            GitInterface git = new GitInterface(gitFolder);
+            IsFunctionChecker checker = new IsFunctionChecker(git.getSourceTree());
+            
             for (FailureTrace fail : failures) {
                 String date = fail.getMail().getDate();
                 GitData gitInfo = fail.getGitInfo();
@@ -65,12 +79,32 @@ public class KbuildCrawlerDumper {
                 }
                 
                 for (FileDefect defect : fail.getDefects()) {
+                    File file = new File(defect.getPath() + defect.getFile());
+                    
+                    // try to find the function name
+                    String functionName = null;
+                    try {
+                        Logger.get().logInfo("Restoring commit...");
+                        long t0 = System.currentTimeMillis();
+                        git.restoreCommit(gitInfo, fail.getFormattedDate(true));
+                        long duration = System.currentTimeMillis() - t0;
+                        Logger.get().logInfo("Restoring commit took " + Util.formatDurationMs(duration));
+                        
+                        functionName = checker.getFunctionName(file, defect.getLine());
+                        
+                        Logger.get().logInfo("Found function name " + functionName);
+                        
+                    } catch (GitException e) {
+                        Logger.get().logException("Could not restore commit", e);
+                    }
                     
                     Dump d = new Dump(date, gitInfo.getBase(), commit, defect.getType().name(),
-                            defect.getPath() + defect.getFile(), defect.getLine(), defect.getDescription());
+                            defect.getPath() + defect.getFile(), defect.getLine(), functionName,
+                            defect.getDescription());
                     tableOut.writeObject(d);
                 }
             }
+            
         }
         
         out.close();
@@ -91,15 +125,19 @@ public class KbuildCrawlerDumper {
         
         private int line;
         
+        private String functionName;
+        
         private String description;
 
-        public Dump(String date, String repo, String commit, String type, String file, int line, String description) {
+        public Dump(String date, String repo, String commit, String type, String file, int line, String functionName,
+                String description) {
             this.date = date;
             this.repo = repo;
             this.commit = commit;
             this.type = type;
             this.file = file;
             this.line = line;
+            this.functionName = functionName;
             this.description = description;
         }
 
@@ -132,8 +170,13 @@ public class KbuildCrawlerDumper {
         public int getLine() {
             return line;
         }
+        
+        @TableElement(index = 6, name = "Function")
+        public String getFunctionName() {
+            return functionName;
+        }
 
-        @TableElement(index = 6, name = "Description")
+        @TableElement(index = 7, name = "Description")
         public String getDescription() {
             return description;
         }
