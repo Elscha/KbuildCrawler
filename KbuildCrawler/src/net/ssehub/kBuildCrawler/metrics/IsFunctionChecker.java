@@ -31,12 +31,19 @@ public class IsFunctionChecker {
         this.resourceDir = new File("kh/res");
     }
     
-    public boolean isWithinFunction(File file, int line) {
-        // isInFunction is wrapped inside a class, so its accessible to the anonymous inner class below
-        class Holder {
-            boolean isInFunction; 
-        }
-        Holder holder = new Holder();
+    // wrapped inside a class, so its accessible to the anonymous inner class below
+    private static class ResultHolder {
+        
+        private boolean isInFunction;
+        
+        private String functionName;
+        
+        private boolean error;
+        
+    }
+    
+    private ResultHolder getFunctionImpl(File file, int line) {
+        ResultHolder resultHolder = new ResultHolder();
         
         try {
             Properties props = new Properties();
@@ -61,7 +68,8 @@ public class IsFunctionChecker {
             @SuppressWarnings("unchecked")
             SourceFile<ISyntaxElement> result = (SourceFile<ISyntaxElement>) runOnFileMethod.invoke(extractor, file);
             
-            holder.isInFunction = false;
+            resultHolder.isInFunction = false;
+            resultHolder.functionName = null;
             for (ISyntaxElement element : result) {
                 element.accept(new ISyntaxElementVisitor() {
                     
@@ -69,7 +77,8 @@ public class IsFunctionChecker {
                     public void visitFunction(@NonNull Function function) {
                         
                         if (function.getLineStart() <= line && function.getLineEnd() >= line) {
-                            holder.isInFunction = true;
+                            resultHolder.isInFunction = true;
+                            resultHolder.functionName = function.getName();
                         }
                         
                         // no recursive visitation of children needed
@@ -77,17 +86,36 @@ public class IsFunctionChecker {
                     
                 });
                 
-                if (holder.isInFunction) {
+                if (resultHolder.isInFunction) {
                     break;
                 }
             }
             
         } catch (ReflectiveOperationException | ClassCastException | SecurityException | SetUpException e) {
             Logger.get().logException("Couldn't extract file \"" + file.getPath() + "\", assuming that line is a function", e);
-            holder.isInFunction = true;
+            resultHolder.error = true;
         }
         
-        return holder.isInFunction;
+        return resultHolder;
+    }
+    
+    /**
+     * Returns the name of the function that the given line in the given file is in.
+     * 
+     * @param file The file to check in.
+     * @param line The line number to get the function name for.
+     * 
+     * @return The function name, or <code>null</code> if the given line is not inside a function (or could not be
+     *      determined).
+     */
+    public String getFunctionName(File file, int line) {
+        ResultHolder result = getFunctionImpl(file, line);
+        return result.functionName;
+    }
+    
+    public boolean isWithinFunction(File file, int line) {
+        ResultHolder result = getFunctionImpl(file, line);
+        return result.isInFunction || result.error;
     }
     
 }
