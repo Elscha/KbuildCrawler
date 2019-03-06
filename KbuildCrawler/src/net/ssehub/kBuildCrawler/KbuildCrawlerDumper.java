@@ -40,8 +40,10 @@ public class KbuildCrawlerDumper {
             String[] fileArguments = args[0].split(":");
             
             if (fileArguments.length == 1) {
-                destFile = new File("MailCrawlerDump-" + fileArguments[0] + ".csv");
-                System.err.println(destFile.getAbsolutePath());
+                int start = fileArguments[0].lastIndexOf('/')  + 1;
+                int end = fileArguments[0].indexOf('.', start);
+                String name = fileArguments[0].substring(start, end);
+                destFile = new File("MailCrawlerDump-" + name + ".csv");
             }
             
             archives = new File[fileArguments.length];
