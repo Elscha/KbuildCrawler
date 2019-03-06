@@ -41,6 +41,7 @@ public class KbuildCrawlerDumper {
             
             if (fileArguments.length == 1) {
                 destFile = new File("MailCrawlerDump-" + fileArguments[0] + ".csv");
+                System.err.println(destFile.getAbsolutePath());
             }
             
             archives = new File[fileArguments.length];
