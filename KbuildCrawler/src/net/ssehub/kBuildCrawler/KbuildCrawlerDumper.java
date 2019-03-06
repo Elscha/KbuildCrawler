@@ -26,6 +26,7 @@ public class KbuildCrawlerDumper {
     private static final File TEST_ARCHIVE = new File(TESTDATA, "2016-August.txt.gz");
 
     public static void main(String[] args) throws Exception {
+        File destFile = new File(Timestamp.INSTANCE.getFilename("MailCrawlerDump", "csv"));
         FileOutputStream out = new FileOutputStream(Timestamp.INSTANCE.getFilename("MailCrawler", "log"));
         Logger.get().clearAllTargets();
         Logger.get().addTarget(out);
@@ -37,6 +38,11 @@ public class KbuildCrawlerDumper {
         if (args.length >= 1) {
             System.err.println("Mailinglist items: " + args[0]);
             String[] fileArguments = args[0].split(":");
+            
+            if (fileArguments.length == 1) {
+                destFile = new File("MailCrawlerDump-" + fileArguments[0] + ".csv");
+            }
+            
             archives = new File[fileArguments.length];
             for (int i = 0; i < fileArguments.length; i++) {
                 archives[i] = new File(fileArguments[i]);
@@ -65,7 +71,7 @@ public class KbuildCrawlerDumper {
             failures.addAll(KbuildCrawler.readMails(archives[i]));
         }
         
-        try (ITableWriter tableOut = new CsvWriter(System.out)) {
+        try (ITableWriter tableOut = new CsvWriter(new FileOutputStream(destFile))) {
             
             GitInterface git = new GitInterface(gitFolder);
             IsFunctionChecker checker = new IsFunctionChecker(git.getSourceTree());
