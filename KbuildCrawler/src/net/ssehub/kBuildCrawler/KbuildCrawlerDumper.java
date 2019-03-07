@@ -88,6 +88,7 @@ public class KbuildCrawlerDumper {
                 int dayIndex = date.indexOf('-') + 1;
                 String failDay = date.substring(dayIndex, date.indexOf('-', dayIndex));
                 if (!day.equals(failDay)) {
+                    day = failDay;
                     date = date.substring(0, date.indexOf(' '));
                     System.err.println(here + " processes: " + date);
                 }
