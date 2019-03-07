@@ -26,6 +26,10 @@ public class KbuildCrawlerDumper {
     private static final File TEST_ARCHIVE = new File(TESTDATA, "2016-August.txt.gz");
 
     public static void main(String[] args) throws Exception {
+        File tmp = new File(".");
+        String here = tmp.getAbsoluteFile().getParentFile().getName();
+        String day = "";
+        
         File destFile = new File(Timestamp.INSTANCE.getFilename("MailCrawlerDump", "csv"));
         FileOutputStream out = new FileOutputStream(Timestamp.INSTANCE.getFilename("MailCrawler", "log"));
         Logger.get().clearAllTargets();
@@ -80,7 +84,14 @@ public class KbuildCrawlerDumper {
             IsFunctionChecker checker = new IsFunctionChecker(git.getSourceTree());
             
             for (FailureTrace fail : failures) {
-                String date = fail.getMail().getDate();
+                String date = fail.getFormattedDate(true);
+                int dayIndex = date.indexOf('-') + 1;
+                String failDay = date.substring(dayIndex, date.indexOf('-', dayIndex));
+                if (!day.equals(failDay)) {
+                    date = date.substring(0, date.indexOf(' '));
+                    System.err.println(here + " processes: " + date);
+                }
+                
                 GitData gitInfo = fail.getGitInfo();
                 String commit = gitInfo.getCommit();
                 if (commit == null) {
@@ -107,7 +118,7 @@ public class KbuildCrawlerDumper {
                         Logger.get().logException("Could not restore commit", e);
                     }
                     
-                    Dump d = new Dump(date, gitInfo.getBase(), commit, defect.getType().name(),
+                    Dump d = new Dump(fail.getMail().getDate(), gitInfo.getBase(), commit, defect.getType().name(),
                             defect.getPath() + defect.getFile(), defect.getLine(), functionName,
                             defect.getDescription());
                     tableOut.writeObject(d);
@@ -118,8 +129,8 @@ public class KbuildCrawlerDumper {
         
         out.close();
         
-        File here = new File(".");
-        System.err.print(here.getAbsolutePath() + " finished.");
+        
+        System.err.print(here + " finished.");
     }
     
     @TableRow
