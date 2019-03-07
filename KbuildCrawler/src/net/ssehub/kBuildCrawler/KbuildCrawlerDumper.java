@@ -117,6 +117,9 @@ public class KbuildCrawlerDumper {
         }
         
         out.close();
+        
+        File here = new File(".");
+        System.err.print(here.getAbsolutePath() + " finished.");
     }
     
     @TableRow
