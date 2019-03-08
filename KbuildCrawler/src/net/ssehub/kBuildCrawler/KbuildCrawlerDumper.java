@@ -28,7 +28,7 @@ public class KbuildCrawlerDumper {
     public static void main(String[] args) throws Exception {
         File tmp = new File(".");
         String here = tmp.getAbsoluteFile().getParentFile().getName();
-        String day = "";
+        String date = "";
         
         File destFile = new File(Timestamp.INSTANCE.getFilename("MailCrawlerDump", "csv"));
         FileOutputStream out = new FileOutputStream(Timestamp.INSTANCE.getFilename("MailCrawler", "log"));
@@ -84,12 +84,10 @@ public class KbuildCrawlerDumper {
             IsFunctionChecker checker = new IsFunctionChecker(git.getSourceTree());
             
             for (FailureTrace fail : failures) {
-                String date = fail.getFormattedDate(true);
-                int dayIndex = date.indexOf('-') + 1;
-                String failDay = date.substring(dayIndex, date.indexOf('-', dayIndex));
-                if (!day.equals(failDay)) {
-                    day = failDay;
-                    date = date.substring(0, date.indexOf(' '));
+                String tmpDate = fail.getFormattedDate(true);
+                tmpDate = tmpDate.substring(0, tmpDate.indexOf(' '));
+                if (!tmpDate.equals(date)) {
+                    date = tmpDate;
                     System.err.println(here + " processes: " + date);
                 }
                 
