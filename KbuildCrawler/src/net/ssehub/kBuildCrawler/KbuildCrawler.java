@@ -195,6 +195,9 @@ public class KbuildCrawler {
                             Object[] newValues = new Object[oldLength + 4];
                             newValues[0] = failureTrace.getMail().getDate();
                             newValues[1] = failureTrace.getGitInfo().getBase();
+                            if (newValues[1] == null) {
+                                newValues[1] = failureTrace.getGitInfo().getUrl();
+                            }
                             newValues[2] = failureTrace.getGitInfo().getCommit();
                             if (null == newValues[2]) {
                                 newValues[2] = failureTrace.getGitInfo().getBranch();

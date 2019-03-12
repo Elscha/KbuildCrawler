@@ -96,6 +96,10 @@ public class KbuildCrawlerDumper {
                 if (commit == null) {
                     commit = gitInfo.getBranch();
                 }
+                String repo = gitInfo.getBase();
+                if (repo == null) {
+                    repo = gitInfo.getUrl();
+                }
                 
                 for (FileDefect defect : fail.getDefects()) {
                     File file = new File(defect.getPath() + defect.getFile());
@@ -117,7 +121,7 @@ public class KbuildCrawlerDumper {
                         Logger.get().logException("Could not restore commit", e);
                     }
                     
-                    Dump d = new Dump(fail.getMail().getDate(), gitInfo.getBase(), commit, defect.getType().name(),
+                    Dump d = new Dump(fail.getMail().getDate(), repo, commit, defect.getType().name(),
                             defect.getPath() + defect.getFile(), defect.getLine(), functionName,
                             defect.getDescription());
                     tableOut.writeObject(d);
