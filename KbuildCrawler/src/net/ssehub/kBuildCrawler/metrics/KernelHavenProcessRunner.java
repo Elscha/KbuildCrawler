@@ -199,7 +199,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             LOGGER.logError2("  Could not execute metrics, cause: " + errLog);
         }
         
-        configFile.delete();
+      //configFile.delete();
         
         long delta = System.currentTimeMillis() - t0;
         System.err.println("  Metric execution (+ merging " + results.size() + " results) took "
