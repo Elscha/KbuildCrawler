@@ -45,7 +45,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
     /**
      * 10 min time out.
      */
-    private static final long KH_TIMEOUT = 10 * 60 * 1000;
+    private static final long KH_TIMEOUT = 30 * 60 * 1000;
     private static final int MAX_TRIES = 1;
 
     private static final int MAX_GB_FOR_KH = 20;
