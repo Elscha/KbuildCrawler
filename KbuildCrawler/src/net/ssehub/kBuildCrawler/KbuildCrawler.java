@@ -42,8 +42,6 @@ public class KbuildCrawler {
     
     private static final int DEBUG_PROCESS_ONLY;
     
-    public static final boolean DISABLE_KH_LOGGING = true;
-    
     static {
         String setting = System.getProperty("DEBUG_PROCESS_ONLY");
         if (setting != null) {

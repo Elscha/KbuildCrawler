@@ -145,7 +145,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             OutputStream outStream = new ByteArrayOutputStream();
             OutputStream errStream = new ByteArrayOutputStream();
             ProcessBuilder processBuilder = new ProcessBuilder("java", "-Djava.io.tmpdir=" + tempFolder.getAbsolutePath(),
-                    INITIAL_MEMORY, MAX_MEMORY, "-jar", "KernelHaven_withsource.jar", configFile.getAbsolutePath());
+                    INITIAL_MEMORY, MAX_MEMORY, "-jar", "KernelHaven.jar", configFile.getAbsolutePath());
             processBuilder.directory(new File(KH_DIR));
             success = Util.executeProcess(processBuilder, "MetricsRunner", outStream,
                 errStream, KH_TIMEOUT);
