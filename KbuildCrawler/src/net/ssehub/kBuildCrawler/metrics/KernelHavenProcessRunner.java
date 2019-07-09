@@ -156,6 +156,8 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                 errLog = outStream.toString();
                 
                 if (executionTime < KH_TIMEOUT) {
+                    System.err.println("    KernelHaven stopped for an unknown reason. Read the KernelHaven log for "
+                        + "more details.");
                     // KH wasn't aborted through time out, there was something critical: No reason to continue loop
                     break;
                 } else {
