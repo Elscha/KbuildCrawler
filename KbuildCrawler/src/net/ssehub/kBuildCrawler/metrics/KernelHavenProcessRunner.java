@@ -43,9 +43,9 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
     private static final String BASE_CONFIGURATION = "res/all_metrics.properties";
     
     /**
-     * 10 min time out.
+     * 45 min time out.
      */
-    private static final long KH_TIMEOUT = 30 * 60 * 1000;
+    private static final long KH_TIMEOUT = 45 * 60 * 1000;
     private static final int MAX_TRIES = 1;
 
     private static final int MAX_GB_FOR_KH = 20;
