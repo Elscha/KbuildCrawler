@@ -19,7 +19,7 @@ public class GitUtils {
     
     static final String CONFIG_REGEX = "^URL: <(.*obj)>$";
     
-    private static final String C_FILE_PATH = "([^:]*/)+([^/:]*\\.c)";
+    private static final String C_FILE_PATH = "([^:]*/)+([^/:]*" + MailUtils.FILE_EXTENSION + ")";
     private static final String NUMBER = "(\\p{Digit}+)";
     private static final String RANGE = NUMBER + "(\\-" + NUMBER + ")?";
     static final String DEFECT_REGEX = ">> " + C_FILE_PATH + ":" + NUMBER + "(:" + RANGE + ")?: (.*)";
@@ -120,11 +120,11 @@ public class GitUtils {
                 if (matcher.matches()) {
                     String path = matcher.group(1);
                     String file = matcher.group(2);
-                    String lineNo = matcher.group(3);
+                    String lineNo = matcher.group(4);
                     int line = null != lineNo ? Integer.valueOf(lineNo) : 0;
                     int charPos = 0;
-                    if (matcher.groupCount() == 6) {
-                        String charNo = matcher.group(5);
+                    if (matcher.groupCount() == 7) {
+                        String charNo = matcher.group(6);
                         if (null != charNo) {
                             charPos = Integer.valueOf(charNo);
                         }

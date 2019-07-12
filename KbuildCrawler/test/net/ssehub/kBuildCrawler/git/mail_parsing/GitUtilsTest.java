@@ -53,7 +53,7 @@ public class GitUtilsTest {
             Assert.assertNotNull(trace.getMail());
             Assert.assertNotNull("Mail \"" + trace.getMail() + "\" has no git data.", trace.getGitInfo());
             Assert.assertNotNull("Mail \"" + trace.getMail() + "\" has no defects.", trace.getDefects());
-            Assert.assertFalse("Mail \"" + trace.getMail() + "\" has no defects.", trace.getDefects().isEmpty());
+            Assert.assertFalse("Mail " + i + " \"" + trace.getMail() + "\" has no defects.", trace.getDefects().isEmpty());
             
             // Test the git data
             GitData gitData =  trace.getGitInfo();
