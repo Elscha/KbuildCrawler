@@ -105,6 +105,7 @@ public class KbuildCrawler {
         // Only mails from Kbuild test robot, containing compilation problems
         mails = MailUtils.filterForKbuildTestRobot(mails, true);
         mails = MailUtils.filterForCompilationProblems(mails, false);
+//        mails = MailUtils.filterForCompilationProblems(mails, false);
         
         // Extract needed infos:
         List<FailureTrace> failures = GitUtils.convertToTraces(mails);

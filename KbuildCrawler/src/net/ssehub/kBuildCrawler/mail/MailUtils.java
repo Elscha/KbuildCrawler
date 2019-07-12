@@ -22,7 +22,10 @@ public class MailUtils {
      * Regex showing an error inside a C file. <br/>
      * <tt>.c:&lt;Line start number&gt;:&lt;Line end number&gt;</tt>
      */
-    static final String COMPILATION_WARNINGS_REGEX = "^.*\\.c\\:\\p{Digit}+:\\p{Digit}+.*$";
+//    static final String COMPILATION_WARNINGS_REGEX = "^.*\\.c\\:\\p{Digit}+:\\p{Digit}+.*$";
+    
+    // Supports also header files
+    static final String COMPILATION_WARNINGS_REGEX = "^.*\\.(c|h)\\:\\p{Digit}+:\\p{Digit}+.*$";
     
     // Valid addresses for the Kbuild test robot.
     private static final String KBUILD_TEST_ROBOT_ADDRESS1 = "lkp at intel.com (kbuild test robot)";
