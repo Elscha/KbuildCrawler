@@ -90,7 +90,18 @@ public class KbuildCrawler {
         for (int i = 0; i < archives.length; i++) {
             failures.addAll(readMails(archives[i]));
         }
-        runMetrics(gitRepo, failures);
+        
+        String name;
+        if (archives.length > 1) {
+            int index = 0;
+            String first = archives[index].getName().substring(0, archives[index].getName().lastIndexOf('.'));
+            index = archives.length - 1;
+            String last = archives[index].getName().substring(0, archives[index].getName().lastIndexOf('.'));
+            name = first + "-" + last;
+        } else {
+            name = archives[0].getName().substring(0, archives[0].getName().lastIndexOf('.'));
+        }
+        runMetrics(gitRepo, failures, name);
         
         out.close();
     }
@@ -113,7 +124,7 @@ public class KbuildCrawler {
         return failures;
     }
     
-    private static void runMetrics(File gitFolder, List<FailureTrace> failures) throws GitException, IOException {
+    private static void runMetrics(File gitFolder, List<FailureTrace> failures, String name) throws GitException, IOException {
         GitInterface git = new GitInterface(gitFolder);
         AbstractKernelHavenRunner runner = new KernelHavenProcessRunner();
         
@@ -122,7 +133,10 @@ public class KbuildCrawler {
         String[] previousMetrics = null;
         Boolean previousConsideredIncludedFile = null;
         
-        try (ExcelBook output = new ExcelBook(new File(Timestamp.INSTANCE.getFilename("MetricsResult", "xlsx")))) {
+        if (null == name) {
+            name = "MetricsResult";
+        }
+        try (ExcelBook output = new ExcelBook(new File(Timestamp.INSTANCE.getFilename(name, "xlsx")))) {
             try (ExcelSheetWriter writer = output.getWriter("Result")) {
         
                 for (FailureTrace failureTrace : failures) {
@@ -143,12 +157,12 @@ public class KbuildCrawler {
                         gitInfo = "(unknown)";
                     }
                     
-                    String name = failureTrace.getFormattedDate(false) + " " + gitInfo;
+                    String failureTraceName = failureTrace.getFormattedDate(false) + " " + gitInfo;
                     
                     long t0 = System.currentTimeMillis();
                     List<MultiMetricResult> result = runner.run(git, failureTrace);        
                     if (result != null && !result.isEmpty()) {
-                        Logger.get().logInfo("Got result for " + name);
+                        Logger.get().logInfo("Got result for " + failureTraceName);
                         
                         List<Type> types = determineTypes(result, failureTrace.getDefects());
                         int resultIndex = -1;
@@ -209,7 +223,7 @@ public class KbuildCrawler {
                         }
                         
                     } else {
-                        Logger.get().logInfo("Got NO result for " + name);
+                        Logger.get().logInfo("Got NO result for " + failureTraceName);
                     }
                     
                     long duration = System.currentTimeMillis() - t0;
