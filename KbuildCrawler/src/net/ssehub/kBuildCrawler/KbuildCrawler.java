@@ -99,7 +99,7 @@ public class KbuildCrawler {
             String last = archives[index].getName().substring(0, archives[index].getName().indexOf('.'));
             name = first + "-" + last;
         } else {
-            name = archives[0].getName().substring(0, archives[0].getName().lastIndexOf('.'));
+            name = archives[0].getName().substring(0, archives[0].getName().indexOf('.'));
         }
         runMetrics(gitRepo, failures, name);
         
