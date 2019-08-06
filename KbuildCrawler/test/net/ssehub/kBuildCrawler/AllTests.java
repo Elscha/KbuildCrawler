@@ -7,6 +7,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 import net.ssehub.kBuildCrawler.git.AllGitTests;
 import net.ssehub.kBuildCrawler.mail.AllMailTests;
+import net.ssehub.kBuildCrawler.metrics.KernelHavenProcessRunnerTest;
 import net.ssehub.kBuildCrawler.metrics.MultiMetricJoinerTest;
 
 @RunWith(Suite.class)
@@ -16,6 +17,7 @@ import net.ssehub.kBuildCrawler.metrics.MultiMetricJoinerTest;
     MultiMetricJoinerTest.class,
     
     KbuildCrawlerTest.class,
+    KernelHavenProcessRunnerTest.class
     })
 public class AllTests {
     public static final File TESTDATA = new File("testdata");

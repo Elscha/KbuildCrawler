@@ -101,13 +101,13 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             FeatureSizeType.POSITIVE_SIZES.name());
         
         // First run: Positive Feature Sizes
-        File configFile = prepareConfiguration(sourceTree, defects, featureSizeSettings);
+        File configFile = prepareAndSaveConfiguration(sourceTree, defects, featureSizeSettings);
         List<MultiMetricResult> result = runMetricsWithConfig(sourceTree, defects, configFile);
         
         // Second run: Total Feature Sizes
         featureSizeSettings.setProperty(MetricSettings.FEATURE_SIZE_MEASURING_SETTING.getKey(),
             FeatureSizeType.TOTAL_SIZES.name());
-        File secondConfigFile = prepareConfiguration(sourceTree, defects, featureSizeSettings);
+        File secondConfigFile = prepareAndSaveConfiguration(sourceTree, defects, featureSizeSettings);
         List<MultiMetricResult> secondResult = runMetricsWithConfig(sourceTree, defects, secondConfigFile);
         
         // Return joined/merged result list
@@ -118,7 +118,7 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
     protected List<MultiMetricResult> runMetrics(File sourceTree, List<FileDefect> defects)
             throws IOException, SetUpException {
         
-        File configFile = prepareConfiguration(sourceTree, defects, null);
+        File configFile = prepareAndSaveConfiguration(sourceTree, defects, null);
         return runMetricsWithConfig(sourceTree, defects, configFile);
     }
     
@@ -210,8 +210,23 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         return results;
     }
 
-    private File prepareConfiguration(File sourceTree, @Nullable List<FileDefect> defects,
+    private File prepareAndSaveConfiguration(File sourceTree, @Nullable List<FileDefect> defects,
         @Nullable Properties settings) throws FileNotFoundException, IOException {
+        
+        Properties props = prepareConfiguration(sourceTree, defects, settings);
+        
+        // Save temporary configuration and return file (required as a parameter, later)
+        File tmpProperties = File.createTempFile("SingleMetricAnalysis", ".properties");
+        tmpProperties.deleteOnExit();
+        try (OutputStream output = new FileOutputStream(tmpProperties)) {
+            props.store(output, null);
+        }
+        
+        return tmpProperties;
+    }
+
+    Properties prepareConfiguration(File sourceTree, List<FileDefect> defects, Properties settings)
+        throws IOException, FileNotFoundException {
         
         // Read configuration template
         // Stores properties in a sorted order (for debugging issues only):
@@ -242,39 +257,35 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
                 LOGGER.logWarning(folder + " doesn't exist (yet) in Linux source tree; omitting from code.extractor.files");
             }
         }
-        codeFilesSetting.deleteCharAt(codeFilesSetting.length() - 1); // remove trailing ","
-        props.setProperty(DefaultSettings.CODE_EXTRACTOR_FILES.getKey(), codeFilesSetting.toString());
-        
-        
-        StringBuilder filesSetting = new StringBuilder();
-        StringBuilder linesSetting = new StringBuilder();
-        
-        for (FileDefect defect : defects) {
-            filesSetting.append(defect.getPath()).append(defect.getFile()).append(", ");
-            linesSetting.append(defect.getPath()).append(defect.getFile()).append(":").append(defect.getLine())
-            .append(", ");
+        // Check if list is not empty (may happen during testing)
+        if (codeFilesSetting.length() > 0) {
+            codeFilesSetting.deleteCharAt(codeFilesSetting.length() - 1); // remove trailing ","
+            props.setProperty(DefaultSettings.CODE_EXTRACTOR_FILES.getKey(), codeFilesSetting.toString());
         }
-        filesSetting.replace(filesSetting.length() - 2, filesSetting.length(), ""); // remove trailing ", "
-        linesSetting.replace(linesSetting.length() - 2, linesSetting.length(), ""); // remove trailing ", "
         
-        // we can't filter code files, since ScatteringDegree and FanInOut need the complete code model
-        // props.setProperty("code.extractor.files", filesSetting.toString());
-        props.setProperty(MetricSettings.FILTER_BY_FILES.getKey(), filesSetting.toString());
-        props.setProperty(MetricSettings.LINE_NUMBER_SETTING.getKey(), linesSetting.toString());
+        if (null != defects  && defects.size() >  0) {
+            StringBuilder filesSetting = new StringBuilder();
+            StringBuilder linesSetting = new StringBuilder();
+            
+            for (FileDefect defect : defects) {
+                filesSetting.append(defect.getPath()).append(defect.getFile()).append(", ");
+                linesSetting.append(defect.getPath()).append(defect.getFile()).append(":").append(defect.getLine())
+                .append(", ");
+            }
+            filesSetting.replace(filesSetting.length() - 2, filesSetting.length(), ""); // remove trailing ", "
+            linesSetting.replace(linesSetting.length() - 2, linesSetting.length(), ""); // remove trailing ", "
+            
+            // we can't filter code files, since ScatteringDegree and FanInOut need the complete code model
+            // props.setProperty("code.extractor.files", filesSetting.toString());
+            props.setProperty(MetricSettings.FILTER_BY_FILES.getKey(), filesSetting.toString());
+            props.setProperty(MetricSettings.LINE_NUMBER_SETTING.getKey(), linesSetting.toString());
+        }
         
         // Add extra settings, if defined
         if (null != settings) {
             props.putAll(settings);
         }
-        
-        // Save temporary configuration and return file (required as a parameter, later)
-        File tmpProperties = File.createTempFile("SingleMetricAnalysis", ".properties");
-        tmpProperties.deleteOnExit();
-        try (OutputStream output = new FileOutputStream(tmpProperties)) {
-            props.store(output, null);
-        }
-        
-        return tmpProperties;
+        return props;
     }
     
 }
