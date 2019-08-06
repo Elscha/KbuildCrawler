@@ -94,9 +94,9 @@ public class KbuildCrawler {
         String name;
         if (archives.length > 1) {
             int index = 0;
-            String first = archives[index].getName().substring(0, archives[index].getName().lastIndexOf('.'));
+            String first = archives[index].getName().substring(0, archives[index].getName().indexOf('.'));
             index = archives.length - 1;
-            String last = archives[index].getName().substring(0, archives[index].getName().lastIndexOf('.'));
+            String last = archives[index].getName().substring(0, archives[index].getName().indexOf('.'));
             name = first + "-" + last;
         } else {
             name = archives[0].getName().substring(0, archives[0].getName().lastIndexOf('.'));
