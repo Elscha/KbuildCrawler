@@ -269,16 +269,26 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             
             for (FileDefect defect : defects) {
                 filesSetting.append(defect.getPath()).append(defect.getFile()).append(", ");
-                linesSetting.append(defect.getPath()).append(defect.getFile()).append(":").append(defect.getLine())
-                .append(", ");
+                
+                // TODO SE: Create method for function -> line number and remove if-statement here
+                if (defect.getLine() != FileDefect.UNKNOWN_POSITION) {
+                    linesSetting.append(defect.getPath()).append(defect.getFile()).append(":").append(defect.getLine())
+                    .append(", ");
+                    }
             }
             filesSetting.replace(filesSetting.length() - 2, filesSetting.length(), ""); // remove trailing ", "
-            linesSetting.replace(linesSetting.length() - 2, linesSetting.length(), ""); // remove trailing ", "
+            
+            if (linesSetting.length() >  0) {
+                linesSetting.replace(linesSetting.length() - 2, linesSetting.length(), ""); // remove trailing ", "
+            }
             
             // we can't filter code files, since ScatteringDegree and FanInOut need the complete code model
             // props.setProperty("code.extractor.files", filesSetting.toString());
             props.setProperty(MetricSettings.FILTER_BY_FILES.getKey(), filesSetting.toString());
-            props.setProperty(MetricSettings.LINE_NUMBER_SETTING.getKey(), linesSetting.toString());
+            
+            if (linesSetting.length() >  0) {
+                props.setProperty(MetricSettings.LINE_NUMBER_SETTING.getKey(), linesSetting.toString());
+            }
         }
         
         // Add extra settings, if defined
