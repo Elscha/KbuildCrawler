@@ -5,9 +5,9 @@ import java.io.FileOutputStream;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.ssehub.kBuildCrawler.git.FailureTrace;
 import net.ssehub.kBuildCrawler.git.GitException;
 import net.ssehub.kBuildCrawler.git.GitInterface;
-import net.ssehub.kBuildCrawler.git.mail_parsing.FailureTrace;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
 import net.ssehub.kBuildCrawler.git.mail_parsing.GitData;
 import net.ssehub.kBuildCrawler.metrics.IsFunctionChecker;
@@ -121,7 +121,7 @@ public class KbuildCrawlerDumper {
                         Logger.get().logException("Could not restore commit", e);
                     }
                     
-                    Dump d = new Dump(fail.getMail().getDate(), repo, commit, defect.getType().name(),
+                    Dump d = new Dump(fail.getDate(), repo, commit, defect.getType().name(),
                             defect.getPath() + defect.getFile(), defect.getLine(), functionName,
                             defect.getDescription());
                     tableOut.writeObject(d);

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.ssehub.kBuildCrawler.git.FailureTrace;
 import net.ssehub.kBuildCrawler.io.IOUtils;
 import net.ssehub.kBuildCrawler.mail.Mail;
 import net.ssehub.kBuildCrawler.mail.MailUtils;
@@ -142,7 +143,7 @@ public class GitUtils {
     }
     
     /**
-     * Converts a list of mails from the Kbuild test robot to Git {@link FailureTrace}s, which contain all
+     * Converts a list of mails from the Kbuild test robot to Git {@link MailReport}s, which contain all
      * necessary information to reproduce the reported error in a structured way.
      * @param kbuildMails Compilation error/warnings reported by the Kbuild test robot.
      * @return The given information in a parsed and structured way to make the report reproduceable.
@@ -155,7 +156,7 @@ public class GitUtils {
             GitData gitInfo = extractGitSettings(lines);
             ConfigProvider config = extractConfigURL(lines);
             List<FileDefect> defects = extractAffectedFiles(lines);
-            traces.add(new FailureTrace(mail, gitInfo, config, defects));
+            traces.add(new MailReport(mail, gitInfo, config, defects));
         }
         
         return traces;

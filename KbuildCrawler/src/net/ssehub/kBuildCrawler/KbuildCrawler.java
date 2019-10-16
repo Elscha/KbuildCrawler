@@ -14,13 +14,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.ssehub.kBuildCrawler.git.FailureTrace;
 import net.ssehub.kBuildCrawler.git.GitException;
 import net.ssehub.kBuildCrawler.git.GitInterface;
-import net.ssehub.kBuildCrawler.git.mail_parsing.FailureTrace;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect.Type;
 import net.ssehub.kBuildCrawler.git.mail_parsing.GitData;
 import net.ssehub.kBuildCrawler.git.mail_parsing.GitUtils;
+import net.ssehub.kBuildCrawler.git.mail_parsing.MailReport;
 import net.ssehub.kBuildCrawler.mail.IMailSource;
 import net.ssehub.kBuildCrawler.mail.Mail;
 import net.ssehub.kBuildCrawler.mail.MailParser;
@@ -205,7 +206,7 @@ public class KbuildCrawler {
                             }
                             
                             Object[] newValues = new Object[oldLength + 4];
-                            newValues[0] = failureTrace.getMail().getDate();
+                            newValues[0] = failureTrace.getDate();
                             newValues[1] = failureTrace.getGitInfo().getBase();
                             if (newValues[1] == null) {
                                 newValues[1] = failureTrace.getGitInfo().getUrl();

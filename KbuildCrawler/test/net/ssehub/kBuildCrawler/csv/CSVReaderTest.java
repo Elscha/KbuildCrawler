@@ -8,7 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import net.ssehub.kBuildCrawler.AllTests;
-import net.ssehub.kBuildCrawler.git.mail_parsing.FailureTrace;
+import net.ssehub.kBuildCrawler.git.FailureTrace;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
 
 /**

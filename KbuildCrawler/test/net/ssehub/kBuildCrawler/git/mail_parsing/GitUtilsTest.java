@@ -5,6 +5,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
+import net.ssehub.kBuildCrawler.git.FailureTrace;
 import net.ssehub.kBuildCrawler.mail.Mail;
 import net.ssehub.kBuildCrawler.mail.MailUtils;
 import net.ssehub.kBuildCrawler.mail.ZipMailSourceTests;
@@ -35,7 +36,7 @@ public class GitUtilsTest {
     
     /**
      * Tests whether all Kbuild test robot mails from the sample, which contain compilation problems/errors,
-     * can be converted to {@link FailureTrace}s, which enable reproducing the report. 
+     * can be converted to {@link MailReport}s, which enable reproducing the report. 
      */
     @Test
     public void testConvertToTraces() {
@@ -48,7 +49,7 @@ public class GitUtilsTest {
         Assert.assertNotNull(traces);
         Assert.assertEquals(mails.size(), traces.size());
         for (int i = 0, end = traces.size(); i < end; i++) {
-            FailureTrace trace = traces.get(i);
+            MailReport trace = (MailReport) traces.get(i);
             Assert.assertNotNull(trace);
             Assert.assertNotNull(trace.getMail());
             Assert.assertNotNull("Mail \"" + trace.getMail() + "\" has no git data.", trace.getGitInfo());

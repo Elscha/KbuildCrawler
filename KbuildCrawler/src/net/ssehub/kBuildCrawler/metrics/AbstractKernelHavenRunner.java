@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.ssehub.kBuildCrawler.git.FailureTrace;
 import net.ssehub.kBuildCrawler.git.GitException;
 import net.ssehub.kBuildCrawler.git.GitInterface;
-import net.ssehub.kBuildCrawler.git.mail_parsing.FailureTrace;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
 import net.ssehub.kernel_haven.SetUpException;
 import net.ssehub.kernel_haven.metric_haven.multi_results.MeasuredItem;

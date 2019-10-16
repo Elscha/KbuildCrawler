@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.ssehub.kBuildCrawler.git.mail_parsing.FailureTrace;
+import net.ssehub.kBuildCrawler.git.FailureTrace;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
 import net.ssehub.kBuildCrawler.git.mail_parsing.GitData;
 import net.ssehub.kernel_haven.util.io.ITableReader;
@@ -68,7 +68,7 @@ public class CSVReader {
                 } else {
                     // New defect trace (new commit hash)
                     GitData data = new GitData(null, GIT_REPOSITORY, GIT_BRANCH, null, commitHash);
-                    lastTrace = new FailureTrace(data, defects);
+                    lastTrace = new CVEReport(data, defects, cve);
                     result.add(lastTrace);
                 }
             }
