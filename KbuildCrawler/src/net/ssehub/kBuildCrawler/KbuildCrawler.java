@@ -154,7 +154,10 @@ public class KbuildCrawler {
                         + sdf.format(Calendar.getInstance().getTime()));
                     String gitInfo;
                     if (failureTrace.getGitInfo().getCommit() != null) {
-                        gitInfo = failureTrace.getGitInfo().getCommit().substring(0, 8);
+                        gitInfo = failureTrace.getGitInfo().getCommit();
+                        if (gitInfo.length() >= 9) {
+                            gitInfo = gitInfo.substring(0, 8);
+                        }
                     } else if (failureTrace.getGitInfo().getBranch() != null) {
                         gitInfo = failureTrace.getGitInfo().getBranch();
                     } else if (failureTrace.getGitInfo().is0DayCommit()) {
