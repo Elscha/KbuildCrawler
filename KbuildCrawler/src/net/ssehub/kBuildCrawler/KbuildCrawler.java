@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.ssehub.kBuildCrawler.csv.CSVReader;
 import net.ssehub.kBuildCrawler.git.FailureTrace;
 import net.ssehub.kBuildCrawler.git.GitException;
 import net.ssehub.kBuildCrawler.git.GitInterface;
@@ -21,7 +22,6 @@ import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect.Type;
 import net.ssehub.kBuildCrawler.git.mail_parsing.GitData;
 import net.ssehub.kBuildCrawler.git.mail_parsing.GitUtils;
-import net.ssehub.kBuildCrawler.git.mail_parsing.MailReport;
 import net.ssehub.kBuildCrawler.mail.IMailSource;
 import net.ssehub.kBuildCrawler.mail.Mail;
 import net.ssehub.kBuildCrawler.mail.MailParser;
@@ -90,7 +90,13 @@ public class KbuildCrawler {
         
         List<FailureTrace> failures = new LinkedList<FailureTrace>();
         for (int i = 0; i < archives.length; i++) {
-            failures.addAll(readMails(archives[i]));
+            File archive = archives[i];
+            if (archive.getName().toLowerCase().endsWith("csv")) {
+                CSVReader reader = new CSVReader(archive.getAbsolutePath(), 0, 1, 2, 3);
+                failures.addAll(reader.readFile());
+            } else {
+                failures.addAll(readMails(archive));
+            }
         }
         
         String name;
