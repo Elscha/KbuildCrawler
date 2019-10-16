@@ -14,18 +14,22 @@ public class FileDefect {
         SPARSE, // this is a static analysis tool specifically for the Linux kernel
         WARNING,
         NOTE,
+        VULNERABILITY,
         UNKNOWN
     }
+
+    public static final int UNKNOWN_POSITION = -1;
     
     private String path;
     private String file;
+    private String function;
     private int line;
     private int posStart;
     private String description;
     private Type type;
     
     /**
-     * Sole constructor for a file based diff.
+     * Constructor for a file based diff (via <b>mails</b>).
      * @param path The relative path to the file inside the repository, without the file itself
      * @param file The file (last segment of the path).
      * @param line The reported starting line of the defect.
@@ -39,6 +43,25 @@ public class FileDefect {
         this.posStart = posStart;
         this.description = description;
         this.type = determineType(description);
+        this.function = null;
+    }
+    
+    /**
+     * Constructor for a file based diff (via <b>CSV list of CVEs</b>).
+     * @param path The relative path to the file inside the repository, without the file itself
+     * @param file The file (last segment of the path).
+     * @param line The reported starting line of the defect.
+     * @param posStart The reported starting positing within the line
+     * @param description Optional: A description of the reported failure.
+     */
+    public FileDefect(String path, String file, String function, String cve, String type) {
+        this.path = path;
+        this.file = file;
+        this.line = UNKNOWN_POSITION;
+        this.posStart = UNKNOWN_POSITION;
+        this.description = cve;
+        this.type = determineType(type);
+        this.function = function;
     }
     
     private static Type determineType(String description) {
@@ -58,6 +81,9 @@ public class FileDefect {
         } else if (description.startsWith("sparse:")) {
             result = Type.SPARSE;
             
+        } else if (description.startsWith("vulnerability")) {
+            result = Type.VULNERABILITY;
+            
         } else {
             Logger.get().logWarning("Could not determine type for: " + description, "Using UNKNOWN");
             result = Type.UNKNOWN;
@@ -72,6 +98,14 @@ public class FileDefect {
     
     public String getFile() {
         return file;
+    }
+    
+    /**
+     * Returns the identified, affected code function.
+     * @return Will be <tt>null</tt> in case of mailing list-based API is used, otherwise the reported code function.
+     */
+    public String getFunction() {
+        return function;
     }
     
     public int getLine() {

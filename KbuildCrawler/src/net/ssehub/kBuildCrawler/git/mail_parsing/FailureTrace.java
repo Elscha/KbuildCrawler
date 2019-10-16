@@ -25,7 +25,7 @@ public class FailureTrace {
     private List<FileDefect> defects;
     
     /**
-     * Solve constructor for this class.
+     * Constructor for parsed mails of the mailing list.
      * @param mail The original mail of the Kbuild test robot, which does contain relevant GIT information
      *     only in an unparsed structure.
      * @param gitInfo The relevant information of {@link Mail#getContent()} in a parsed structure to reproduce
@@ -37,6 +37,17 @@ public class FailureTrace {
         this.mail = mail;
         this.gitInfo = gitInfo;
         this.config = config;
+        this.defects = defects;
+    }
+    
+    /**
+     * Constructor to use when working without a mailing archive, e.g., with a CSV file.
+     * @param gitInfo The relevant information of {@link Mail#getContent()} in a parsed structure to reproduce
+     *     the reported error.
+     * @param defects Optional: A list of found defects.
+     */
+    public FailureTrace(GitData gitInfo, List<FileDefect> defects) {
+        this.gitInfo = gitInfo;
         this.defects = defects;
     }
     

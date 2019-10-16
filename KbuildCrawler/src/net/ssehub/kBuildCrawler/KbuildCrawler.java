@@ -52,6 +52,7 @@ public class KbuildCrawler {
     }
 
     public static void main(String[] args) throws Exception {
+        // Init Logger
         FileOutputStream out = new FileOutputStream(Timestamp.INSTANCE.getFilename("MailCrawler", "log"));
         Logger.get().clearAllTargets();
         Logger.get().addTarget(out);
@@ -107,11 +108,9 @@ public class KbuildCrawler {
     }
 
     static List<FailureTrace> readMails(File zipFile) throws Exception {
-        IMailSource augMails = new ZipMailSource(zipFile);
+        IMailSource zippedMails = new ZipMailSource(zipFile);
         MailParser parser = new MailParser();
-        
-        // Aug 2016 mails
-        List<Mail> mails = parser.loadMails(augMails);
+        List<Mail> mails = parser.loadMails(zippedMails);
         
         // Only mails from Kbuild test robot, containing compilation problems
         mails = MailUtils.filterForKbuildTestRobot(mails, true);
