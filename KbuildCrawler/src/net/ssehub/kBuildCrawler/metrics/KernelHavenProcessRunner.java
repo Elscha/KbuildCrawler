@@ -46,14 +46,11 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
      * 22 min time out.
      */
     private static final long KH_TIMEOUT = 22 * 60 * 1000;
-    private static final long KH_TIMEOUT_FULL_ANALYSIS = KH_TIMEOUT * 10 ;
     private static final int MAX_TRIES = 1;
 
     private static final int MAX_GB_FOR_KH = 40;
     private static final String MAX_MEMORY = "-Xmx" + MAX_GB_FOR_KH + "G";
     private static final String INITIAL_MEMORY = "-Xms" + MAX_GB_FOR_KH + "G";
-    
-    private boolean useShortTimeOut = true;
     
     private void readMultiMetricResults(ITableReader reader, List<MultiMetricResult> resultList) throws IOException {
         // Read Header
@@ -147,19 +144,18 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             long started = System.currentTimeMillis();
             OutputStream outStream = new ByteArrayOutputStream();
             OutputStream errStream = new ByteArrayOutputStream();
-            long timeout = useShortTimeOut ? KH_TIMEOUT : KH_TIMEOUT_FULL_ANALYSIS;
             ProcessBuilder processBuilder = new ProcessBuilder("java", "-Djava.io.tmpdir=" + tempFolder.getAbsolutePath(),
                     INITIAL_MEMORY, MAX_MEMORY, "-jar", "KernelHaven.jar", configFile.getAbsolutePath());
             processBuilder.directory(new File(KH_DIR));
             success = Util.executeProcess(processBuilder, "MetricsRunner", outStream,
-                errStream, timeout);
+                errStream, KH_TIMEOUT);
             
             if (!success) {
                 long executionTime = System.currentTimeMillis() - started;
                 tries++;
                 errLog = outStream.toString();
                 
-                if (executionTime < timeout) {
+                if (executionTime < KH_TIMEOUT) {
                     System.err.println("    KernelHaven stopped for an unknown reason. Read the KernelHaven log for "
                         + "more details.");
                     // KH wasn't aborted through time out, there was something critical: No reason to continue loop
@@ -270,30 +266,32 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
         if (null != defects  && defects.size() >  0) {
             StringBuilder filesSetting = new StringBuilder();
             StringBuilder linesSetting = new StringBuilder();
+            StringBuilder namesSetting = new StringBuilder();
             
             for (FileDefect defect : defects) {
                 filesSetting.append(defect.getPath()).append(defect.getFile()).append(", ");
                 
-                // TODO SE: Create method for function -> line number and remove if-statement here
+                String path = defect.getPath() + defect.getFile() + ":";
                 if (defect.getLine() != FileDefect.UNKNOWN_POSITION) {
-                    linesSetting.append(defect.getPath()).append(defect.getFile()).append(":").append(defect.getLine())
-                    .append(", ");
-                    }
+                    linesSetting.append(path).append(defect.getLine()).append(", ");
+                }
+                if (defect.getFunction() != null && !defect.getFunction().isEmpty()) {
+                    namesSetting.append(path).append(defect.getFunction()).append(", ");
+                }
             }
             filesSetting.replace(filesSetting.length() - 2, filesSetting.length(), ""); // remove trailing ", "
             
             if (linesSetting.length() >  0) {
                 linesSetting.replace(linesSetting.length() - 2, linesSetting.length(), ""); // remove trailing ", "
-            } else {
-                useShortTimeOut = false;
             }
-            
-            // we can't filter code files, since ScatteringDegree and FanInOut need the complete code model
-            // props.setProperty("code.extractor.files", filesSetting.toString());
-            props.setProperty(MetricSettings.FILTER_BY_FILES.getKey(), filesSetting.toString());
-            
+            if (namesSetting.length() >  0) {
+                namesSetting.replace(namesSetting.length() - 2, namesSetting.length(), ""); // remove trailing ", "
+            }
+
             if (linesSetting.length() >  0) {
                 props.setProperty(MetricSettings.LINE_NUMBER_SETTING.getKey(), linesSetting.toString());
+            } else if (namesSetting.length() > 0) {
+                props.setProperty(MetricSettings.FILTER_BY_FUNCTIONS.getKey(), namesSetting.toString());                
             }
         }
         
