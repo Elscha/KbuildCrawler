@@ -43,14 +43,17 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
     private static final String BASE_CONFIGURATION = "res/all_metrics.properties";
     
     /**
-     * 45 min time out.
+     * 22 min time out.
      */
     private static final long KH_TIMEOUT = 22 * 60 * 1000;
+    private static final long KH_TIMEOUT_FULL_ANALYSIS = KH_TIMEOUT * 10 ;
     private static final int MAX_TRIES = 1;
 
     private static final int MAX_GB_FOR_KH = 40;
     private static final String MAX_MEMORY = "-Xmx" + MAX_GB_FOR_KH + "G";
     private static final String INITIAL_MEMORY = "-Xms" + MAX_GB_FOR_KH + "G";
+    
+    private boolean useShortTimeOut = true;
     
     private void readMultiMetricResults(ITableReader reader, List<MultiMetricResult> resultList) throws IOException {
         // Read Header
@@ -144,18 +147,19 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             long started = System.currentTimeMillis();
             OutputStream outStream = new ByteArrayOutputStream();
             OutputStream errStream = new ByteArrayOutputStream();
+            long timeout = useShortTimeOut ? KH_TIMEOUT : KH_TIMEOUT_FULL_ANALYSIS;
             ProcessBuilder processBuilder = new ProcessBuilder("java", "-Djava.io.tmpdir=" + tempFolder.getAbsolutePath(),
                     INITIAL_MEMORY, MAX_MEMORY, "-jar", "KernelHaven.jar", configFile.getAbsolutePath());
             processBuilder.directory(new File(KH_DIR));
             success = Util.executeProcess(processBuilder, "MetricsRunner", outStream,
-                errStream, KH_TIMEOUT);
+                errStream, timeout);
             
             if (!success) {
                 long executionTime = System.currentTimeMillis() - started;
                 tries++;
                 errLog = outStream.toString();
                 
-                if (executionTime < KH_TIMEOUT) {
+                if (executionTime < timeout) {
                     System.err.println("    KernelHaven stopped for an unknown reason. Read the KernelHaven log for "
                         + "more details.");
                     // KH wasn't aborted through time out, there was something critical: No reason to continue loop
@@ -280,6 +284,8 @@ public class KernelHavenProcessRunner extends AbstractKernelHavenRunner {
             
             if (linesSetting.length() >  0) {
                 linesSetting.replace(linesSetting.length() - 2, linesSetting.length(), ""); // remove trailing ", "
+            } else {
+                useShortTimeOut = false;
             }
             
             // we can't filter code files, since ScatteringDegree and FanInOut need the complete code model
