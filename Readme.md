@@ -8,4 +8,4 @@ A crawler ro reproducing failures reported by the Kbuild Test Robot.
 - Early implementation, not finished, not working
 - Latest stable build can be obtained from [here](http://jenkins.sse.uni-hildesheim.de/job/KbuildCrawler/lastSuccessfulBuild/artifact/KbuildCrawler/build/jar/net.ssehub.kBuildCrawler.jar)
 
-![Status of /KbuildCrawler](http://jenkins.sse.uni-hildesheim.de/buildStatus/icon?job=/KbuildCrawler)
+![Status of /KbuildCrawler](http://jenkins-2.sse.uni-hildesheim.de/buildStatus/icon?job=/KH_KbuildCrawler)
