@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.ssehub.kBuildCrawler.csv.CSVReader;
+import net.ssehub.kBuildCrawler.csv.CSVReader2;
 import net.ssehub.kBuildCrawler.git.FailureTrace;
 import net.ssehub.kBuildCrawler.git.GitException;
 import net.ssehub.kBuildCrawler.git.GitInterface;
@@ -91,7 +92,11 @@ public class KbuildCrawler {
         List<FailureTrace> failures = new LinkedList<FailureTrace>();
         for (int i = 0; i < archives.length; i++) {
             File archive = archives[i];
-            if (archive.getName().toLowerCase().endsWith("csv")) {
+            if ("CVEs.csv".equals(archive.getName())) {
+                // CVE list created by CVE Extractor
+                CSVReader2 reader = new CSVReader2(archive.getAbsolutePath(), 3, 1, 0, 4);
+                failures.addAll(reader.readFile());
+            } else if (archive.getName().toLowerCase().endsWith("csv")) {
                 CSVReader reader = new CSVReader(archive.getAbsolutePath(), 0, 1, 2, 3);
                 failures.addAll(reader.readFile());
             } else {

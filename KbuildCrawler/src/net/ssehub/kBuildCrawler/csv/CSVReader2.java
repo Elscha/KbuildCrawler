@@ -14,14 +14,13 @@ import net.ssehub.kernel_haven.util.io.ITableReader;
 import net.ssehub.kernel_haven.util.io.csv.CsvReader;
 
 /**
- * Parser to parse CSV reported created by Gabriel Ferreira.
+ * Parser to parse CVEs collected by own CVE-Extractor tool.
  * @author El-Sharkawy
  *
  */
-public class CSVReader {
+public class CSVReader2 {
 
-    private static final char CSV_SEPARATOR = ',';
-    private static final String DEFECT_DESCRIPTION = FileDefect.Type.VULNERABILITY.name();
+    private static final char CSV_SEPARATOR = ';';
     private static final String GIT_REPOSITORY = "git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git";
     private static final String GIT_BRANCH = "master";
     
@@ -29,15 +28,15 @@ public class CSVReader {
     private int commitColumn;
     private int cveColumn;
     private int fileColumn;
-    private int funcColumns;
+    private int linesColumn;
     
-    public CSVReader(String path, int commitColumn, int cveColumn, int fileColumn, int funcColumns)
+    public CSVReader2(String path, int commitColumn, int cveColumn, int fileColumn, int linesColumn)
         throws FileNotFoundException {
         
         this.commitColumn = commitColumn;
         this.cveColumn = cveColumn;
         this.fileColumn = fileColumn;
-        this.funcColumns = funcColumns;
+        this.linesColumn = linesColumn;
         reader = new CsvReader(new BufferedReader(new FileReader(path)), CSV_SEPARATOR);
     }
     
@@ -55,20 +54,18 @@ public class CSVReader {
                 int sep = path.lastIndexOf('/');
                 String file = path.substring(sep + 1);
                 path = path.substring(0, sep + 1);
+                String[] lines = row[linesColumn].split("-");
+                int start = Integer.valueOf(lines[0]);
+                int end = Integer.valueOf(lines[1]);
+                
                 
                 List<FileDefect> defects = new ArrayList<>();
-                for (int i = funcColumns; i < row.length; i++) {
-                    String func = row[i];
-                    if (!func.isEmpty()) {
-                        FileDefect defect = new FileDefect(path, file, func, cve, DEFECT_DESCRIPTION);
-                        defects.add(defect);
-                    } else {
-                        break;
-                    }
+                for (int i = start; i <= end; i++) {
+                    defects.add(new FileDefect(path, file, i, 0, cve));
                 }
                 
                 if (lastTrace != null && lastTrace.getGitInfo().getCommit().equals(commitHash)) {
-                    // Add defects to last trace (same commit, but other files)
+                    // Add defects to last trace (same commit, but other file or at least other chunk)
                     lastTrace.getDefects().addAll(defects);
                 } else {
                     // New defect trace (new commit hash)
