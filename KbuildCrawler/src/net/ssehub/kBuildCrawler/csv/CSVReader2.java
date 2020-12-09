@@ -5,7 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.ssehub.kBuildCrawler.git.FailureTrace;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
@@ -21,6 +24,7 @@ import net.ssehub.kernel_haven.util.io.csv.CsvReader;
 public class CSVReader2 {
 
     private static final char CSV_SEPARATOR = ';';
+    private static final String DEFECT_DESCRIPTION = FileDefect.Type.VULNERABILITY.name();
     private static final String GIT_REPOSITORY = "git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git";
     private static final String GIT_BRANCH = "master";
     
@@ -54,24 +58,27 @@ public class CSVReader2 {
                 int sep = path.lastIndexOf('/');
                 String file = path.substring(sep + 1);
                 path = path.substring(0, sep + 1);
-                String[] lines = row[linesColumn].split("-");
-                int start = Integer.valueOf(lines[0]);
-                int end = Integer.valueOf(lines[1]);
+                String lineEntry = row[linesColumn];
                 
-                
-                List<FileDefect> defects = new ArrayList<>();
-                for (int i = start; i <= end; i++) {
-                    defects.add(new FileDefect(path, file, i, 0, cve));
-                }
-                
-                if (lastTrace != null && lastTrace.getGitInfo().getCommit().equals(commitHash)) {
-                    // Add defects to last trace (same commit, but other file or at least other chunk)
-                    lastTrace.getDefects().addAll(defects);
-                } else {
-                    // New defect trace (new commit hash)
-                    GitData data = new GitData(null, GIT_REPOSITORY, GIT_BRANCH, null, commitHash);
-                    lastTrace = new CVEReport(data, defects, cve);
-                    result.add(lastTrace);
+                // Skip newly added files marked with Lines = "0"
+                if (!"0".equals(lineEntry)) {
+                    String[] lines = lineEntry.split("-");
+                    List<FileDefect> defects = new ArrayList<>();
+                    int start = Integer.valueOf(lines[0]);
+                    int end = Integer.valueOf(lines[1]);
+                    for (int i = start; i <= end; i++) {
+                        defects.add(new FileDefect(path, file, i, 0, DEFECT_DESCRIPTION));
+                    }
+                    
+                    if (lastTrace != null && lastTrace.getGitInfo().getCommit().equals(commitHash)) {
+                        // Add defects to last trace (same commit, but other file or at least other chunk)
+                        lastTrace.getDefects().addAll(defects);
+                    } else {
+                        // New defect trace (new commit hash)
+                        GitData data = new GitData(null, GIT_REPOSITORY, GIT_BRANCH, null, commitHash);
+                        lastTrace = new CVEReport(data, defects, cve);
+                        result.add(lastTrace);
+                    }
                 }
             }
         } catch (IOException e) {
@@ -84,6 +91,18 @@ public class CSVReader2 {
             if (result.get(i).getDefects().isEmpty()) {
                 result.remove(i);
             }
+        }
+        
+        // Remove duplicated commits
+        int nBefore = result.size();
+        Set<FailureTrace> hashTraces = new HashSet<>(result);
+        result = new ArrayList<>(hashTraces);
+        int nAfter = result.size();
+        
+        if (nAfter != nBefore) {
+            int delta = nBefore - nAfter;
+            System.out.println("Removed " + delta + " duplicates");
+            Collections.sort(result, new CveComparator());
         }
         
         return result;
