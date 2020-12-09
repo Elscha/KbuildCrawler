@@ -51,6 +51,10 @@ public class CSVReader2 {
         
         try {
             String[] row;
+            
+            // Skip very first line (contains header)
+            reader.readNextRow();
+            
             while ((row = reader.readNextRow()) != null) {
                 String commitHash = row[commitColumn];
                 String cve = row[cveColumn];
