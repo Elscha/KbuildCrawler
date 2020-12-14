@@ -1,7 +1,5 @@
 package net.ssehub.kBuildCrawler.git.mail_parsing;
 
-import java.util.Objects;
-
 /**
  * Parsed information of how to reproduce an error reported by the Kbuild test robot.
  * There exist two ways to reproduce the data (depends on the information available):
@@ -145,26 +143,5 @@ public class GitData {
         }
         
         return result.toString();
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(base, branch, commit, head, url);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof GitData)) {
-            return false;
-        }
-        GitData other = (GitData) obj;
-        return Objects.equals(base, other.base) && Objects.equals(branch, other.branch)
-                && Objects.equals(commit, other.commit) && Objects.equals(head, other.head)
-                && Objects.equals(url, other.url);
-    }
-    
-    
+    }    
 }

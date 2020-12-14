@@ -6,9 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import net.ssehub.kBuildCrawler.git.FailureTrace;
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
@@ -99,13 +97,14 @@ public class CSVReader2 {
         
         // Remove duplicated commits
         int nBefore = result.size();
-        Set<FailureTrace> hashTraces = new HashSet<>(result);
-        result = new ArrayList<>(hashTraces);
-        int nAfter = result.size();
+        FailureTraceMerger merger = new FailureTraceMerger();
+        merger.addAll(result);
+        int nAfter = merger.size();
         
         if (nAfter != nBefore) {
             int delta = nBefore - nAfter;
             System.out.println("Removed " + delta + " duplicates");
+            result = merger.getTraces();
             Collections.sort(result, new CveComparator());
         }
         

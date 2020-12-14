@@ -1,5 +1,7 @@
 package net.ssehub.kBuildCrawler.git.mail_parsing;
 
+import java.util.Objects;
+
 import net.ssehub.kernel_haven.util.Logger;
 
 /**
@@ -133,5 +135,25 @@ public class FileDefect {
         
         return error;
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(description, file, function, line, path, posStart, type);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof FileDefect)) {
+            return false;
+        }
+        FileDefect other = (FileDefect) obj;
+        return Objects.equals(description, other.description) && Objects.equals(file, other.file)
+                && Objects.equals(function, other.function) && line == other.line && Objects.equals(path, other.path)
+                && posStart == other.posStart && type == other.type;
+    }
+    
     
 }

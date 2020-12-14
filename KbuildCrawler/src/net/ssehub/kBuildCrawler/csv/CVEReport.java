@@ -20,6 +20,10 @@ public class CVEReport extends FailureTrace {
         super(gitInfo, defects);
         this.cve = cve;
     }
+    
+    public void setName(String cve) {
+        this.cve = cve;
+    }
 
     @Override
     public String getFormattedDate(boolean useColons) throws DateTimeParseException {

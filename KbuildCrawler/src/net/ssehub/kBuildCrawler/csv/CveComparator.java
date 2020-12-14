@@ -15,8 +15,19 @@ public class CveComparator implements Comparator<FailureTrace> {
         String[] cve2Segments = null;
         boolean bothValid = false;
         if (null != report1 && null != report2) {
-            cve1Segments = report1.getDate().split("-");
-            cve2Segments = report2.getDate().split("-");
+            String cve1 = report1.getDate();
+            String cve2 = report2.getDate();
+            
+            int pos = -1;
+            if ((pos = cve1.indexOf(',')) != -1) {
+                cve1 = cve1.substring(0, pos);
+            }
+            if ((pos = cve2.indexOf(',')) != -1) {
+                cve2 = cve2.substring(0, pos);
+            }
+                        
+            cve1Segments = cve1.split("-");
+            cve2Segments = cve2.split("-");
             bothValid = cve1Segments.length == 3 && cve2Segments.length == 3;            
         }
         

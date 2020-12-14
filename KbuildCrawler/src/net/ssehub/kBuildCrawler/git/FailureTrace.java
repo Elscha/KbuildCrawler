@@ -2,7 +2,6 @@ package net.ssehub.kBuildCrawler.git;
 
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Objects;
 
 import net.ssehub.kBuildCrawler.git.mail_parsing.FileDefect;
 import net.ssehub.kBuildCrawler.git.mail_parsing.GitData;
@@ -55,21 +54,4 @@ public abstract class FailureTrace {
      * @return A date or a year based CVE number.
      */
     public abstract String getDate();
-    
-    @Override
-    public int hashCode() {
-        return gitInfo.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof FailureTrace)) {
-            return false;
-        }
-        FailureTrace other = (FailureTrace) obj;
-        return Objects.equals(gitInfo, other.gitInfo);
-    }
 }
